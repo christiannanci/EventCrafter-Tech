@@ -1,0 +1,77 @@
+{
+  "name": "VendorFlag",
+  "type": "object",
+  "properties": {
+    "vendor_id": {
+      "type": "string",
+      "description": "User ID du prestataire signal\u00e9"
+    },
+    "reporter_id": {
+      "type": "string",
+      "description": "User ID du signaleur"
+    },
+    "flag_type": {
+      "type": "string",
+      "enum": [
+        "cultural_misrepresentation",
+        "poor_service",
+        "fraud",
+        "other"
+      ],
+      "default": "cultural_misrepresentation",
+      "description": "Type de signalement"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium",
+      "description": "Gravit\u00e9 du signalement"
+    },
+    "cultural_badge_concerned": {
+      "type": "string",
+      "description": "Badge culturel concern\u00e9 par le signalement"
+    },
+    "description": {
+      "type": "string",
+      "description": "D\u00e9tails du signalement"
+    },
+    "evidence_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs de preuves (photos, vid\u00e9os)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "under_review",
+        "resolved",
+        "dismissed"
+      ],
+      "default": "pending",
+      "description": "Statut du signalement"
+    },
+    "admin_action": {
+      "type": "string",
+      "description": "Action prise par l'admin"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de r\u00e9solution"
+    }
+  },
+  "required": [
+    "vendor_id",
+    "reporter_id",
+    "flag_type",
+    "description"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "Arrondissement",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the arrondissement"
+    },
+    "code": {
+      "type": "string",
+      "description": "Arrondissement code"
+    },
+    "departement_code": {
+      "type": "string",
+      "description": "Code of the departement this arrondissement belongs to"
+    },
+    "ville_code": {
+      "type": "string",
+      "description": "Code of the city this arrondissement belongs to (optional)"
+    },
+    "center_latitude": {
+      "type": "number",
+      "description": "Central GPS Latitude"
+    },
+    "center_longitude": {
+      "type": "number",
+      "description": "Central GPS Longitude"
+    },
+    "perimeter_geojson": {
+      "type": "object",
+      "description": "GeoJSON object defining the simplified boundary",
+      "default": {}
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "pending",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Verification status"
+    }
+  },
+  "required": [
+    "name",
+    "code",
+    "departement_code"
+  ]
+}

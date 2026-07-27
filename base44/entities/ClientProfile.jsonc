@@ -1,0 +1,87 @@
+{
+  "name": "ClientProfile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Link to the base User entity"
+    },
+    "last_name": {
+      "type": "string",
+      "description": "NOM"
+    },
+    "first_name": {
+      "type": "string",
+      "description": "PRENOM"
+    },
+    "pseudo": {
+      "type": "string",
+      "description": "PSEUDO (Display name preference)"
+    },
+    "city": {
+      "type": "string",
+      "description": "VILLE"
+    },
+    "neighborhood_code": {
+      "type": "string",
+      "description": "CODE_QUARTIER (Links to Quartier.code)"
+    },
+    "gps_longitude": {
+      "type": "number",
+      "description": "POSITION_LON"
+    },
+    "gps_latitude": {
+      "type": "number",
+      "description": "POSISION_LAT"
+    },
+    "phone": {
+      "type": "string",
+      "description": "CONTACT_TELEPHONE"
+    },
+    "whatsapp": {
+      "type": "string",
+      "description": "CONTACT_WHATSAPP"
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "CONTACT_EMAIL"
+    },
+    "account_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "AVOIRS_CLIENT"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "pending",
+        "verified",
+        "rejected"
+      ],
+      "default": "unverified",
+      "description": "STATUT_VERIFICATION"
+    },
+    "verification_documents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs of documents (PDF, Word, Audio, Video) submitted for verification"
+    },
+    "profile_image": {
+      "type": "string",
+      "description": "Profile Picture URL"
+    },
+    "preferences": {
+      "type": "object",
+      "description": "User preferences (json)",
+      "default": {}
+    }
+  },
+  "required": [
+    "user_id",
+    "last_name",
+    "first_name"
+  ]
+}

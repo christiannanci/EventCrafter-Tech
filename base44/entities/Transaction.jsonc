@@ -1,0 +1,65 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string",
+      "default": "FCFA"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "subscription",
+        "commission",
+        "ad_fee",
+        "booking_payment",
+        "payout"
+      ],
+      "default": "booking_payment"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "card",
+        "mtn_momo",
+        "orange_momo",
+        "paystack",
+        "flutterwave",
+        "taptap",
+        "manual_transfer"
+      ],
+      "default": "card"
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed",
+        "escrow_held",
+        "released",
+        "payout_sent",
+        "blocked"
+      ],
+      "default": "escrow_held"
+    },
+    "reference_id": {
+      "type": "string",
+      "description": "ID of related booking or subscription"
+    }
+  },
+  "required": [
+    "user_id",
+    "amount",
+    "type"
+  ]
+}

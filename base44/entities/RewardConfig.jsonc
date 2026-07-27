@@ -1,0 +1,51 @@
+{
+  "name": "RewardConfig",
+  "type": "object",
+  "properties": {
+    "config_key": {
+      "type": "string",
+      "default": "default",
+      "description": "Cl\u00e9 de configuration (toujours 'default')"
+    },
+    "credit_value_leads": {
+      "type": "number",
+      "default": 1,
+      "description": "Nombre de leads qu'un cr\u00e9dit bonus permet de d\u00e9bloquer"
+    },
+    "eligible_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "small",
+        "medium",
+        "large"
+      ],
+      "description": "Cat\u00e9gories de leads \u00e9ligibles pour bonus (small, medium, large)"
+    },
+    "contracts_for_bonus": {
+      "type": "number",
+      "default": 3,
+      "description": "Nombre de contrats requis pour obtenir 1 cr\u00e9dit bonus"
+    },
+    "bonus_amount_per_threshold": {
+      "type": "number",
+      "default": 1,
+      "description": "Nombre de cr\u00e9dits bonus attribu\u00e9s quand le seuil est atteint"
+    },
+    "auto_reward_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Activer l'attribution automatique des bonus"
+    },
+    "spiritual_integrity_multiplier": {
+      "type": "number",
+      "default": 2,
+      "description": "Multiplicateur bonus pour prestataires verified spiritual integrity"
+    }
+  },
+  "required": [
+    "config_key"
+  ]
+}

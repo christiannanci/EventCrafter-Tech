@@ -1,0 +1,57 @@
+{
+  "name": "ServiceReception",
+  "type": "object",
+  "properties": {
+    "contract_id": {
+      "type": "string",
+      "description": "CODE_CONTRAT: Link to the Contract"
+    },
+    "booking_id": {
+      "type": "string",
+      "description": "Link to the Booking (for easier lookups)"
+    },
+    "reception_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DATE_RECEPTION"
+    },
+    "reception_type": {
+      "type": "string",
+      "enum": [
+        "partial",
+        "complete"
+      ],
+      "default": "complete",
+      "description": "TYPE_RECEPTION (PARTIELLE, COMPLETE)"
+    },
+    "client_satisfied": {
+      "type": "boolean",
+      "default": true,
+      "description": "SATISFACTION_CLIENT (VRAI, FAUX)"
+    },
+    "observations": {
+      "type": "string",
+      "description": "OBSERVATION"
+    },
+    "payment_authorized": {
+      "type": "boolean",
+      "default": true,
+      "description": "AUTORISATION_PAIEMENT"
+    },
+    "payment_quota": {
+      "type": "number",
+      "default": 100,
+      "description": "QUOTITE_PAIEMENT (% of payment authorized to be released, 0-100)"
+    },
+    "dispute_opened": {
+      "type": "boolean",
+      "default": false,
+      "description": "OUVERTURE_LITIGE (VRAI, FAUX)"
+    }
+  },
+  "required": [
+    "contract_id",
+    "reception_date",
+    "reception_type"
+  ]
+}

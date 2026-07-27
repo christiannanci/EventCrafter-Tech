@@ -1,0 +1,74 @@
+{
+  "name": "ProviderPayout",
+  "type": "object",
+  "properties": {
+    "payment_code": {
+      "type": "string",
+      "description": "CODE_PAIEMENT (Unique reference)"
+    },
+    "invoice_id": {
+      "type": "string",
+      "description": "CODE_FACTURE: Link to the Provider Invoice"
+    },
+    "reception_id": {
+      "type": "string",
+      "description": "CODE_RECEPTION: Link to the Service Reception"
+    },
+    "contract_id": {
+      "type": "string",
+      "description": "Link to Contract (Context)"
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "User ID of the provider receiving payment"
+    },
+    "cash_voucher_number": {
+      "type": "string",
+      "description": "NUMERO_PIECE_CAISSE"
+    },
+    "payment_nature": {
+      "type": "string",
+      "enum": [
+        "partial",
+        "total"
+      ],
+      "default": "total",
+      "description": "NATURE_PAIEMENT (PARTIEL, TOTAL)"
+    },
+    "amount_paid": {
+      "type": "number",
+      "description": "MONTANT_VERSE (Net amount to provider)"
+    },
+    "admin_fee": {
+      "type": "number",
+      "description": "MONTANT_RETENU_ADMIN (Platform commission)"
+    },
+    "remaining_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "MONTANT_RESTANT"
+    },
+    "payment_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DATE_PAIEMENT"
+    },
+    "transaction_status": {
+      "type": "string",
+      "enum": [
+        "pending_approval",
+        "approved",
+        "processed",
+        "rejected"
+      ],
+      "default": "pending_approval",
+      "description": "STATUS_TRANSACTION"
+    }
+  },
+  "required": [
+    "invoice_id",
+    "reception_id",
+    "amount_paid",
+    "transaction_status"
+  ]
+}

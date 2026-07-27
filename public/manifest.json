@@ -1,0 +1,22 @@
+{
+  "name": "EventCrafter — Marketplace Événementiel",
+  "short_name": "EventCrafter",
+  "description": "Marketplace des prestataires événementiels au Cameroun",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F9F7F3",
+  "theme_color": "#FF6B35",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://eventcraftercm.com/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://eventcraftercm.com/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

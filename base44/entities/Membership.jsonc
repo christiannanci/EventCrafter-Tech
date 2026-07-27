@@ -1,0 +1,91 @@
+{
+  "name": "Membership",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User ID of the provider"
+    },
+    "membership_type_code": {
+      "type": "string",
+      "description": "Code of the membership plan (e.g. premium)"
+    },
+    "contract_id": {
+      "type": "string",
+      "description": "Link to the subscription contract"
+    },
+    "invoice_id": {
+      "type": "string",
+      "description": "Link to the subscription invoice"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de d\u00e9but"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de fin (Validit\u00e9)"
+    },
+    "duration_days": {
+      "type": "number",
+      "description": "Dur\u00e9e en jours"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Montant pay\u00e9"
+    },
+    "currency": {
+      "type": "string",
+      "default": "FCFA"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "cancelled",
+        "pending_contract",
+        "pending_payment"
+      ],
+      "default": "pending_contract",
+      "description": "Statut de l'abonnement"
+    },
+    "payment_method": {
+      "type": "string",
+      "description": "MODALITE_PAIEMENT (ex: Mobile Money, Carte, Virement, Portefeuille)"
+    },
+    "provider_account_id": {
+      "type": "string",
+      "description": "CODE_COMPTE_PRESTATAIRE (Compte d\u00e9bit\u00e9)"
+    },
+    "admin_account_id": {
+      "type": "string",
+      "description": "CODE_COMPTE_ADMIN (Compte cr\u00e9dit\u00e9)"
+    },
+    "auto_renew": {
+      "type": "boolean",
+      "default": true,
+      "description": "Renouvellement automatique"
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "Lien vers la transaction de paiement"
+    },
+    "cancellation_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cancellation_reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "membership_type_code",
+    "start_date",
+    "end_date",
+    "status"
+  ]
+}

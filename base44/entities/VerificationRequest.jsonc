@@ -1,0 +1,73 @@
+{
+  "name": "VerificationRequest",
+  "type": "object",
+  "properties": {
+    "request_code": {
+      "type": "string",
+      "description": "Unique verification request code"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "User ID of the client requesting verification"
+    },
+    "profile_id": {
+      "type": "string",
+      "description": "ClientProfile ID"
+    },
+    "request_type": {
+      "type": "string",
+      "enum": [
+        "identity",
+        "business",
+        "address"
+      ],
+      "default": "identity",
+      "description": "Type of verification requested"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "documents_sent",
+        "documents_received",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Current status of the verification request"
+    },
+    "client_message": {
+      "type": "string",
+      "description": "Message from client explaining the request"
+    },
+    "admin_response": {
+      "type": "string",
+      "description": "Response from admin with requirements"
+    },
+    "admin_id": {
+      "type": "string",
+      "description": "User ID of admin handling the request"
+    },
+    "documents_required": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of required documents (e.g. ID card, proof of address)"
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Reason if request is rejected"
+    },
+    "approved_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date when verification was approved"
+    }
+  },
+  "required": [
+    "client_id",
+    "profile_id",
+    "request_type"
+  ]
+}

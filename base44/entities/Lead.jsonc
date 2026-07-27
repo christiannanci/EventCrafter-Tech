@@ -1,0 +1,115 @@
+{
+  "name": "Lead",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "User ID of the client posting the request"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "client_phone": {
+      "type": "string",
+      "description": "Contact phone - flout\u00e9 pour niveau Gratuit"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Contact email - flout\u00e9 pour niveau Gratuit"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "Wedding",
+        "Birthday",
+        "Corporate",
+        "Conference",
+        "Baby Shower",
+        "Graduation",
+        "Religious",
+        "Funeral",
+        "Concert",
+        "Baptism",
+        "Dowry",
+        "Gala",
+        "Other"
+      ],
+      "default": "Other"
+    },
+    "service_category": {
+      "type": "string",
+      "description": "Type of service needed (e.g. Caterer, DJ)",
+      "enum": [
+        "All",
+        "Event Planner",
+        "Caterer",
+        "Photographer",
+        "Florist",
+        "Stage Builder",
+        "Decorator",
+        "Draper",
+        "Seamstress",
+        "Server",
+        "Bartender",
+        "Musician",
+        "DJ",
+        "Venue",
+        "Other"
+      ],
+      "default": "All"
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "location": {
+      "type": "string",
+      "description": "City or Neighborhood"
+    },
+    "budget": {
+      "type": "string",
+      "description": "Estimated budget (e.g. 50,000 - 100,000 FCFA)"
+    },
+    "budget_amount": {
+      "type": "number",
+      "description": "Budget num\u00e9rique pour calcul automatique (en FCFA)"
+    },
+    "guest_count": {
+      "type": "string",
+      "enum": [
+        "< 50",
+        "50-200",
+        "200+"
+      ],
+      "description": "Nombre d'invit\u00e9s pour qualification du lead"
+    },
+    "budget_category": {
+      "type": "string",
+      "enum": [
+        "small",
+        "medium",
+        "large"
+      ],
+      "default": "medium",
+      "description": "Cat\u00e9gorie budget calcul\u00e9e automatiquement: small=$2, medium=$4, large=$8-10"
+    },
+    "description": {
+      "type": "string",
+      "description": "Details about the event and requirements"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed"
+      ],
+      "default": "open"
+    }
+  },
+  "required": [
+    "client_id",
+    "event_type",
+    "location",
+    "description"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "Quartier",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the neighborhood (e.g. Bonapriso)"
+    },
+    "code": {
+      "type": "string",
+      "description": "Unique Neighborhood code"
+    },
+    "ville_code": {
+      "type": "string",
+      "description": "Code of the city this neighborhood belongs to"
+    },
+    "arrondissement_code": {
+      "type": "string",
+      "description": "Code of the arrondissement this neighborhood belongs to (optional)"
+    },
+    "center_latitude": {
+      "type": "number",
+      "description": "Central GPS Latitude"
+    },
+    "center_longitude": {
+      "type": "number",
+      "description": "Central GPS Longitude"
+    },
+    "perimeter_geojson": {
+      "type": "object",
+      "description": "GeoJSON object defining the simplified boundary",
+      "default": {}
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "pending",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Verification status"
+    }
+  },
+  "required": [
+    "name",
+    "code",
+    "ville_code"
+  ]
+}

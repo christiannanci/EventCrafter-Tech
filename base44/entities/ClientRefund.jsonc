@@ -1,0 +1,63 @@
+{
+  "name": "ClientRefund",
+  "type": "object",
+  "properties": {
+    "refund_code": {
+      "type": "string",
+      "description": "Unique refund reference (e.g. RFD-2024-001)"
+    },
+    "booking_id": {
+      "type": "string",
+      "description": "Link to the Booking"
+    },
+    "dispute_id": {
+      "type": "string",
+      "description": "Link to the Dispute (if applicable)"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "User ID of the client receiving the refund"
+    },
+    "amount_refunded": {
+      "type": "number",
+      "description": "Net amount returned to client"
+    },
+    "commission_retained": {
+      "type": "number",
+      "description": "Platform fee kept (non-refundable)"
+    },
+    "penalty_amount": {
+      "type": "number",
+      "description": "Any penalty deducted from the refund",
+      "default": 0
+    },
+    "reason": {
+      "type": "string",
+      "description": "Reason for refund (e.g. Dispute Resolution, Cancellation)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_approval",
+        "approved",
+        "processed",
+        "rejected"
+      ],
+      "default": "pending_approval"
+    },
+    "processed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "transaction_reference": {
+      "type": "string",
+      "description": "External payment processor reference"
+    }
+  },
+  "required": [
+    "refund_code",
+    "booking_id",
+    "amount_refunded",
+    "status"
+  ]
+}

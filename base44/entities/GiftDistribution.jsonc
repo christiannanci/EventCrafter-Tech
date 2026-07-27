@@ -1,0 +1,49 @@
+{
+  "name": "GiftDistribution",
+  "type": "object",
+  "properties": {
+    "distribution_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de la distribution du cadeau"
+    },
+    "leads_count": {
+      "type": "number",
+      "description": "Nombre de leads offerts par vendeur"
+    },
+    "total_vendors": {
+      "type": "number",
+      "description": "Nombre total de vendeurs cibl\u00e9s"
+    },
+    "filter_plan": {
+      "type": "string",
+      "description": "Filtre de plan appliqu\u00e9 (all, free, premium, gold)"
+    },
+    "filter_cultural_badge": {
+      "type": "string",
+      "description": "Filtre de badge culturel appliqu\u00e9"
+    },
+    "filter_min_rating": {
+      "type": "number",
+      "description": "Note minimale filtr\u00e9e"
+    },
+    "total_leads_distributed": {
+      "type": "number",
+      "description": "Total de leads distribu\u00e9s (vendors * leads_count)"
+    },
+    "admin_id": {
+      "type": "string",
+      "description": "User ID de l'admin qui a d\u00e9clench\u00e9"
+    },
+    "campaign_name": {
+      "type": "string",
+      "description": "Nom de la campagne (ex: Cadeau F\u00e9vrier 2026)"
+    }
+  },
+  "required": [
+    "distribution_date",
+    "leads_count",
+    "total_vendors",
+    "total_leads_distributed"
+  ]
+}

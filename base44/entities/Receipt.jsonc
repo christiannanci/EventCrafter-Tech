@@ -1,0 +1,48 @@
+{
+  "name": "Receipt",
+  "type": "object",
+  "properties": {
+    "receipt_number": {
+      "type": "string",
+      "description": "Unique receipt reference (e.g. RCPT-2024-001)"
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "Linked transaction"
+    },
+    "invoice_id": {
+      "type": "string",
+      "description": "Linked invoice"
+    },
+    "booking_id": {
+      "type": "string"
+    },
+    "payer_id": {
+      "type": "string",
+      "description": "User ID of the payer"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string",
+      "default": "FCFA"
+    },
+    "payment_method": {
+      "type": "string"
+    },
+    "payment_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "details": {
+      "type": "string",
+      "description": "Summary of what was paid"
+    }
+  },
+  "required": [
+    "receipt_number",
+    "amount",
+    "payment_date"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "name": "ClientBankAccount",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Owner of the account"
+    },
+    "account_label": {
+      "type": "string",
+      "description": "INTITULE_COMPTE (e.g. My Savings, Business Account)"
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "bank_account",
+        "mobile_money",
+        "credit_card",
+        "paypal",
+        "other"
+      ],
+      "default": "bank_account",
+      "description": "TYPE_COMPTE"
+    },
+    "bank_name": {
+      "type": "string",
+      "description": "DOMICILIATION (e.g. UBA, Ecobank, MTN, Orange)"
+    },
+    "account_number": {
+      "type": "string",
+      "description": "NUMERO_COMPTE"
+    },
+    "associated_phone": {
+      "type": "string",
+      "description": "CONTACT_TELEPHONE associated with the account"
+    },
+    "notification_email": {
+      "type": "string",
+      "description": "CONTACT_EMAIL for notifications"
+    },
+    "priority": {
+      "type": "number",
+      "default": 1,
+      "description": "PRIORITE_PAIEMENT (1 = Highest)"
+    }
+  },
+  "required": [
+    "user_id",
+    "account_label",
+    "account_type",
+    "account_number"
+  ]
+}

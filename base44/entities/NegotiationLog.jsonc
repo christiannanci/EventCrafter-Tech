@@ -1,0 +1,63 @@
+{
+  "name": "NegotiationLog",
+  "type": "object",
+  "properties": {
+    "booking_id": {
+      "type": "string",
+      "description": "Lien vers la r\u00e9servation/n\u00e9gociation concern\u00e9e"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "CODE_CLIENT"
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "CODE_PRESTATAIRE"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DATE_HEURE de l'\u00e9change"
+    },
+    "interaction_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "video",
+        "audio",
+        "visit"
+      ],
+      "description": "TYPE ECHANGE (TEXTE, VIDEO, AUDIO, VISITE)"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "description": "DUREE de l'\u00e9change (en minutes)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "en_cours",
+        "approuve",
+        "termine"
+      ],
+      "default": "en_cours",
+      "description": "Statut de la n\u00e9gociation: en cours, approuv\u00e9, termin\u00e9"
+    },
+    "deal_concluded": {
+      "type": "boolean",
+      "default": false,
+      "description": "DEAL (OUI, NON) - L'\u00e9change a-t-il abouti \u00e0 un accord ?"
+    },
+    "notes": {
+      "type": "string",
+      "description": "R\u00e9sum\u00e9 ou notes sur l'\u00e9change"
+    }
+  },
+  "required": [
+    "booking_id",
+    "client_id",
+    "provider_id",
+    "timestamp",
+    "interaction_type"
+  ]
+}

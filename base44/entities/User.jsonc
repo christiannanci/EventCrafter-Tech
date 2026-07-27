@@ -1,0 +1,19 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "staff_role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "legal",
+        "sales",
+        "tech",
+        "none"
+      ],
+      "default": "none",
+      "description": "Internal role for platform staff: Admin, Juriste, Commercial, Technicien"
+    }
+  },
+  "required": []
+}

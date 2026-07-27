@@ -1,0 +1,51 @@
+{
+  "name": "BudgetItem",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Link to the specific Event"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the expense (e.g. Venue Deposit)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Venue",
+        "Catering",
+        "Attire",
+        "Decor",
+        "Music",
+        "Photo/Video",
+        "Transportation",
+        "Other"
+      ],
+      "default": "Other"
+    },
+    "estimated_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "actual_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "paid_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "estimated_cost"
+  ]
+}

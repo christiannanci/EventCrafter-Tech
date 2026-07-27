@@ -1,0 +1,55 @@
+{
+  "name": "ServiceType",
+  "type": "object",
+  "properties": {
+    "code_service": {
+      "type": "string",
+      "description": "Unique code for the service type (CODE_SERVICE)"
+    },
+    "code_typeservice": {
+      "type": "string",
+      "description": "Category grouping code (CODE_TYPESERVICE)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the service type"
+    },
+    "description": {
+      "type": "string",
+      "description": "Long detailed description"
+    },
+    "abbreviation": {
+      "type": "string",
+      "description": "Short description / Abbreviation (ABREV)"
+    },
+    "media_url": {
+      "type": "string",
+      "description": "URL to the illustration media (image, video, or audio)"
+    },
+    "media_type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "video",
+        "audio"
+      ],
+      "default": "image",
+      "description": "Type of the media provided"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "pending",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Approval status of the service type"
+    }
+  },
+  "required": [
+    "code_service",
+    "name",
+    "media_type"
+  ]
+}

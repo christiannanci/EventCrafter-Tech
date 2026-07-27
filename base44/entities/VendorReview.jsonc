@@ -1,0 +1,52 @@
+{
+  "name": "VendorReview",
+  "type": "object",
+  "properties": {
+    "review_code": {
+      "type": "string",
+      "description": "CODE_AVIS (Unique identifier for the review)"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "User ID of the client leaving the review"
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "User ID of the provider being reviewed"
+    },
+    "booking_id": {
+      "type": "string",
+      "description": "Linked booking (optional but recommended)"
+    },
+    "comment": {
+      "type": "string",
+      "description": "Details about the experience with the vendor"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Rating from 1 to 5"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Moderation status of the review"
+    },
+    "moderation_note": {
+      "type": "string",
+      "description": "Admin note for rejection or approval"
+    }
+  },
+  "required": [
+    "client_id",
+    "provider_id",
+    "rating",
+    "comment"
+  ]
+}

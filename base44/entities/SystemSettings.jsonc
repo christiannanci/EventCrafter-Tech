@@ -1,0 +1,26 @@
+{
+  "name": "SystemSettings",
+  "type": "object",
+  "properties": {
+    "setting_key": {
+      "type": "string",
+      "description": "Cl\u00e9 unique du param\u00e8tre (ex: fair_share_weights)"
+    },
+    "setting_value": {
+      "type": "object",
+      "description": "Valeur du param\u00e8tre (objet JSON flexible)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description du param\u00e8tre"
+    },
+    "last_updated_by": {
+      "type": "string",
+      "description": "User ID de l'admin qui a modifi\u00e9"
+    }
+  },
+  "required": [
+    "setting_key",
+    "setting_value"
+  ]
+}

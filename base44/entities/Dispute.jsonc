@@ -1,0 +1,89 @@
+{
+  "name": "Dispute",
+  "type": "object",
+  "properties": {
+    "dispute_code": {
+      "type": "string",
+      "description": "CODE_LITIGE: Unique reference"
+    },
+    "booking_id": {
+      "type": "string",
+      "description": "Link to Booking (for easier lookups)"
+    },
+    "contract_id": {
+      "type": "string",
+      "description": "CODE_CONTRAT"
+    },
+    "reception_id": {
+      "type": "string",
+      "description": "CODE_RECEPTION"
+    },
+    "nature": {
+      "type": "string",
+      "enum": [
+        "contract_denunciation",
+        "client_dissatisfaction",
+        "other"
+      ],
+      "default": "client_dissatisfaction",
+      "description": "NATURE_LITIGE"
+    },
+    "initiator": {
+      "type": "string",
+      "enum": [
+        "client",
+        "provider"
+      ],
+      "default": "client",
+      "description": "INITIATEUR"
+    },
+    "description": {
+      "type": "string",
+      "description": "DECRIPTION_LITIGE"
+    },
+    "is_resolved": {
+      "type": "boolean",
+      "default": false,
+      "description": "RESOLUTION (VRAI, FAUX)"
+    },
+    "negotiation_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DATE_NEGOCIATION"
+    },
+    "negotiation_conclusion": {
+      "type": "string",
+      "description": "CONCLUSION_NEGOCIATION"
+    },
+    "report_url": {
+      "type": "string",
+      "description": "CODE_RAPPORT_LITIGE (LIEN STOCKAGE FICHIER)"
+    },
+    "payment_authorized": {
+      "type": "boolean",
+      "default": false,
+      "description": "AUTORISATION_PAIEMENT (If resolved -> pay provider)"
+    },
+    "refund_authorized": {
+      "type": "boolean",
+      "default": false,
+      "description": "AUTORISATION_REMBOURSEMENT (If resolved -> refund client)"
+    },
+    "is_closed": {
+      "type": "boolean",
+      "default": false,
+      "description": "CLOTURE_LITIGE"
+    },
+    "closed_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DATE_CLOTURE"
+    }
+  },
+  "required": [
+    "dispute_code",
+    "contract_id",
+    "nature",
+    "description"
+  ]
+}

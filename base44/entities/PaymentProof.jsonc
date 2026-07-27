@@ -1,0 +1,72 @@
+{
+  "name": "PaymentProof",
+  "type": "object",
+  "properties": {
+    "proof_code": {
+      "type": "string",
+      "description": "Unique reference code for the payment proof"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "User ID who submitted the proof"
+    },
+    "booking_id": {
+      "type": "string",
+      "description": "Related booking ID (optional)"
+    },
+    "invoice_id": {
+      "type": "string",
+      "description": "Related invoice ID (optional)"
+    },
+    "membership_id": {
+      "type": "string",
+      "description": "Related membership ID for subscription payments (optional)"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount paid"
+    },
+    "payment_method": {
+      "type": "string",
+      "description": "Payment method used (MTN, Orange, etc.)"
+    },
+    "proof_image_url": {
+      "type": "string",
+      "description": "URL to the payment receipt/proof image"
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Phone number used for payment"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Validation status"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Admin notes/comments during validation"
+    },
+    "validated_by": {
+      "type": "string",
+      "description": "Admin user ID who validated"
+    },
+    "validated_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date of validation"
+    }
+  },
+  "required": [
+    "proof_code",
+    "user_id",
+    "amount",
+    "payment_method",
+    "proof_image_url"
+  ]
+}

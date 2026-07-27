@@ -1,0 +1,37 @@
+{
+  "name": "LeadUnlock",
+  "type": "object",
+  "properties": {
+    "vendor_id": {
+      "type": "string",
+      "description": "User ID of the vendor who unlocked"
+    },
+    "lead_id": {
+      "type": "string",
+      "description": "ID of the unlocked lead"
+    },
+    "unlock_type": {
+      "type": "string",
+      "enum": [
+        "pay_per_lead",
+        "subscription",
+        "reward_credit"
+      ],
+      "description": "How the lead was unlocked: pay_per_lead ($2-$10), subscription (Premium/Gold), reward_credit (1 cr\u00e9dit)"
+    },
+    "amount_paid": {
+      "type": "number",
+      "description": "Amount paid to unlock (0 if via subscription or credit)"
+    },
+    "unlocked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the lead was unlocked"
+    }
+  },
+  "required": [
+    "vendor_id",
+    "lead_id",
+    "unlock_type"
+  ]
+}

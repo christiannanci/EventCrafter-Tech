@@ -1,0 +1,94 @@
+{
+  "name": "PlatformFeedback",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User ID of the person giving feedback"
+    },
+    "user_role": {
+      "type": "string",
+      "enum": [
+        "client",
+        "provider",
+        "admin"
+      ],
+      "description": "Role of the user at the time of feedback"
+    },
+    "feedback_type": {
+      "type": "string",
+      "enum": [
+        "satisfaction",
+        "bug_report",
+        "feature_request",
+        "testimonial"
+      ],
+      "default": "satisfaction",
+      "description": "Category of the feedback"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Global rating of the platform (1-5)"
+    },
+    "nps_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Net Promoter Score: How likely to recommend (0-10)"
+    },
+    "comment": {
+      "type": "string",
+      "description": "General feedback or opinion"
+    },
+    "benefits_experienced": {
+      "type": "string",
+      "description": "Specific benefits or positive impact on their needs (Bienfaits/Impact)"
+    },
+    "performance_rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Specific rating for technical performance/speed"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, can be displayed as a testimonial on landing page"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Internal notes by admin"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewed",
+        "addressed",
+        "archived"
+      ],
+      "default": "new"
+    },
+    "moderation_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Moderation status for public display"
+    },
+    "moderation_note": {
+      "type": "string",
+      "description": "Admin note for moderation decision"
+    }
+  },
+  "required": [
+    "user_id",
+    "rating",
+    "comment"
+  ]
+}

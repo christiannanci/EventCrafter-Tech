@@ -1,0 +1,46 @@
+{
+  "name": "Departement",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the department (e.g. Wouri)"
+    },
+    "code": {
+      "type": "string",
+      "description": "Department code"
+    },
+    "region_code": {
+      "type": "string",
+      "description": "Code of the region this department belongs to (e.g. LT)"
+    },
+    "center_latitude": {
+      "type": "number",
+      "description": "Central GPS Latitude"
+    },
+    "center_longitude": {
+      "type": "number",
+      "description": "Central GPS Longitude"
+    },
+    "perimeter_geojson": {
+      "type": "object",
+      "description": "GeoJSON object defining the simplified boundary",
+      "default": {}
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "pending",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Verification status"
+    }
+  },
+  "required": [
+    "name",
+    "code",
+    "region_code"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "Fonction",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Unique code for the function (sub-category)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the function"
+    },
+    "service_type_code": {
+      "type": "string",
+      "description": "Link to the parent ServiceType (code_service)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the function"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "code",
+    "name",
+    "service_type_code"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "name": "GiftUsage",
+  "type": "object",
+  "properties": {
+    "distribution_id": {
+      "type": "string",
+      "description": "ID de la distribution de cadeau"
+    },
+    "vendor_id": {
+      "type": "string",
+      "description": "User ID du vendeur"
+    },
+    "leads_received": {
+      "type": "number",
+      "description": "Nombre de leads re\u00e7us en cadeau"
+    },
+    "leads_used": {
+      "type": "number",
+      "default": 0,
+      "description": "Nombre de leads effectivement utilis\u00e9s"
+    },
+    "plan_before": {
+      "type": "string",
+      "enum": [
+        "free",
+        "premium",
+        "gold"
+      ],
+      "description": "Plan du vendeur au moment du cadeau"
+    },
+    "plan_after": {
+      "type": "string",
+      "enum": [
+        "free",
+        "premium",
+        "gold"
+      ],
+      "description": "Plan actuel du vendeur (pour tracking conversion)"
+    },
+    "converted_to_paid": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si le vendeur est pass\u00e9 de free \u00e0 premium/gold"
+    },
+    "conversion_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de conversion si applicable"
+    },
+    "first_lead_used_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de premi\u00e8re utilisation du cadeau"
+    }
+  },
+  "required": [
+    "distribution_id",
+    "vendor_id",
+    "leads_received",
+    "plan_before"
+  ]
+}

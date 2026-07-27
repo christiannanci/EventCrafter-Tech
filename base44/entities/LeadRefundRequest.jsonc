@@ -1,0 +1,73 @@
+{
+  "name": "LeadRefundRequest",
+  "type": "object",
+  "properties": {
+    "vendor_id": {
+      "type": "string",
+      "description": "User ID du prestataire"
+    },
+    "lead_id": {
+      "type": "string",
+      "description": "ID du lead concern\u00e9"
+    },
+    "unlock_id": {
+      "type": "string",
+      "description": "ID du LeadUnlock original"
+    },
+    "amount_paid": {
+      "type": "number",
+      "description": "Montant pay\u00e9 pour ce lead"
+    },
+    "unlock_type": {
+      "type": "string",
+      "enum": [
+        "pay_per_lead",
+        "reward_credit"
+      ],
+      "description": "Type de d\u00e9blocage (subscription non remboursable)"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Raison de la demande (client ne r\u00e9pond pas)"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "ID de la conversation pour v\u00e9rification admin"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "auto_approved"
+      ],
+      "default": "pending",
+      "description": "Statut de la demande de remboursement"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Notes de l'admin pour justifier d\u00e9cision"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "User ID de l'admin qui a trait\u00e9"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de r\u00e9vision"
+    },
+    "refund_processed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si le remboursement a \u00e9t\u00e9 effectu\u00e9"
+    }
+  },
+  "required": [
+    "vendor_id",
+    "lead_id",
+    "unlock_id",
+    "unlock_type"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "RefundPolicyConfig",
+  "type": "object",
+  "properties": {
+    "config_key": {
+      "type": "string",
+      "default": "default",
+      "description": "Cl\u00e9 de configuration (toujours 'default')"
+    },
+    "waiting_period_days": {
+      "type": "number",
+      "default": 7,
+      "description": "Jours d'attente avant de pouvoir demander remboursement"
+    },
+    "reminder_after_days": {
+      "type": "number",
+      "default": 4,
+      "description": "Jours avant d'envoyer relance au client"
+    },
+    "auto_refund_after_days": {
+      "type": "number",
+      "default": 10,
+      "description": "Jours avant remboursement automatique si pas de r\u00e9ponse"
+    },
+    "auto_refund_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Activer le remboursement automatique"
+    },
+    "refund_methods": {
+      "type": "object",
+      "description": "Configuration des m\u00e9thodes de remboursement selon type",
+      "default": {
+        "pay_per_lead": "wallet_credit",
+        "reward_credit": "restore_credit",
+        "subscription": "priority_badge"
+      }
+    },
+    "fraud_detection_threshold": {
+      "type": "number",
+      "default": 3,
+      "description": "Nombre de signalements avant alerte fraude client"
+    }
+  },
+  "required": [
+    "config_key"
+  ]
+}

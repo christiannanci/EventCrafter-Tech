@@ -1,0 +1,492 @@
+import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { createPageUrl } from './utils';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { 
+  CalendarHeart, 
+  Search, 
+  Menu, 
+  X,
+  LayoutDashboard,
+  Globe,
+  Shield
+} from "lucide-react";
+import { base44 } from "@/api/apiClient";
+import { LanguageProvider, useLanguage } from '@/components/LanguageContext';
+import { LocationProvider, useLocationContext } from '@/components/LocationContext';
+import { CurrencyProvider } from '@/components/CurrencyContext';
+import { UserProvider } from '@/components/UserContext';
+import QueryProvider from '@/components/QueryProvider';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import NotificationBell from '@/components/NotificationBell';
+import CartIconNav from '@/components/CartIconNav';
+import CurrencySelector from '@/components/CurrencySelector';
+import ScrollToTop from '@/components/ScrollToTop';
+import PlatformRatingButton from '@/components/PlatformRatingButton';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import MobileBottomNav from '@/components/MobileBottomNav';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+
+function LayoutContent({ children }) {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [user, setUser] = React.useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isRootPage = location.pathname === '/';
+  const [hasVendorProfile, setHasVendorProfile] = React.useState(false);
+  const [hasClientProfile, setHasClientProfile] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const { t, language, setLanguage } = useLanguage();
+  const { selectedCountry, setSelectedCountry, countries } = useLocationContext();
+
+  React.useEffect(() => {
+    let mounted = true;
+    
+    const checkUser = async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        
+        if (!mounted) return;
+        
+        setUser(currentUser);
+
+        // Paralleliser les deux requetes profil
+        const [vendorProfiles, clientProfiles] = await Promise.all([
+          base44.entities.VendorProfile.filter({ user_id: currentUser.id }),
+          base44.entities.ClientProfile.filter({ user_id: currentUser.id })
+        ]);
+        
+        if (!mounted) return;
+        
+        setHasVendorProfile(vendorProfiles.length > 0);
+        setHasClientProfile(clientProfiles.length > 0);
+
+        // Initialiser les notifications en arriere-plan (non-bloquant)
+        import('@/components/RealtimeNotificationSystem').then(({ realtimeNotifications }) => {
+          if (mounted) realtimeNotifications.initialize(currentUser.id, currentUser.role);
+        }).catch(() => {});
+      } catch (e) {
+        if (!mounted) return;
+        setUser(null);
+        setHasVendorProfile(false);
+        setHasClientProfile(false);
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+    checkUser();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await base44.auth.logout();
+    window.location.href = '/';
+  };
+
+  const navLinks = React.useMemo(() => [
+    { name: t("nav.marketplace"), path: "/Marketplace", icon: Search },
+    { name: t("nav.inspiration"), path: "/Inspiration", icon: null },
+    { name: t("nav.tools"), path: "/Tools", icon: null },
+    { name: "Post Request", path: "/PostRequest", icon: null },
+  ], [t]);
+
+  const languages = [
+    { code: 'en', label: 'English' },
+    { code: 'fr', label: 'Francais' },
+    { code: 'pcm', label: 'Pidgin' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#F9F7F3] font-['Inter'] text-[#2C2C2C] flex flex-col">
+      <Toaster />
+      <SonnerToaster />
+      <ScrollToTop />
+      {/* Google Analytics removed: external scripts blocked by MTN/Orange */}
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#F4C542]/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-20 items-center">
+            
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2 group">
+              <span className="text-2xl font-['Poppins'] font-bold tracking-tight text-[#2C2C2C]">
+                Event<span className="text-[#FF6B35] relative">
+                  Crafter
+                  <span className="absolute -top-1 -right-2 text-[#F4C542] text-xs">?</span>
+                </span>
+              </span>
+            </Link>
+
+            {/* Desktop Nav */}
+            <div className="hidden md:flex items-center gap-8">
+              {navLinks.map((link) => (
+                <Link 
+                  key={link.path}
+                  to={createPageUrl(link.path.replace('/', ''))}
+                  className={`text-sm font-medium transition-colors hover:text-[#FF6B35] ${
+                    location.pathname === link.path ? 'text-[#FF6B35]' : 'text-[#2C2C2C]'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+                ))}
+
+              {user ? (
+                <div className="flex items-center gap-3">
+                  <PlatformRatingButton user={user} />
+                  <CurrencySelector />
+                  <CartIconNav />
+                  <NotificationBell user={user} />
+
+                  {(user.role === 'admin' || (user.staff_role && user.staff_role !== 'none')) && (
+                      <Link to={createPageUrl('AdminDashboard')}>
+                          <Button variant="ghost" className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-100">
+                              <Shield className="w-4 h-4 mr-2" />
+                              Back Office
+                          </Button>
+                      </Link>
+                  )}
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="text-sm text-stone-600 font-medium px-3 py-1.5 bg-stone-100 rounded-full hover:bg-stone-200">
+                        <span className="mr-2">{user.full_name || user.email}</span>
+                        {hasVendorProfile && hasClientProfile && (
+                          <>
+                            <Badge className="bg-purple-500 text-white text-[10px] px-1.5 py-0 mr-1">VENDOR</Badge>
+                            <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">CLIENT</Badge>
+                          </>
+                        )}
+                        {hasVendorProfile && !hasClientProfile && (
+                          <Badge className="bg-purple-500 text-white text-[10px] px-1.5 py-0">VENDOR</Badge>
+                        )}
+                        {!hasVendorProfile && hasClientProfile && (
+                          <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">CLIENT</Badge>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      {hasVendorProfile && (
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('VendorDashboard')} className="cursor-pointer">
+                            <LayoutDashboard className="w-4 h-4 mr-2" />
+                            Business Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                      {hasVendorProfile && (
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('VendorProfile')} className="cursor-pointer">
+                            <LayoutDashboard className="w-4 h-4 mr-2" />
+                            Mon Profil
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                      {hasClientProfile && (
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('ClientDashboard')} className="cursor-pointer">
+                            <LayoutDashboard className="w-4 h-4 mr-2" />
+                            Tableau de Bord
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                      {hasClientProfile && (
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('ClientDashboard') + '?tab=client_profile'} className="cursor-pointer">
+                            <LayoutDashboard className="w-4 h-4 mr-2" />
+                            Mon Profil
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                      {(hasVendorProfile || hasClientProfile) && <div className="border-t my-1" />}
+
+                      {countries.length > 0 && (
+                        <div className="px-2 py-2">
+                          <p className="text-xs text-stone-500 mb-2">Pays</p>
+                          <Select value={selectedCountry || ''} onValueChange={setSelectedCountry}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Selectionner pays" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {countries.map((c) => (
+                                <SelectItem key={c.code} value={c.code}>
+                                  {c.name} ({c.code})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
+                      <div className="px-2 py-2 border-t">
+                        <p className="text-xs text-stone-500 mb-2">Langue</p>
+                        {languages.map((lang) => (
+                          <DropdownMenuItem 
+                            key={lang.code} 
+                            onClick={() => setLanguage(lang.code)}
+                            className={language === lang.code ? "bg-[#FFF0E8] text-[#FF6B35] font-medium" : ""}
+                          >
+                            <Globe className="w-4 h-4 mr-2" />
+                            {lang.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </div>
+
+                      <DropdownMenuItem onClick={handleLogout} className="border-t text-red-600 focus:text-red-600">
+                        {t("nav.logout")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <CartIconNav />
+                  <Button variant="ghost" onClick={() => window.location.href = "/Login"} className="text-[#2C2C2C] hover:text-[#FF6B35]">
+                    {t("nav.signIn")}
+                  </Button>
+                  <Button onClick={() => window.location.href = "/Login"} className="bg-[#FF6B35] hover:bg-[#e05a2b] text-white rounded-full px-6 font-medium shadow-md hover:shadow-lg transition-all">
+                    {t("nav.joinPlanner")}
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center gap-4">
+               {/* Language Switcher Mobile */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-stone-600">
+                    <Globe className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {languages.map((lang) => (
+                    <DropdownMenuItem 
+                      key={lang.code} 
+                      onClick={() => setLanguage(lang.code)}
+                      className={language === lang.code ? "bg-rose-50 text-rose-600 font-medium" : ""}
+                    >
+                      {lang.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label={isMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+                aria-expanded={isMenuOpen}
+                className="text-stone-600 hover:text-rose-600 focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Nav */}
+            {isMenuOpen && (
+              <div className="md:hidden bg-white border-b border-[#F4C542]/20 animate-in slide-in-from-top-5">
+                <div className="px-4 pt-2 pb-6 space-y-2">
+                  {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={createPageUrl(link.path.replace('/', ''))}
+                  className="block px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              ))}
+               {user ? (
+                <>
+                  {hasVendorProfile && (
+                    <Link 
+                      to={createPageUrl('VendorDashboard')}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Business Dashboard
+                    </Link>
+                  )}
+                  {hasVendorProfile && (
+                    <Link 
+                      to={createPageUrl('VendorProfile')}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Mon Profil
+                    </Link>
+                  )}
+                  {hasClientProfile && (
+                    <Link 
+                      to={createPageUrl('ClientDashboard')}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Tableau de Bord
+                    </Link>
+                  )}
+                  {hasClientProfile && (
+                    <Link 
+                      to={createPageUrl('ClientDashboard') + '?tab=client_profile'}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Mon Profil
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                  >
+                    {t("nav.logout")}
+                  </button>
+                </>
+               ) : (
+                <div className="pt-4 flex flex-col gap-3">
+                  <Button onClick={() => window.location.href = "/Login"} variant="outline" className="w-full justify-center">
+                     {t("nav.signIn")}
+                  </Button>
+                  <Button onClick={() => window.location.href = "/Login"} className="w-full justify-center bg-[#FF6B35] hover:bg-[#e05a2b] text-white">
+                     {t("nav.joinPlanner")}
+                  </Button>
+                </div>
+               )}
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Main Content */}
+      <main className="flex-grow pb-16 md:pb-0">
+        {/* Back button for non-root pages */}
+        {!isRootPage && (
+          <div className="bg-white border-b border-stone-100 px-4 py-2 md:hidden">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 text-sm text-stone-600 hover:text-[#FF6B35] transition-colors select-none"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+              Retour
+            </button>
+          </div>
+        )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, x: 18 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -18 }}
+            transition={{ duration: 0.18, ease: 'easeInOut' }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav user={user} hasVendorProfile={hasVendorProfile} hasClientProfile={hasClientProfile} />
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-stone-200 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl font-['Poppins'] font-bold tracking-tight text-[#2C2C2C]">
+                  Event<span className="text-[#FF6B35]">Crafter</span>
+                </span>
+              </div>
+              <p className="text-stone-500 max-w-sm">
+                The ultimate marketplace for all your event needs. From planners to photographers, we have it all.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Platform</h3>
+              <ul className="space-y-2 text-stone-500">
+                <li><Link to={createPageUrl("Marketplace")} className="hover:text-[#FF6B35]">{t("nav.marketplace")}</Link></li>
+                <li><Link to={createPageUrl("About")} className="hover:text-[#FF6B35]">{t("nav.howItWorks")}</Link></li>
+                <li><Link to={createPageUrl("FAQ")} className="hover:text-[#FF6B35]">FAQ</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Support</h3>
+              <ul className="space-y-2 text-stone-500">
+                <li><Link to={createPageUrl("Support")} className="hover:text-[#FF6B35]">Centre d'aide</Link></li>
+                <li><a href="https://wa.me/237670934378" target="_blank" rel="noopener noreferrer" className="hover:text-[#FF6B35]">WhatsApp</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Legal</h3>
+              <ul className="space-y-2 text-stone-500">
+                <li><Link to={createPageUrl("TermsOfService")} className="hover:text-[#FF6B35]">CGU</Link></li>
+                <li><Link to={createPageUrl("PrivacyPolicy")} className="hover:text-[#FF6B35]">Confidentialite</Link></li>
+                <li><Link to={createPageUrl("LegalNotice")} className="hover:text-[#FF6B35]">Mentions legales</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Contact</h3>
+              <ul className="space-y-2 text-stone-500">
+                <li>founder@eventcraftercm.com</li>
+                <li>hello@eventcraftercm.com</li>
+                <li>support@eventcraftercm.com</li>
+                <li>vendor@eventcraftercm.com</li>
+                <li>partnerships@eventcraftercm.com</li>
+                <li className="mt-3 pt-3 border-t border-stone-200">+237 670 93 43 78</li>
+                <li>+237 690 17 31 93</li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-12 pt-8 border-t border-stone-100 text-center text-stone-400 text-sm">
+          <p className="mb-2">{t('about.legalInfo')}</p>
+          Copyright 2026 Event Crafter Marketplace. All rights reserved.
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+export default function Layout({ children }) {
+  return (
+    <ErrorBoundary>
+      <QueryProvider>
+        <UserProvider>
+          <CurrencyProvider>
+            <LanguageProvider>
+              <LocationProvider>
+                <LayoutContent>{children}</LayoutContent>
+              </LocationProvider>
+            </LanguageProvider>
+          </CurrencyProvider>
+        </UserProvider>
+      </QueryProvider>
+    </ErrorBoundary>
+  );
+}

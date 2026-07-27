@@ -1,0 +1,41 @@
+{
+  "name": "Continent",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the continent (e.g. Africa)"
+    },
+    "code": {
+      "type": "string",
+      "description": "2-letter code (e.g. AF)"
+    },
+    "center_latitude": {
+      "type": "number",
+      "description": "Central GPS Latitude"
+    },
+    "center_longitude": {
+      "type": "number",
+      "description": "Central GPS Longitude"
+    },
+    "perimeter_geojson": {
+      "type": "object",
+      "description": "GeoJSON object defining the simplified boundary of the continent",
+      "default": {}
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "pending",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Verification status"
+    }
+  },
+  "required": [
+    "name",
+    "code"
+  ]
+}

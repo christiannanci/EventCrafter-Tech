@@ -1,0 +1,61 @@
+{
+  "name": "LeadPricingConfig",
+  "type": "object",
+  "properties": {
+    "config_key": {
+      "type": "string",
+      "default": "default",
+      "description": "Cl\u00e9 de configuration (toujours 'default' pour config globale)"
+    },
+    "small_threshold_max": {
+      "type": "number",
+      "default": 300000,
+      "description": "Budget maximum (FCFA) pour cat\u00e9gorie FAIBLE"
+    },
+    "medium_threshold_max": {
+      "type": "number",
+      "default": 1500000,
+      "description": "Budget maximum (FCFA) pour cat\u00e9gorie MOYENNE"
+    },
+    "small_price_usd": {
+      "type": "number",
+      "default": 2,
+      "description": "Prix du lead cat\u00e9gorie FAIBLE en USD"
+    },
+    "medium_price_usd": {
+      "type": "number",
+      "default": 4,
+      "description": "Prix du lead cat\u00e9gorie MOYENNE en USD"
+    },
+    "large_price_usd": {
+      "type": "number",
+      "default": 10,
+      "description": "Prix du lead cat\u00e9gorie HAUTE en USD"
+    },
+    "premium_event_multiplier": {
+      "type": "number",
+      "default": 1.0,
+      "description": "Multiplicateur pour \u00e9v\u00e9nements premium (ex: Mariage = 1.2)"
+    },
+    "seasonal_multiplier": {
+      "type": "number",
+      "default": 1.0,
+      "description": "Multiplicateur saisonnier (ex: haute saison = 1.2)"
+    },
+    "premium_event_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "Wedding",
+        "Gala",
+        "Corporate"
+      ],
+      "description": "Types d'\u00e9v\u00e9nements consid\u00e9r\u00e9s comme premium"
+    }
+  },
+  "required": [
+    "config_key"
+  ]
+}

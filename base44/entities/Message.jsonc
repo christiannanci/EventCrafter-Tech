@@ -1,0 +1,28 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "string"
+    },
+    "sender_id": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "read_status": {
+      "type": "string",
+      "enum": [
+        "read",
+        "unread"
+      ],
+      "default": "unread"
+    }
+  },
+  "required": [
+    "conversation_id",
+    "sender_id",
+    "content"
+  ]
+}

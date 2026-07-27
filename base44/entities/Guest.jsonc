@@ -1,0 +1,54 @@
+{
+  "name": "Guest",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Link to the specific Event"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "group": {
+      "type": "string",
+      "enum": [
+        "Bride Family",
+        "Groom Family",
+        "Bride Friends",
+        "Groom Friends",
+        "Mutual Friends",
+        "Colleagues",
+        "Other"
+      ],
+      "default": "Other"
+    },
+    "rsvp_status": {
+      "type": "string",
+      "enum": [
+        "Pending",
+        "Accepted",
+        "Declined"
+      ],
+      "default": "Pending"
+    },
+    "dietary_restrictions": {
+      "type": "string"
+    },
+    "plus_one": {
+      "type": "boolean",
+      "default": false
+    },
+    "table_number": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "full_name"
+  ]
+}

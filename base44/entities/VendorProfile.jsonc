@@ -1,0 +1,227 @@
+{
+  "name": "VendorProfile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "The user ID of the vendor"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "free",
+        "premium",
+        "gold"
+      ],
+      "default": "free"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "cancelled"
+      ],
+      "default": "active"
+    },
+    "subscription_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "free_leads_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of free leads already consumed (max 10 for free plan)"
+    },
+    "purchased_leads_allowance": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of additional leads purchased via unlock button"
+    },
+    "reward_credits": {
+      "type": "number",
+      "default": 0,
+      "description": "Reward credits earned (1 credit = 1 free lead unlock)"
+    },
+    "monthly_free_lead_used": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flag pour lead gratuit mensuel (r\u00e9initialis\u00e9 par admin)"
+    },
+    "last_quota_reset": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time the free_leads_count was reset (monthly)"
+    },
+    "cultural_badge_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Badge d'affinit\u00e9 tribale actif ($5/mois)"
+    },
+    "cultural_badge_type": {
+      "type": "string",
+      "description": "Type de badge culturel (ex: Bamil\u00e9k\u00e9, Sawa, Grassfields)"
+    },
+    "cultural_badge_expiry": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date d'expiration du badge culturel"
+    },
+    "spiritual_integrity_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "GOLD ONLY: Audit\u00e9 pour respect des rites et traditions"
+    },
+    "spiritual_audit_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date du dernier audit spirituel/culturel"
+    },
+    "smart_match_boost_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Boost Smart Match actif ($3-$5 pour 1 semaine)"
+    },
+    "smart_match_boost_category": {
+      "type": "string",
+      "description": "Cat\u00e9gorie boost\u00e9e pour Smart Match"
+    },
+    "smart_match_boost_expiry": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de fin du boost Smart Match"
+    },
+    "contracts_this_month": {
+      "type": "number",
+      "default": 0,
+      "description": "Nombre de contrats conclus ce mois (pour r\u00e9compenses)"
+    },
+    "last_performance_reward": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de la derni\u00e8re r\u00e9compense performance re\u00e7ue"
+    },
+    "disputes_lost_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Nombre de litiges perdus par le prestataire"
+    },
+    "account_suspended": {
+      "type": "boolean",
+      "default": false,
+      "description": "Compte suspendu apr\u00e8s 3 litiges perdus"
+    },
+    "business_name": {
+      "type": "string"
+    },
+    "profile_image": {
+      "type": "string",
+      "description": "Business Logo / Profile Picture URL"
+    },
+    "description": {
+      "type": "string",
+      "description": "About the business"
+    },
+    "category_primary": {
+      "type": "string",
+      "description": "Main service category"
+    },
+    "region": {
+      "type": "string",
+      "description": "Administrative Region (e.g. Littoral, Centre)"
+    },
+    "city": {
+      "type": "string"
+    },
+    "neighborhood_code": {
+      "type": "string",
+      "description": "CODE_QUARTIER (Links to Quartier.code)"
+    },
+    "quarter": {
+      "type": "string",
+      "description": "Neighborhood/Quartier (Deprecated in favor of neighborhood_code but kept for compatibility)"
+    },
+    "address_details": {
+      "type": "string",
+      "description": "Specific street address or PO Box"
+    },
+    "gps_latitude": {
+      "type": "number",
+      "description": "Latitude"
+    },
+    "gps_longitude": {
+      "type": "number",
+      "description": "Longitude"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "portfolio_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Gallery of past work images"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "pending",
+        "verified",
+        "rejected"
+      ],
+      "default": "unverified",
+      "description": "Verification status of the vendor"
+    },
+    "verification_required": {
+      "type": "boolean",
+      "default": true,
+      "description": "RN1: Verification obligatoire avant inscription compl\u00e8te"
+    },
+    "verification_docs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs to uploaded business documents"
+    },
+    "missed_leads_count": {
+      "type": "number",
+      "default": 0,
+      "description": "RN6: Nombre de demandes manqu\u00e9es ce mois (pour prompts upgrade)"
+    },
+    "account_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Wallet balance for the vendor"
+    },
+    "payment_api_provider": {
+      "type": "string",
+      "enum": [
+        "mtn",
+        "orange"
+      ],
+      "description": "Mobile money provider for direct payments"
+    },
+    "payment_api_key": {
+      "type": "string",
+      "description": "API Key for payment provider"
+    },
+    "payment_api_secret": {
+      "type": "string",
+      "description": "API Secret for payment provider"
+    },
+    "payment_merchant_id": {
+      "type": "string",
+      "description": "Merchant ID for payment provider"
+    }
+  },
+  "required": [
+    "user_id",
+    "plan"
+  ]
+}

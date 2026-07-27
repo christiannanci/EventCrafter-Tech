@@ -1,0 +1,47 @@
+{
+  "name": "VendorLeadPack",
+  "type": "object",
+  "properties": {
+    "vendor_id": {
+      "type": "string",
+      "description": "User ID du vendeur"
+    },
+    "pack_type": {
+      "type": "string",
+      "enum": [
+        "pack_10",
+        "pack_25",
+        "pack_50",
+        "pass_24h",
+        "premium_24h"
+      ],
+      "description": "Type de pack achet\u00e9"
+    },
+    "leads_remaining": {
+      "type": "number",
+      "description": "Nombre de leads restants dans le pack"
+    },
+    "amount_paid": {
+      "type": "number",
+      "description": "Montant pay\u00e9 en USD"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date d'expiration (pour pass temporaires)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "consumed"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "vendor_id",
+    "pack_type"
+  ]
+}

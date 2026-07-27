@@ -1,0 +1,41 @@
+{
+  "name": "Inspiration",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Short description for the card"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full article content (markdown supported)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Tradition",
+        "Attire",
+        "Food",
+        "Music",
+        "Ceremony",
+        "Decor"
+      ],
+      "default": "Tradition"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string",
+      "description": "Specific region or culture (e.g. Bamileke, Douala, North West)"
+    }
+  },
+  "required": [
+    "title",
+    "summary",
+    "category"
+  ]
+}

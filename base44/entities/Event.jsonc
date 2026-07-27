@@ -1,0 +1,96 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "event_code": {
+      "type": "string",
+      "description": "Unique public code (EVT-XXXXXX) - used for sharing and URLs"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "CODE_CLIENT: User ID of the client owner"
+    },
+    "title": {
+      "type": "string",
+      "description": "Name of the event (e.g. Sarah's Wedding)"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "Wedding",
+        "Birthday",
+        "Corporate",
+        "Conference",
+        "Baby Shower",
+        "Graduation",
+        "Religious",
+        "Funeral",
+        "Concert",
+        "Other"
+      ],
+      "default": "Other",
+      "description": "TYPE_EVENT"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DATE_DEBUT_EVENT"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DATE_FIN_EVENT"
+    },
+    "address": {
+      "type": "string",
+      "description": "Adresse du lieu"
+    },
+    "neighborhood_code": {
+      "type": "string",
+      "description": "CODE_QUARTIER (Links to Quartier.code)"
+    },
+    "location_city": {
+      "type": "string"
+    },
+    "gps_latitude": {
+      "type": "number",
+      "description": "Coordonn\u00e9es GPS Latitude"
+    },
+    "gps_longitude": {
+      "type": "number",
+      "description": "Coordonn\u00e9es GPS Longitude"
+    },
+    "currency": {
+      "type": "string",
+      "default": "XAF",
+      "description": "Currency for the event budget"
+    },
+    "estimated_cost": {
+      "type": "number",
+      "description": "COUT_EVENEMENT: Estimation du co\u00fbt associ\u00e9"
+    },
+    "budget_total": {
+      "type": "number",
+      "description": "Target budget for the whole event"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planning",
+        "active",
+        "completed",
+        "cancelled"
+      ],
+      "default": "planning"
+    },
+    "guest_count_expected": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "client_id",
+    "title",
+    "start_date",
+    "event_type"
+  ]
+}

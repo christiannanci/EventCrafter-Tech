@@ -1,0 +1,28 @@
+{
+  "name": "Conversation",
+  "type": "object",
+  "properties": {
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user IDs (client and vendor)"
+    },
+    "last_message": {
+      "type": "string",
+      "description": "Preview of the last message"
+    },
+    "last_message_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "service_id": {
+      "type": "string",
+      "description": "Optional: link chat to a specific service context"
+    }
+  },
+  "required": [
+    "participants"
+  ]
+}

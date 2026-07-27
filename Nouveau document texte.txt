@@ -1,0 +1,6 @@
+Travaille a faire
+
+1 s'occuper de la page login de sorte qu'on puisse se connecter
+2 s'occuper de la page inscription 
+3 s'copper de la partie selection de profils pour etre diriger vers son dash
+4 s'occuper du dash vendor ( l'option upgrade, contrat, paiement, poser un service, verifies si on peux inserer les images)S

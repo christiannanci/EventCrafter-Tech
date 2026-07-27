@@ -1,0 +1,46 @@
+{
+  "name": "Region",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the region (e.g. Littoral)"
+    },
+    "code": {
+      "type": "string",
+      "description": "Region code (e.g. LT)"
+    },
+    "country_code": {
+      "type": "string",
+      "description": "Code of the country this region belongs to (e.g. CM)"
+    },
+    "center_latitude": {
+      "type": "number",
+      "description": "Central GPS Latitude"
+    },
+    "center_longitude": {
+      "type": "number",
+      "description": "Central GPS Longitude"
+    },
+    "perimeter_geojson": {
+      "type": "object",
+      "description": "GeoJSON object defining the simplified boundary",
+      "default": {}
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "pending",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Verification status"
+    }
+  },
+  "required": [
+    "name",
+    "code",
+    "country_code"
+  ]
+}

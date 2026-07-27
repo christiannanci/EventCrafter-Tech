@@ -1,0 +1,50 @@
+{
+  "name": "AvailabilitySlot",
+  "type": "object",
+  "properties": {
+    "planner_id": {
+      "type": "string",
+      "description": "User ID of the provider"
+    },
+    "service_id": {
+      "type": "string",
+      "description": "Optional: Link to specific service. If null, applies to all."
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "available",
+        "blocked"
+      ],
+      "default": "available",
+      "description": "Whether this slot is explicitly open or blocked"
+    },
+    "recurrence": {
+      "type": "string",
+      "enum": [
+        "none",
+        "daily",
+        "weekly",
+        "weekdays"
+      ],
+      "default": "none"
+    },
+    "recurrence_end": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "planner_id",
+    "start_time",
+    "end_time"
+  ]
+}

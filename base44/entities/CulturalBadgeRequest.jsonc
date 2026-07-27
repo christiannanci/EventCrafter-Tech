@@ -1,0 +1,57 @@
+{
+  "name": "CulturalBadgeRequest",
+  "type": "object",
+  "properties": {
+    "vendor_id": {
+      "type": "string",
+      "description": "User ID of the vendor requesting the badge"
+    },
+    "badge_type": {
+      "type": "string",
+      "description": "Type de badge demand\u00e9 (bamileke, sawa, etc.)"
+    },
+    "proof_photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs de 3 photos de r\u00e9alisations pass\u00e9es"
+    },
+    "questionnaire_answers": {
+      "type": "object",
+      "description": "R\u00e9ponses au micro-questionnaire culturel"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Statut de la demande"
+    },
+    "verification_level": {
+      "type": "string",
+      "enum": [
+        "declarative",
+        "verified"
+      ],
+      "default": "declarative",
+      "description": "Niveau de graduation du tag"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Notes de l'administrateur"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de la r\u00e9vision admin"
+    }
+  },
+  "required": [
+    "vendor_id",
+    "badge_type"
+  ]
+}

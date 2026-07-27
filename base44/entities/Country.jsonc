@@ -1,0 +1,56 @@
+{
+  "name": "Country",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the country (e.g. Cameroon)"
+    },
+    "code": {
+      "type": "string",
+      "description": "ISO 2-letter code (e.g. CM)"
+    },
+    "continent_code": {
+      "type": "string",
+      "description": "Code of the continent this country belongs to (e.g. AF)"
+    },
+    "currency_code": {
+      "type": "string",
+      "description": "Currency ISO code (e.g. XAF, EUR, USD)",
+      "default": "XAF"
+    },
+    "currency_symbol": {
+      "type": "string",
+      "description": "Currency Symbol (e.g. FCFA, \u20ac, $)",
+      "default": "FCFA"
+    },
+    "center_latitude": {
+      "type": "number",
+      "description": "Central GPS Latitude"
+    },
+    "center_longitude": {
+      "type": "number",
+      "description": "Central GPS Longitude"
+    },
+    "perimeter_geojson": {
+      "type": "object",
+      "description": "GeoJSON object defining the simplified boundary",
+      "default": {}
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "pending",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Verification status"
+    }
+  },
+  "required": [
+    "name",
+    "code",
+    "continent_code"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Recipient of the notification"
+    },
+    "title": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "booking",
+        "payment",
+        "message",
+        "system"
+      ],
+      "default": "system"
+    },
+    "link": {
+      "type": "string",
+      "description": "Link to the relevant page"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "user_id",
+    "title",
+    "message"
+  ]
+}

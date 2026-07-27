@@ -1,0 +1,181 @@
+{
+  "name": "Service",
+  "type": "object",
+  "properties": {
+    "service_code": {
+      "type": "string",
+      "description": "Unique public code (SRV-XXXXXX) - used in URLs instead of ID"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly slug for SEO (mon-service-traiteur-xyz123)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Title of the service (e.g. Full Wedding Planning)"
+    },
+    "description": {
+      "type": "string",
+      "description": "General overview of the service"
+    },
+    "description_details": {
+      "type": "string",
+      "description": "Detailed breakdown of the service (e.g. Methodology, specific inclusions)"
+    },
+    "description_terms": {
+      "type": "string",
+      "description": "Terms, conditions, or prerequisites"
+    },
+    "category": {
+      "type": "string",
+      "description": "Service category (Legacy name)",
+      "default": "Event Planner"
+    },
+    "service_type_code": {
+      "type": "string",
+      "description": "Code of the ServiceType (e.g. SRV_VENUE)"
+    },
+    "function_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of function codes (sub-categories) this service fulfills"
+    },
+    "supported_event_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Types of events this service supports (e.g. Wedding, Birthday, Corporate)"
+    },
+    "price_min": {
+      "type": "number",
+      "description": "Minimum starting price"
+    },
+    "availability_level": {
+      "type": "string",
+      "enum": [
+        "continent",
+        "country",
+        "region",
+        "departement",
+        "ville",
+        "arrondissement",
+        "quartier"
+      ],
+      "default": "ville",
+      "description": "Niveau g\u00e9ographique de disponibilit\u00e9 du service"
+    },
+    "availability_code": {
+      "type": "string",
+      "description": "Code de la zone de disponibilit\u00e9 (ex: CM, LT, DLA, CODE_QUARTIER)"
+    },
+    "location": {
+      "type": "string",
+      "description": "General display location (Legacy/Fallback)"
+    },
+    "region": {
+      "type": "string",
+      "description": "Administrative Region Name (Legacy)"
+    },
+    "city": {
+      "type": "string",
+      "description": "City Name (Legacy)"
+    },
+    "neighborhood_code": {
+      "type": "string",
+      "description": "Neighborhood Code (CODE_QUARTIER) - Specific location of the vendor base"
+    },
+    "address_details": {
+      "type": "string",
+      "description": "Specific street address or venue name"
+    },
+    "gps_latitude": {
+      "type": "number",
+      "description": "GPS Latitude"
+    },
+    "gps_longitude": {
+      "type": "number",
+      "description": "GPS Longitude"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Main cover image for the service"
+    },
+    "video_url": {
+      "type": "string",
+      "description": "Presentation video URL for the service"
+    },
+    "rating": {
+      "type": "number",
+      "default": 0
+    },
+    "review_count": {
+      "type": "number",
+      "default": 0
+    },
+    "views": {
+      "type": "number",
+      "default": 0
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "featured_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RN5: Date fin du boost Coup de Coeur (48h)"
+    },
+    "planner_id": {
+      "type": "string",
+      "description": "User ID of the vendor"
+    },
+    "vendor_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "cultural_zones": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cultural zones where the service is compliant (e.g. Aire Sawa, Grassfields, Grand Nord)"
+    },
+    "cultural_compliance_details": {
+      "type": "string",
+      "description": "Details about cultural compliance (e.g. Respect of traditional protocols)"
+    },
+    "spoken_languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Languages spoken by the provider (e.g. French, English, Pidgin, Duala)"
+    },
+    "religious_compatibility": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Religious traditions the service is compatible with (e.g. Christian, Muslim, Traditional)"
+    },
+    "diaspora_ready": {
+      "type": "boolean",
+      "default": false,
+      "description": "Available to offer services for the diaspora (remote planning or specific logistics)"
+    },
+    "rotation_last_shown": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RN7: Derni\u00e8re fois que ce service a \u00e9t\u00e9 affich\u00e9 en top r\u00e9sultats"
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "category",
+    "price_min"
+  ]
+}

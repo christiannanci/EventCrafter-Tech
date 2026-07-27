@@ -1,0 +1,44 @@
+{
+  "name": "RankingConfig",
+  "type": "object",
+  "properties": {
+    "config_key": {
+      "type": "string",
+      "default": "default",
+      "description": "Cl\u00e9 de configuration (toujours 'default')"
+    },
+    "boost_weight": {
+      "type": "number",
+      "default": 50,
+      "description": "Points bonus pour un service boost\u00e9"
+    },
+    "rating_weight": {
+      "type": "number",
+      "default": 30,
+      "description": "Points max pour la note (5/5 = 30 points)"
+    },
+    "responsiveness_weight": {
+      "type": "number",
+      "default": 10,
+      "description": "Points bonus pour r\u00e9activit\u00e9 (r\u00e9ponse < 2h)"
+    },
+    "verification_weight": {
+      "type": "number",
+      "default": 5,
+      "description": "Points bonus pour prestataire v\u00e9rifi\u00e9"
+    },
+    "cultural_match_weight": {
+      "type": "number",
+      "default": 8,
+      "description": "Points bonus pour correspondance culturelle"
+    },
+    "rotation_hours": {
+      "type": "number",
+      "default": 4,
+      "description": "Heures avant rotation des services boost\u00e9s en top position"
+    }
+  },
+  "required": [
+    "config_key"
+  ]
+}

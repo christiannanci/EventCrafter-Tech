@@ -1,0 +1,81 @@
+{
+  "name": "LeadPackConfig",
+  "type": "object",
+  "properties": {
+    "config_key": {
+      "type": "string",
+      "default": "default",
+      "description": "Cl\u00e9 de configuration (toujours 'default')"
+    },
+    "premium_monthly_price": {
+      "type": "number",
+      "default": 30,
+      "description": "Prix mensuel Premium en USD"
+    },
+    "gold_monthly_price": {
+      "type": "number",
+      "default": 60,
+      "description": "Prix mensuel Gold en USD"
+    },
+    "pack_10_leads_price": {
+      "type": "number",
+      "default": 18,
+      "description": "Prix du pack 10 leads"
+    },
+    "pack_10_leads_count": {
+      "type": "number",
+      "default": 10
+    },
+    "pack_25_leads_price": {
+      "type": "number",
+      "default": 40,
+      "description": "Prix du pack 25 leads"
+    },
+    "pack_25_leads_count": {
+      "type": "number",
+      "default": 25
+    },
+    "pack_50_leads_price": {
+      "type": "number",
+      "default": 75,
+      "description": "Prix du pack 50 leads"
+    },
+    "pack_50_leads_count": {
+      "type": "number",
+      "default": 50
+    },
+    "pass_24h_unlimited_price": {
+      "type": "number",
+      "default": 10,
+      "description": "Prix du pass illimit\u00e9 24h"
+    },
+    "premium_24h_trial_price": {
+      "type": "number",
+      "default": 7,
+      "description": "Prix test Premium 24h"
+    },
+    "free_leads_threshold": {
+      "type": "number",
+      "default": 10,
+      "description": "Nombre de leads gratuits avant affichage upsell"
+    },
+    "show_single_purchase": {
+      "type": "boolean",
+      "default": true,
+      "description": "Afficher l'option achat \u00e0 l'unit\u00e9"
+    },
+    "show_packs": {
+      "type": "boolean",
+      "default": true,
+      "description": "Afficher les packs de leads"
+    },
+    "show_temporary_passes": {
+      "type": "boolean",
+      "default": true,
+      "description": "Afficher les pass temporaires"
+    }
+  },
+  "required": [
+    "config_key"
+  ]
+}

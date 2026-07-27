@@ -1,0 +1,122 @@
+{
+  "name": "Contract",
+  "type": "object",
+  "properties": {
+    "booking_id": {
+      "type": "string",
+      "description": "Lien vers la r\u00e9servation"
+    },
+    "membership_id": {
+      "type": "string",
+      "description": "Lien vers l'abonnement"
+    },
+    "contract_number": {
+      "type": "string",
+      "description": "NUMERO_CONTRAT (Unique)"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "booking",
+        "subscription"
+      ],
+      "default": "booking"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "pending_signatures",
+        "signed",
+        "rejected"
+      ],
+      "default": "draft",
+      "description": "Statut du contrat"
+    },
+    "signed_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de signature finale"
+    },
+    "deposit_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "AVANCE_REQUISE : Si une avance est n\u00e9cessaire pour d\u00e9marrer"
+    },
+    "deposit_percentage": {
+      "type": "number",
+      "default": 0,
+      "description": "POURCENTAGE_AVANCE (ex: 30 pour 30%)"
+    },
+    "deposit_amount": {
+      "type": "number",
+      "description": "MONTANT_AVANCE (Calcul\u00e9)"
+    },
+    "balance_due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "DATE_ECHEANCE_SOLDE"
+    },
+    "delivery_address": {
+      "type": "string"
+    },
+    "delivery_neighborhood_code": {
+      "type": "string"
+    },
+    "delivery_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "execution_delay": {
+      "type": "string"
+    },
+    "focal_point_name": {
+      "type": "string"
+    },
+    "focal_point_contact": {
+      "type": "string"
+    },
+    "negotiated_unit_price": {
+      "type": "number"
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "negotiated_unit_measure": {
+      "type": "string"
+    },
+    "contract_amount": {
+      "type": "number"
+    },
+    "payment_terms": {
+      "type": "string",
+      "description": "Texte libre des modalit\u00e9s"
+    },
+    "client_account_id": {
+      "type": "string"
+    },
+    "provider_account_id": {
+      "type": "string"
+    },
+    "client_signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "provider_signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "jurisdiction_clause": {
+      "type": "string"
+    },
+    "cancellation_terms": {
+      "type": "string"
+    },
+    "commission_clause": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_number"
+  ]
+}

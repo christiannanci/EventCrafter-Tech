@@ -1,0 +1,46 @@
+{
+  "name": "Ville",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the city (e.g. Douala)"
+    },
+    "code": {
+      "type": "string",
+      "description": "City code (e.g. DLA)"
+    },
+    "departement_code": {
+      "type": "string",
+      "description": "Code of the departement this city belongs to"
+    },
+    "center_latitude": {
+      "type": "number",
+      "description": "Central GPS Latitude"
+    },
+    "center_longitude": {
+      "type": "number",
+      "description": "Central GPS Longitude"
+    },
+    "perimeter_geojson": {
+      "type": "object",
+      "description": "GeoJSON object defining the simplified boundary",
+      "default": {}
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "pending",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Verification status"
+    }
+  },
+  "required": [
+    "name",
+    "code",
+    "departement_code"
+  ]
+}

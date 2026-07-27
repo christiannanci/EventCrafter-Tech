@@ -1,0 +1,114 @@
+{
+  "name": "Booking",
+  "type": "object",
+  "properties": {
+    "booking_code": {
+      "type": "string",
+      "description": "Unique public code (BKG-XXXXXX) - used for tracking and URLs"
+    },
+    "event_id": {
+      "type": "string",
+      "description": "Optional link to a parent Event container"
+    },
+    "service_id": {
+      "type": "string",
+      "description": "ID of the service being booked"
+    },
+    "planner_id": {
+      "type": "string",
+      "description": "User ID of the planner/vendor"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string",
+      "default": "Other"
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "negotiating",
+        "offer_submitted",
+        "contract_pending",
+        "awaiting_deposit",
+        "deposit_paid",
+        "in_progress",
+        "awaiting_balance",
+        "delivered",
+        "warranty_period",
+        "completed",
+        "cancelled",
+        "disputed"
+      ],
+      "default": "pending",
+      "description": "Cycle de vie \u00e9tendu avec gestion acompte"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "unpaid",
+        "deposit_paid",
+        "fully_paid",
+        "refunded"
+      ],
+      "default": "unpaid"
+    },
+    "requested_unit_price": {
+      "type": "number"
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "unit_measure": {
+      "type": "string"
+    },
+    "condition_1": {
+      "type": "string"
+    },
+    "condition_2": {
+      "type": "string"
+    },
+    "condition_3": {
+      "type": "string"
+    },
+    "condition_4": {
+      "type": "string"
+    },
+    "request_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "total_amount": {
+      "type": "number"
+    },
+    "paid_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Montant total pay\u00e9 par le client (Acompte + Solde)"
+    },
+    "amount_released": {
+      "type": "number",
+      "default": 0,
+      "description": "Montant effectivement revers\u00e9 au prestataire (Avance d\u00e9bloqu\u00e9e)"
+    },
+    "commission_amount": {
+      "type": "number"
+    },
+    "contract_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "service_id",
+    "event_date"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "name": "MembershipType",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "CODE_MEMBERSHIP (e.g. free, premium, gold)"
+    },
+    "name": {
+      "type": "string",
+      "description": "DESIGNATION (e.g. Premium Plan)"
+    },
+    "abbreviation": {
+      "type": "string",
+      "description": "ABREVIATION (e.g. PREM)"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "PRESTATIONS_OFFERTES"
+    },
+    "price": {
+      "type": "number",
+      "description": "COUT"
+    },
+    "legal_terms": {
+      "type": "string",
+      "description": "MENTIONS LEGALES"
+    },
+    "billing_cycle": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "yearly",
+        "one_time"
+      ],
+      "default": "monthly"
+    },
+    "currency": {
+      "type": "string",
+      "default": "FCFA"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "code",
+    "name",
+    "price"
+  ]
+}

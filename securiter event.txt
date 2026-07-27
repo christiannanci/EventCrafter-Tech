@@ -1,0 +1,51 @@
+Voici un listing complet des points de sécurité à traiter pour EventCrafter, organisés par catégorie et adaptés à ta stack (React/Vite + Supabase + Vercel + Mobile Money) :
+
+1. Base de données (Supabase / RLS) — priorité haute
+Auditer toutes les tables une par une : vérifier qu'aucune n'a RLS activé sans policy (comme le bug membership_type qu'on avait trouvé) — ça bloque silencieusement ou, pire, expose tout si RLS est désactivé par erreur
+Vérifier qu'aucune table sensible n'a de policy trop permissive (allow_all_vendor par exemple — à revérifier que ce n'est pas un accès total non filtré)
+S'assurer que les policies d'écriture vérifient bien auth.uid() et pas seulement l'existence d'une ligne (éviter qu'un client modifie le contrat/booking d'un autre utilisateur)
+Ne jamais exposer la clé service_role côté frontend — seulement l'anon key publique
+Vérifier les fonctions RPC/Postgres (comme has_staff_access) pour s'assurer qu'elles ne contournent pas RLS involontairement
+
+2. Authentification & autorisation
+Forcer un mot de passe fort à l'inscription (longueur minimum, complexité)
+Rendre le numéro de téléphone obligatoire et validé à l'inscription (déjà identifié dans ta checklist)
+Vérifier que chaque route/dashboard contrôle le rôle côté serveur, pas seulement côté frontend (un rôle vérifié uniquement en React peut être contourné en modifiant le state ou en appelant l'API directement)
+Limiter les tentatives de connexion (rate limiting sur le login, protection brute-force)
+Vérifier l'expiration et le renouvellement des sessions Supabase
+
+3. Frontend / Injection
+Échapper tout contenu généré par l'utilisateur avant affichage (descriptions de leads, messages chat, avis) pour éviter le XSS — vérifier qu'aucun dangerouslySetInnerHTML n'est utilisé sur du texte utilisateur non filtré
+Valider et sanitizer tous les formulaires côté client ET serveur (jamais faire confiance au frontend seul)
+Protéger contre le clickjacking (headers X-Frame-Options / Content-Security-Policy)
+
+
+4. Upload de fichiers
+Limiter les types de fichiers acceptés et leur taille (documents de vérification, preuves de paiement, images de profil)
+Scanner ou au minimum valider le contenu réel du fichier (pas juste l'extension) pour éviter l'upload de scripts déguisés
+Ne jamais rendre exécutable un fichier uploadé
+
+
+5. Paiements & argent (zone critique vu le wallet et Mobile Money)
+Revalider côté serveur tous les montants avant de créditer/débiter un wallet — ne jamais faire confiance à une valeur envoyée par le frontend
+Vérifier qu'un utilisateur ne peut valider sa propre preuve de paiement (seul un admin doit pouvoir approuver)
+Logger toutes les transactions avec traçabilité (qui a crédité/débité, quand, pourquoi)
+Protéger le flux Escrow Afrikpay contre le rejeu de requêtes (idempotency keys si l'API le permet)
+
+
+6. Secrets & configuration
+Vérifier qu'aucune clé API, mot de passe DB, ou token n'est commité sur GitHub (variables d'environnement uniquement, .env dans .gitignore)
+Faire un audit rapide de l'historique Git pour s'assurer qu'aucun secret n'a été poussé par le passé (sinon il faut les régénérer, pas juste les supprimer)
+
+
+7. Infrastructure / Déploiement
+HTTPS forcé (normalement automatique sur Vercel, à vérifier)
+Headers de sécurité (CSP, HSTS, X-Content-Type-Options) — pas configurés par défaut sur Vite/Vercel, à ajouter
+Rate limiting sur les endpoints sensibles (login, envoi de messages, création de leads) pour éviter le spam/abus
+8. Dépendances
+npm audit régulièrement pour détecter les vulnérabilités connues dans les packages
+Garder les dépendances à jour, surtout Supabase JS client et les libs d'authentification
+
+Pour prioriser, je te propose de commencer par le point 1 (audit RLS complet) puisque c'est la faille la plus critique — une policy manquante ou trop permissive peut exposer toute une table publiquement, comme on l'a déjà vu une fois avec membership_type.
+
+Tu veux qu'on commence par là ? Si oui, je te donne une requête SQL pour lister toutes tes tables et vérifier lesquelles ont RLS activé sans aucune policy associée.

@@ -1,0 +1,106 @@
+{
+  "name": "Invoice",
+  "type": "object",
+  "properties": {
+    "invoice_number": {
+      "type": "string",
+      "description": "Unique invoice reference (e.g. INV-2024-001)"
+    },
+    "booking_id": {
+      "type": "string"
+    },
+    "membership_id": {
+      "type": "string"
+    },
+    "contract_id": {
+      "type": "string",
+      "description": "Linked contract"
+    },
+    "emitter_id": {
+      "type": "string",
+      "description": "Vendor User ID or Platform"
+    },
+    "recipient_id": {
+      "type": "string",
+      "description": "Client User ID or Subscriber"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "global",
+        "partial_deposit",
+        "partial_balance",
+        "subscription"
+      ],
+      "default": "global",
+      "description": "Type de facture: Globale, Acompte, Solde ou Abonnement"
+    },
+    "percentage": {
+      "type": "number",
+      "description": "Percentage of total amount (if partial)"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string",
+      "default": "FCFA"
+    },
+    "billing_address": {
+      "type": "string",
+      "description": "Adresse de facturation"
+    },
+    "focal_point_name": {
+      "type": "string",
+      "description": "Nom du point focal (Personne \u00e0 contacter)"
+    },
+    "focal_point_contact": {
+      "type": "string",
+      "description": "Contact du point focal"
+    },
+    "issued_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "issued",
+        "paid",
+        "overdue",
+        "cancelled"
+      ],
+      "default": "draft"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_price": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "invoice_number",
+    "amount",
+    "status"
+  ]
+}
