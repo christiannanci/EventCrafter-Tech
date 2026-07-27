@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { base44, supabase } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -126,7 +126,7 @@ export default function AdminDashboard() {
         { value: "payouts", label: "Payouts", icon: DollarSign, show: isSuperAdmin },
         { value: "reviews", label: "Modération Avis", icon: Shield, show: isSuperAdmin },
         { value: "ranking", label: "Système Ranking", icon: Shield, show: isSuperAdmin },
-        { value: "disputes", label: "Litiges en Cours", icon: AlertTriangle, show: isSuperAdmin },
+        { value: "disputes", label: "Litiges en Cours", icon: AlertTriangle, show: hasAccess('legal') },
         { value: "contracts", label: "Tour de Contrôle", icon: DollarSign, show: isSuperAdmin },
         { value: "leads", label: "Gestion Leads", icon: Briefcase, show: hasAccess('sales') },
     ].filter(item => item.show);
@@ -267,13 +267,16 @@ export default function AdminDashboard() {
                                 <TabsContent value="ranking" className="mt-0">
                                     <RankingDashboard />
                                 </TabsContent>
-                                <TabsContent value="disputes" className="mt-0">
-                                    <DisputeManagement />
-                                </TabsContent>
                                 <TabsContent value="contracts" className="mt-0">
                                     <ContractMonitoring />
                                 </TabsContent>
                             </>
+                        )}
+
+                        {hasAccess('legal') && (
+                            <TabsContent value="disputes" className="mt-0">
+                                <DisputeManagement />
+                            </TabsContent>
                         )}
 
                         {hasAccess('sales') && (
