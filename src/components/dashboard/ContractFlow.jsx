@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { base44 } from "@/api/apiClient";
+import { SendEmail } from "@/api/integrations";
 import { FileSignature, CheckCircle2, ArrowRight, ArrowLeft, Edit3, FileCheck, Download } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
@@ -78,11 +79,11 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                 setContract(existing);
                 setFormData(existing);
                 
-                // DÃ©terminer l'Ã©tape en fonction du statut
+                // Déterminer l'étape en fonction du statut
                 if (existing.status === 'draft') {
                     setStep(1);
                 } else if (existing.status === 'pending_signatures') {
-                    setStep(3); // Aller directement Ã  la signature
+                    setStep(3); // Aller directement à la signature
                 } else if (existing.status === 'signed') {
                     setStep(3);
                 }
@@ -105,9 +106,9 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                     contract_amount: booking.total_amount || 0,
                     payment_terms: "100% Escrow Release upon completion",
                     status: 'draft',
-                    jurisdiction_clause: "En cas d'impasse dans les nÃ©gociations ou de litige persistant, les tribunaux compÃ©tents seront ceux du ressort du siÃ¨ge social de la plateforme EventCrafter.",
-                    cancellation_terms: "RESPONSABILITES ET ANNULATION :\n- Si l'Ã©chec du contrat est imputable au Client : Le Prestataire conserve les montants dÃ©jÃ  versÃ©s Ã  titre d'indemnitÃ©.\n- Si l'Ã©chec est imputable au Prestataire : Le Client sera remboursÃ© des sommes versÃ©es (hors frais de service).\n- ConsÃ©quences financiÃ¨res : Toute annulation entraÃ®ne l'application des pÃ©nalitÃ©s prÃ©vues aux CGU.",
-                    commission_clause: "COMMISSION PLATEFORME :\nLa commission de service prÃ©levÃ©e par EventCrafter rÃ©munÃ¨re l'intermÃ©diation et la sÃ©curisation de la transaction. Elle reste acquise Ã  la plateforme en toute circonstance, quel que soit le motif de l'annulation ou l'issue du litige."
+                    jurisdiction_clause: "En cas d'impasse dans les négociations ou de litige persistant, les tribunaux compétents seront ceux du ressort du siège social de la plateforme EventCrafter.",
+                    cancellation_terms: "RESPONSABILITES ET ANNULATION :\n- Si l'échec du contrat est imputable au Client : Le Prestataire conserve les montants déjà versés à titre d'indemnité.\n- Si l'échec est imputable au Prestataire : Le Client sera remboursé des sommes versées (hors frais de service).\n- Conséquences financières : Toute annulation entraîne l'application des pénalités prévues aux CGU.",
+                    commission_clause: "COMMISSION PLATEFORME :\nLa commission de service prélevée par EventCrafter rémunère l'intermédiation et la sécurisation de la transaction. Elle reste acquise à la plateforme en toute circonstance, quel que soit le motif de l'annulation ou l'issue du litige."
                 });
                 setStep(1);
             }
@@ -128,8 +129,8 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                 savedContract = await base44.entities.Contract.create(formData);
             }
             setContract(savedContract);
-            setStep(2); // Aller Ã  la rÃ©vision
-            toast({ title: "Contrat enregistrÃ©", description: "Passez Ã  l'Ã©tape suivante" });
+            setStep(2); // Aller à la révision
+            toast({ title: "Contrat enregistré", description: "Passez à l'étape suivante" });
         } catch (error) {
             console.error("Save failed", error);
             toast({ title: "Erreur", description: "Impossible de sauvegarder le contrat", variant: "destructive" });
@@ -148,7 +149,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
             setStep(3);
             toast({ title: "Soumis", description: "Le contrat attend les signatures" });
         } catch (error) {
-            toast({ title: "Erreur", description: "Ã‰chec de la soumission", variant: "destructive" });
+            toast({ title: "Erreur", description: "Échec de la soumission", variant: "destructive" });
         } finally {
             setLoading(false);
         }
@@ -188,7 +189,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                     status: 'awaiting_payment'
                 });
                 
-                // GÃ©nÃ©rer et envoyer la facture automatiquement
+                // Générer et envoyer la facture automatiquement
                 try {
                     const vendorProfiles = await base44.entities.VendorProfile.filter({ user_id: booking.planner_id });
                     const allUsers = await base44.entities.User.list();
@@ -205,8 +206,8 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                     // Notifications
                     await NotificationService.sendToVendor({
                         vendorId: booking.planner_id,
-                        title: "âœ… Contrat SignÃ© & Facture GÃ©nÃ©rÃ©e",
-                        message: `Le contrat ${contract.contract_number} a Ã©tÃ© signÃ© par les deux parties. La facture a Ã©tÃ© envoyÃ©e par email.`,
+                        title: "✅ Contrat Signé & Facture Générée",
+                        message: `Le contrat ${contract.contract_number} a été signé par les deux parties. La facture a été envoyée par email.`,
                         type: "contract",
                         link: "/VendorDashboard?tab=dossiers"
                     });
@@ -214,23 +215,31 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                     if (clientUser) {
                         await base44.entities.Notification.create({
                             user_id: clientUser.id,
-                            title: "âœ… Contrat SignÃ© - Paiement Requis",
-                            message: `Le contrat ${contract.contract_number} est finalisÃ©. Veuillez procÃ©der au paiement pour confirmer votre rÃ©servation.`,
+                            title: "✅ Contrat Signé - Paiement Requis",
+                            message: `Le contrat ${contract.contract_number} est finalisé. Veuillez procéder au paiement pour confirmer votre réservation.`,
                             type: "contract",
                             link: "/ClientDashboard",
                             is_read: false
                         });
+
+                        // Email au client : action urgente (paiement requis pour débloquer la réservation),
+                        // manquait ici alors que le vendeur en recevait déjà un via NotificationService
+                        await SendEmail({
+                            to: clientUser.email,
+                            subject: "✅ Contrat signé - Paiement requis",
+                            body: `Bonjour ${clientUser.full_name || ''},\n\nLe contrat ${contract.contract_number} a été signé par les deux parties.\n\nVeuillez procéder au paiement pour confirmer votre réservation.\n\nCordialement,\nL'équipe EventCrafter`
+                        });
                     }
                     
                     toast({ 
-                        title: "Contrat SignÃ© & Facture EnvoyÃ©e!", 
-                        description: "La facture a Ã©tÃ© gÃ©nÃ©rÃ©e et envoyÃ©e par email aux deux parties"
+                        title: "Contrat Signé & Facture Envoyée!", 
+                        description: "La facture a été générée et envoyée par email aux deux parties"
                     });
                 } catch (invoiceError) {
                     console.error('Invoice generation failed:', invoiceError);
                     toast({ 
-                        title: "Contrat SignÃ©", 
-                        description: "âš ï¸ Facture non gÃ©nÃ©rÃ©e automatiquement", 
+                        title: "Contrat Signé", 
+                        description: "⚠️ Facture non générée automatiquement", 
                         variant: "destructive" 
                     });
                 }
@@ -240,7 +249,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
             setContract(updated);
             
             if (!updateData.status) {
-                toast({ title: "SignÃ©!", description: "Vous avez approuvÃ© et signÃ© le contrat" });
+                toast({ title: "Signé!", description: "Vous avez approuvé et signé le contrat" });
             }
             
             if (updateData.status === 'signed') {
@@ -251,7 +260,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
             }
         } catch (error) {
             console.error("Sign failed", error);
-            toast({ title: "Erreur", description: "Ã‰chec de la signature", variant: "destructive" });
+            toast({ title: "Erreur", description: "Échec de la signature", variant: "destructive" });
         } finally {
             setLoading(false);
         }
@@ -285,39 +294,39 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
   <h1>Contrat pour Services</h1>
   <p class="subtitle">Entre <strong>${providerName}</strong> (Prestataire) et <strong>${clientName}</strong> (Client)</p>
   <div class="section">
-    <h2>Informations GÃ©nÃ©rales</h2>
-    <div class="row"><span class="label">NumÃ©ro de contrat:</span><span class="value">${formData.contract_number || 'N/A'}</span></div>
+    <h2>Informations Générales</h2>
+    <div class="row"><span class="label">Numéro de contrat:</span><span class="value">${formData.contract_number || 'N/A'}</span></div>
     <div class="row"><span class="label">Point focal:</span><span class="value">${formData.focal_point_name || 'N/A'}</span></div>
     <div class="row"><span class="label">Contact:</span><span class="value">${formData.focal_point_contact || 'N/A'}</span></div>
     <div class="row"><span class="label">Date de livraison:</span><span class="value">${formData.delivery_date || 'N/A'}</span></div>
     <div class="row"><span class="label">Adresse:</span><span class="value">${formData.delivery_address || 'N/A'}</span></div>
-    <div class="row"><span class="label">DÃ©lai d'exÃ©cution:</span><span class="value">${formData.execution_delay || 'N/A'}</span></div>
+    <div class="row"><span class="label">Délai d'exécution:</span><span class="value">${formData.execution_delay || 'N/A'}</span></div>
   </div>
   <div class="section">
-    <h2>DÃ©tails Financiers</h2>
+    <h2>Détails Financiers</h2>
     <div class="financial">
       <div class="row"><span class="label">Prix unitaire:</span><span class="value">${formData.negotiated_unit_price || 0} FCFA</span></div>
-      <div class="row"><span class="label">QuantitÃ©:</span><span class="value">${formData.quantity || 1} ${formData.negotiated_unit_measure || ''}</span></div>
+      <div class="row"><span class="label">Quantité:</span><span class="value">${formData.quantity || 1} ${formData.negotiated_unit_measure || ''}</span></div>
       <div class="row"><span class="label">Conditions de paiement:</span><span class="value">${formData.payment_terms || 'N/A'}</span></div>
       <div class="row" style="border-top:1px solid #ddd;padding-top:10px;margin-top:10px"><span class="label">MONTANT TOTAL:</span><span class="total">${formData.contract_amount || 0} FCFA</span></div>
     </div>
   </div>
   <div class="section">
-    <h2>Conditions LÃ©gales</h2>
+    <h2>Conditions Légales</h2>
     <p class="legal">${formData.cancellation_terms || ''}</p>
     <p class="legal" style="margin-top:10px">${formData.commission_clause || ''}</p>
   </div>
   <div class="signatures">
     <div class="sig-block">
       <strong>Prestataire</strong>
-      ${contract?.provider_signed_at ? `<p>SignÃ©: ${contract.provider_signature_name || providerName}</p><p style="font-size:11px;color:#666">${new Date(contract.provider_signed_at).toLocaleDateString('fr-FR')}</p>` : '<p style="color:#999;font-style:italic">Non signÃ©</p>'}
+      ${contract?.provider_signed_at ? `<p>Signé: ${contract.provider_signature_name || providerName}</p><p style="font-size:11px;color:#666">${new Date(contract.provider_signed_at).toLocaleDateString('fr-FR')}</p>` : '<p style="color:#999;font-style:italic">Non signé</p>'}
     </div>
     <div class="sig-block">
       <strong>Client</strong>
-      ${contract?.client_signed_at ? `<p>SignÃ©: ${contract.client_signature_name || clientName}</p><p style="font-size:11px;color:#666">${new Date(contract.client_signed_at).toLocaleDateString('fr-FR')}</p>` : '<p style="color:#999;font-style:italic">Non signÃ©</p>'}
+      ${contract?.client_signed_at ? `<p>Signé: ${contract.client_signature_name || clientName}</p><p style="font-size:11px;color:#666">${new Date(contract.client_signed_at).toLocaleDateString('fr-FR')}</p>` : '<p style="color:#999;font-style:italic">Non signé</p>'}
     </div>
   </div>
-  <div class="footer">Document gÃ©nÃ©rÃ© par EventCrafter Marketplace - Valeur lÃ©gale selon CGU</div>
+  <div class="footer">Document généré par EventCrafter Marketplace - Valeur légale selon CGU</div>
 </body>
 </html>`;
 
@@ -339,7 +348,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                         </span>
                         {contract?.status === 'signed' && (
                             <span className="text-green-600 flex items-center text-sm bg-green-50 px-3 py-1 rounded-full border border-green-200">
-                                <CheckCircle2 className="w-4 h-4 mr-2" /> SignÃ©
+                                <CheckCircle2 className="w-4 h-4 mr-2" /> Signé
                             </span>
                         )}
                     </DialogTitle>
@@ -351,14 +360,14 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-rose-600 text-white' : 'bg-stone-200'}`}>
                             {step > 1 ? <CheckCircle2 className="w-5 h-5" /> : '1'}
                         </div>
-                        <span className="text-sm font-medium">Ã‰diter</span>
+                        <span className="text-sm font-medium">Éditer</span>
                     </div>
                     <div className="w-12 h-0.5 bg-stone-200" />
                     <div className={`flex items-center gap-2 ${step >= 2 ? 'text-rose-600' : 'text-stone-300'}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-rose-600 text-white' : 'bg-stone-200'}`}>
                             {step > 2 ? <CheckCircle2 className="w-5 h-5" /> : '2'}
                         </div>
-                        <span className="text-sm font-medium">RÃ©viser</span>
+                        <span className="text-sm font-medium">Réviser</span>
                     </div>
                     <div className="w-12 h-0.5 bg-stone-200" />
                     <div className={`flex items-center gap-2 ${step >= 3 ? 'text-rose-600' : 'text-stone-300'}`}>
@@ -380,7 +389,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>NumÃ©ro de contrat</Label>
+                                    <Label>Numéro de contrat</Label>
                                     <Input disabled value={formData.contract_number || ''} />
                                 </div>
                                 <div className="space-y-2">
@@ -398,7 +407,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Retard d'exÃ©cution</Label>
+                                    <Label>Retard d'exécution</Label>
                                     <Input 
                                         value={formData.execution_delay || ''} 
                                         onChange={e => setFormData({...formData, execution_delay: e.target.value})}
@@ -408,7 +417,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                             </div>
 
                             <div className="border-t pt-4">
-                                <h3 className="font-semibold text-lg mb-4">DÃ©tails de livraison</h3>
+                                <h3 className="font-semibold text-lg mb-4">Détails de livraison</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label>Date de livraison</Label>
@@ -447,7 +456,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>QuantitÃ©</Label>
+                                        <Label>Quantité</Label>
                                         <Input 
                                             type="number"
                                             value={formData.quantity || ''} 
@@ -455,7 +464,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>UnitÃ© de mesure</Label>
+                                        <Label>Unité de mesure</Label>
                                         <Input 
                                             value={formData.negotiated_unit_measure || ''} 
                                             onChange={e => setFormData({...formData, negotiated_unit_measure: e.target.value})}
@@ -487,14 +496,14 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                     {step === 2 && (
                         <div className="max-w-3xl mx-auto space-y-6 bg-white p-8 rounded-lg shadow-sm">
                             <div className="text-center border-b pb-4">
-                                <h2 className="text-2xl font-bold text-stone-900">RÃ‰VISION DU CONTRAT</h2>
-                                <p className="text-stone-500 mt-2">VÃ©rifiez tous les dÃ©tails avant de soumettre</p>
+                                <h2 className="text-2xl font-bold text-stone-900">RÉVISION DU CONTRAT</h2>
+                                <p className="text-stone-500 mt-2">Vérifiez tous les détails avant de soumettre</p>
                             </div>
 
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <p className="text-xs text-stone-500 font-medium">NumÃ©ro de contrat</p>
+                                        <p className="text-xs text-stone-500 font-medium">Numéro de contrat</p>
                                         <p className="font-semibold">{formData.contract_number}</p>
                                     </div>
                                     <div>
@@ -506,20 +515,20 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                                         <p className="font-semibold">{formData.delivery_date}</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-stone-500 font-medium">DÃ©lai d'exÃ©cution</p>
+                                        <p className="text-xs text-stone-500 font-medium">Délai d'exécution</p>
                                         <p className="font-semibold">{formData.execution_delay || 'N/A'}</p>
                                     </div>
                                 </div>
 
                                 <div className="border-t pt-4">
-                                    <h3 className="font-bold mb-3">DÃ©tails financiers</h3>
+                                    <h3 className="font-bold mb-3">Détails financiers</h3>
                                     <div className="bg-stone-50 p-4 rounded-lg space-y-2">
                                         <div className="flex justify-between">
                                             <span className="text-stone-600">Prix unitaire:</span>
                                             <span className="font-semibold">{formData.negotiated_unit_price} FCFA</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-stone-600">QuantitÃ©:</span>
+                                            <span className="text-stone-600">Quantité:</span>
                                             <span className="font-semibold">{formData.quantity} {formData.negotiated_unit_measure}</span>
                                         </div>
                                         <div className="flex justify-between border-t pt-2">
@@ -530,18 +539,18 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                                 </div>
 
                                 <div className="border-t pt-4">
-                                    <h3 className="font-bold mb-3">Conditions lÃ©gales</h3>
+                                    <h3 className="font-bold mb-3">Conditions légales</h3>
                                     <div className="space-y-3 text-sm">
                                         <div>
                                             <p className="font-semibold text-stone-700">1. Commission Plateforme</p>
                                             <p className="text-stone-600 text-xs">{formData.commission_clause}</p>
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-stone-700">2. ResponsabilitÃ©s et Annulation</p>
+                                            <p className="font-semibold text-stone-700">2. Responsabilités et Annulation</p>
                                             <p className="text-stone-600 text-xs whitespace-pre-line">{formData.cancellation_terms}</p>
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-stone-700">3. Juridiction CompÃ©tente</p>
+                                            <p className="font-semibold text-stone-700">3. Juridiction Compétente</p>
                                             <p className="text-stone-600 text-xs">{formData.jurisdiction_clause}</p>
                                         </div>
                                     </div>
@@ -578,7 +587,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                                     ) : contract?.provider_signed_at ? (
                                         <div className="space-y-2 text-center">
                                             <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto" />
-                                            <p className="text-green-600 font-medium">SignÃ©</p>
+                                            <p className="text-green-600 font-medium">Signé</p>
                                             <p className="text-xs text-stone-600 font-medium">{contract?.provider_signature_name}</p>
                                             <p className="text-xs text-stone-500">
                                                 {format(new Date(contract.provider_signed_at), 'dd/MM/yyyy HH:mm')}
@@ -612,7 +621,7 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                                     ) : contract?.client_signed_at ? (
                                         <div className="space-y-2 text-center">
                                             <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto" />
-                                            <p className="text-green-600 font-medium">SignÃ©</p>
+                                            <p className="text-green-600 font-medium">Signé</p>
                                             <p className="text-xs text-stone-600 font-medium">{contract?.client_signature_name}</p>
                                             <p className="text-xs text-stone-500">
                                                 {format(new Date(contract.client_signed_at), 'dd/MM/yyyy HH:mm')}
@@ -630,8 +639,8 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                             {contract?.status === 'signed' && (
                                 <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6 text-center">
                                     <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-3" />
-                                    <h3 className="text-xl font-bold text-green-900 mb-2">Contrat ValidÃ© !</h3>
-                                    <p className="text-green-700">Les deux parties ont signÃ©. Le contrat est maintenant actif.</p>
+                                    <h3 className="text-xl font-bold text-green-900 mb-2">Contrat Validé !</h3>
+                                    <p className="text-green-700">Les deux parties ont signé. Le contrat est maintenant actif.</p>
                                 </div>
                             )}
                         </div>
@@ -679,14 +688,14 @@ export default function ContractFlow({ booking, currentUser, open, onOpenChange,
                         {step === 3 && isSignedByMe && contract?.status === 'pending_signatures' && (
                             <div className="text-sm text-green-600 font-medium flex items-center gap-2 bg-green-50 px-4 py-2 rounded-lg">
                                 <CheckCircle2 className="w-4 h-4" />
-                                Vous avez signÃ© - En attente de l'autre partie
+                                Vous avez signé - En attente de l'autre partie
                             </div>
                         )}
 
                         {contract?.status === 'signed' && (
                             <>
                                 <Button variant="outline" onClick={handleDownloadPDF}>
-                                    <Download className="w-4 h-4 mr-2" /> TÃ©lÃ©charger PDF
+                                    <Download className="w-4 h-4 mr-2" /> Télécharger PDF
                                 </Button>
                                 <Button onClick={() => onOpenChange(false)} className="bg-rose-600 hover:bg-rose-700">
                                     Fermer

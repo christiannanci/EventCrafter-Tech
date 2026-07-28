@@ -109,12 +109,23 @@ export default function ContractMonitoring() {
       if (booking) {
         await base44.entities.Notification.create({
           user_id: booking.planner_id,
-          title: '? Service Cloture par Admin',
+          title: '✅ Service Cloture par Admin',
           message: `Votre service a ete marque comme termine par l'administration. Raison: ${reason}`,
           type: 'admin_action',
           link: '/VendorDashboard?tab=dossiers',
           is_read: false
         });
+
+        // Email au vendeur : cloture + liberation des fonds, information financiere importante
+        const allUsers = await base44.entities.User.list();
+        const vendorUser = allUsers.find(u => u.id === booking.planner_id);
+        if (vendorUser) {
+          await SendEmail({
+            to: vendorUser.email,
+            subject: '✅ Service clôturé par l\'administration',
+            body: `Bonjour ${vendorUser.full_name},\n\nVotre service a été marqué comme terminé par l'administration EventCrafter et les fonds correspondants ont été libérés.\n\nRaison : ${reason}\n\nCordialement,\nL'équipe EventCrafter`
+          });
+        }
       }
     },
     onSuccess: () => {
@@ -137,7 +148,7 @@ export default function ContractMonitoring() {
       if (clientUser) {
         await base44.entities.Notification.create({
           user_id: clientUser.id,
-          title: '? Rappel de Paiement',
+          title: '🔔 Rappel de Paiement',
           message: `Votre paiement est en attente depuis plus de 48h. Veuillez proceder au paiement pour confirmer votre reservation.`,
           type: 'payment_reminder',
           link: '/ClientDashboard',
@@ -251,7 +262,7 @@ export default function ContractMonitoring() {
                   <div key={booking.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-amber-200">
                     <div className="flex-1">
                       <p className="font-semibold text-stone-900">
-                        {booking.client_name || 'Client'} ? {vendor?.business_name || 'Vendeur'}
+                        {booking.client_name || 'Client'} • {vendor?.business_name || 'Vendeur'}
                       </p>
                       <div className="flex items-center gap-3 mt-1 text-sm text-stone-600">
                         <span className="flex items-center gap-1">
@@ -374,7 +385,7 @@ export default function ContractMonitoring() {
                   <div key={booking.id} className="flex items-center justify-between p-3 bg-stone-50 rounded-lg">
                     <div className="flex-1">
                       <p className="text-sm font-medium text-stone-900">
-                        {booking.client_name || 'Client'} ? {vendor?.business_name || 'Vendeur'}
+                        {booking.client_name || 'Client'} • {vendor?.business_name || 'Vendeur'}
                       </p>
                       <div className="flex items-center gap-3 mt-1 text-xs text-stone-600">
                         <span>{booking.total_amount?.toLocaleString()} FCFA</span>
