@@ -67,16 +67,16 @@ export default function VerificationRequests() {
                 admin_response: adminResponse,
                 admin_id: currentUser.id,
                 documents_required: [
-                    "Copie de la piËce d'identitÈ (CNI, passeport)",
-                    "Preuve de rÈsidence (facture ÈlectricitÈ/eau)",
-                    "Photo selfie avec piËce d'identitÈ"
+                    "Copie de la pi√®ce d'identit√© (CNI, passeport)",
+                    "Preuve de r√©sidence (facture √©lectricit√©/eau)",
+                    "Photo selfie avec pi√®ce d'identit√©"
                 ]
             });
 
             // Notify client
             await base44.entities.Notification.create({
                 user_id: selectedRequest.client_id,
-                title: "Documents requis pour vÈrification",
+                title: "Documents requis pour v√©rification",
                 message: adminResponse,
                 type: "verification_response",
                 link: "/ClientDashboard",
@@ -88,10 +88,10 @@ export default function VerificationRequests() {
             if (client) {
                 await SendEmail({
                     to: client.email,
-                    subject: "?? Documents requis pour vÈrification",
+                    subject: "üìã Documents requis pour v√©rification",
                     body: `
                         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                            <h2 style="color: #FF6B35;">Documents requis pour vÈrification</h2>
+                            <h2 style="color: #FF6B35;">Documents requis pour v√©rification</h2>
                             <p>Bonjour ${client.full_name},</p>
                             <p>${adminResponse}</p>
                             <a href="${window.location.origin}/ClientDashboard" 
@@ -104,7 +104,7 @@ export default function VerificationRequests() {
                 });
             }
 
-            toast({ title: "Exigences envoyÈes au client" });
+            toast({ title: "Exigences envoy√©es au client" });
             setSelectedRequest(null);
             setAdminResponse("");
             fetchData();
@@ -147,8 +147,8 @@ export default function VerificationRequests() {
             // Notify client
             await base44.entities.Notification.create({
                 user_id: request.client_id,
-                title: "? Compte vÈrifiÈ avec succËs",
-                message: "FÈlicitations ! Votre identitÈ a ÈtÈ vÈrifiÈe. Vous bÈnÈficiez maintenant de tous les avantages.",
+                title: "‚úÖ Compte v√©rifi√© avec succ√®s",
+                message: "F√©licitations ! Votre identit√© a √©t√© v√©rifi√©e. Vous b√©n√©ficiez maintenant de tous les avantages.",
                 type: "verification_approved",
                 link: "/ClientDashboard",
                 is_read: false
@@ -159,23 +159,23 @@ export default function VerificationRequests() {
             if (approvedUser) {
                 await SendEmail({
                     to: approvedUser.email,
-                    subject: "? Compte vÈrifiÈ avec succËs",
+                    subject: "‚úÖ Compte v√©rifi√© avec succ√®s",
                     body: `
                         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                            <h2 style="color: #22C55E;">FÈlicitations ! Votre compte est vÈrifiÈ</h2>
+                            <h2 style="color: #22C55E;">F√©licitations ! Votre compte est v√©rifi√©</h2>
                             <p>Bonjour ${approvedUser.full_name},</p>
-                            <p>Votre identitÈ a ÈtÈ vÈrifiÈe avec succËs. Vous bÈnÈficiez maintenant de tous les avantages de notre plateforme.</p>
+                            <p>Votre identit√© a √©t√© v√©rifi√©e avec succ√®s. Vous b√©n√©ficiez maintenant de tous les avantages de notre plateforme.</p>
                             <a href="${window.location.origin}/ClientDashboard" 
                                style="display: inline-block; background: #22C55E; color: white; padding: 12px 24px; 
                                       text-decoration: none; border-radius: 6px; margin-top: 15px;">
-                                AccÈder ‡ mon compte
+                                Acc√©der √† mon compte
                             </a>
                         </div>
                     `
                 });
             }
 
-            toast({ title: "Client vÈrifiÈ avec succËs", description: "Badge vÈrifiÈ attribuÈ." });
+            toast({ title: "Client v√©rifi√© avec succ√®s", description: "Badge v√©rifi√© attribu√©." });
             fetchData();
         } catch (error) {
             console.error("Error approving verification:", error);
@@ -217,7 +217,7 @@ export default function VerificationRequests() {
             // Notification cloche
             await base44.entities.Notification.create({
                 user_id: request.client_id,
-                title: "Demande de vÈrification refusÈe ?",
+                title: "Demande de v√©rification refus√©e ‚ùå",
                 message: `Raison : ${reason}`,
                 type: "verification_rejected",
                 link: "/ClientDashboard",
@@ -229,12 +229,12 @@ export default function VerificationRequests() {
             if (rejectedUser) {
                 await SendEmail({
                     to: rejectedUser.email,
-                    subject: "? Demande de vÈrification refusÈe",
-                    body: `Bonjour ${rejectedUser.full_name},\n\nVotre demande de vÈrification a ÈtÈ rejetÈe.\n\nRaison du rejet: ${reason}\n\nVous pouvez soumettre une nouvelle demande avec les documents corrigÈs.\n\nCordialement,\nL'Èquipe EventCrafter`
+                    subject: "‚ùå Demande de v√©rification refus√©e",
+                    body: `Bonjour ${rejectedUser.full_name},\n\nVotre demande de v√©rification a √©t√© rejet√©e.\n\nRaison du rejet: ${reason}\n\nVous pouvez soumettre une nouvelle demande avec les documents corrig√©s.\n\nCordialement,\nL'√©quipe EventCrafter`
                 });
             }
 
-            toast({ title: "Demande rejetÈe et utilisateur notifiÈ", duration: 4000 });
+            toast({ title: "Demande rejet√©e et utilisateur notifi√©", duration: 4000 });
             fetchData();
         } catch (error) {
             console.error("Error rejecting verification:", error);
@@ -260,9 +260,9 @@ export default function VerificationRequests() {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Shield className="w-5 h-5" />
-                    Demandes de VÈrification
+                    Demandes de V√©rification
                 </CardTitle>
-                <CardDescription>GÈrer les demandes de vÈrification (Clients & Prestataires)</CardDescription>
+                <CardDescription>G√©rer les demandes de v√©rification (Clients & Prestataires)</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="rounded-md border">
@@ -309,7 +309,7 @@ export default function VerificationRequests() {
                                                                     onClick={() => setSelectedRequest(req)}
                                                                 >
                                                                     <MessageSquare className="w-3 h-3 mr-1" />
-                                                                    RÈpondre
+                                                                    R√©pondre
                                                                 </Button>
                                                             </DialogTrigger>
                                                             <DialogContent>
@@ -323,7 +323,7 @@ export default function VerificationRequests() {
                                                                     </div>
 
                                                                     <Textarea 
-                                                                        placeholder="Bonjour, pour vÈrifier votre compte, veuillez nous fournir..."
+                                                                        placeholder="Bonjour, pour v√©rifier votre compte, veuillez nous fournir..."
                                                                         value={adminResponse}
                                                                         onChange={(e) => setAdminResponse(e.target.value)}
                                                                         rows={6}
@@ -349,7 +349,7 @@ export default function VerificationRequests() {
                                                                 disabled={actionLoading}
                                                             >
                                                                 <CheckCircle2 className="w-3 h-3 mr-1" />
-                                                                VÈrifier
+                                                                V√©rifier
                                                             </Button>
                                                         )}
                                                     </>
@@ -413,7 +413,7 @@ export default function VerificationRequests() {
                                                                                 <DialogTitle>Raison du rejet</DialogTitle>
                                                                             </DialogHeader>
                                                                             <Textarea 
-                                                                                placeholder="Veuillez expliquer pourquoi la vÈrification est rejetÈe..."
+                                                                                placeholder="Veuillez expliquer pourquoi la v√©rification est rejet√©e..."
                                                                                 rows={4}
                                                                                 id="reject-reason"
                                                                             />
@@ -438,7 +438,7 @@ export default function VerificationRequests() {
                                                 {req.status === 'approved' && (
                                                     <Badge className="bg-green-100 text-green-800">
                                                         <CheckCircle2 className="w-3 h-3 mr-1" />
-                                                        VÈrifiÈ
+                                                        V√©rifi√©
                                                     </Badge>
                                                 )}
                                             </div>
@@ -453,7 +453,7 @@ export default function VerificationRequests() {
                 {requests.length === 0 && !loading && (
                     <div className="text-center py-12">
                         <Shield className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                        <p className="text-stone-500">Aucune demande de vÈrification</p>
+                        <p className="text-stone-500">Aucune demande de v√©rification</p>
                     </div>
                 )}
             </CardContent>
