@@ -40,7 +40,11 @@ export default function PaymentProofValidation() {
     try {
       const currentUser = await base44.auth.me();
       const proof = proofs.find(p => p.id === proofId);
-      
+
+      // Chargee une seule fois pour toutes les branches qui ont besoin d'envoyer un email
+      const userList = await base44.entities.User.list();
+      const proofUser = userList.find(u => u.id === proof.user_id);
+
       await base44.entities.PaymentProof.update(proofId, {
         status,
         admin_notes: adminNotes,
@@ -68,17 +72,26 @@ export default function PaymentProofValidation() {
 
           await base44.entities.Notification.create({
             user_id: proof.user_id,
-            title: "Portefeuille recharge",
-            message: `Votre portefeuille a ete credite de ${proof.amount?.toLocaleString()} FCFA.`,
+            title: "Portefeuille rechargé",
+            message: `Votre portefeuille a été crédité de ${proof.amount?.toLocaleString()} FCFA.`,
             type: "payment",
             link: "/VendorDashboard?tab=growth",
             is_read: false
           });
+
+          // Email de confirmation de recharge
+          if (proofUser) {
+            await SendEmail({
+              to: proofUser.email,
+              subject: "✅ Portefeuille rechargé",
+              body: `Bonjour ${proofUser.full_name},\n\nVotre portefeuille a été crédité de ${proof.amount?.toLocaleString()} FCFA suite à votre recharge (référence ${proof.proof_code}).\n\nVous pouvez consulter votre solde depuis votre tableau de bord.\n\nCordialement,\nL'équipe EventCrafter`
+            });
+          }
         }
 
         toast({
-          title: "Recharge validee",
-          description: "Le portefeuille du vendeur a ete credite.",
+          title: "Recharge validée",
+          description: "Le portefeuille du vendeur a été crédité.",
           duration: 4000
         });
 
@@ -141,6 +154,16 @@ export default function PaymentProofValidation() {
               link: "/Dashboard",
               is_read: false
             });
+
+            // Email au vendeur
+            const vendorUser = userList.find(u => u.id === booking.planner_id);
+            if (vendorUser) {
+              await SendEmail({
+                to: vendorUser.email,
+                subject: "✅ Paiement validé - Prêt à démarrer",
+                body: `Bonjour ${vendorUser.full_name},\n\nLe paiement de ${proof.amount?.toLocaleString()} FCFA pour la réservation #${proof.booking_id} a été reçu et validé (fonds en séquestre).\n\nVous pouvez commencer le service dès maintenant.\n\nCordialement,\nL'équipe EventCrafter`
+              });
+            }
           }
         }
 
@@ -153,7 +176,7 @@ export default function PaymentProofValidation() {
               payment_status: 'paid'
             });
 
-            // ?? SÉCURITÉ CRITIQUE: SEUL l'admin peut changer le plan après validation
+            // SÉCURITÉ CRITIQUE: SEUL l'admin peut changer le plan après validation
             const vendorProfiles = await base44.entities.VendorProfile.filter({ user_id: proof.user_id });
             if (vendorProfiles.length > 0) {
               await base44.entities.VendorProfile.update(vendorProfiles[0].id, {
@@ -168,12 +191,21 @@ export default function PaymentProofValidation() {
         // Notify user
         await base44.entities.Notification.create({
           user_id: proof.user_id,
-          title: "Paiement Validé ?",
-          message: `Votre paiement de ${proof.amount?.toLocaleString()} FCFA a été validé. Merci!`,
+          title: "Paiement Validé ✅",
+          message: `Votre paiement de ${proof.amount?.toLocaleString()} FCFA a été validé. Merci !`,
           type: "payment",
           link: "/Dashboard",
           is_read: false
         });
+
+        // Email au client
+        if (proofUser) {
+          await SendEmail({
+            to: proofUser.email,
+            subject: "✅ Paiement validé",
+            body: `Bonjour ${proofUser.full_name},\n\nVotre paiement de ${proof.amount?.toLocaleString()} FCFA (référence ${proof.proof_code}) a été validé avec succès.\n\nMerci pour votre confiance.\n\nCordialement,\nL'équipe EventCrafter`
+          });
+        }
 
         toast({ 
           title: "Validé", 
@@ -184,22 +216,18 @@ export default function PaymentProofValidation() {
         // Notify user of rejection (cloche + email)
         await base44.entities.Notification.create({
           user_id: proof.user_id,
-          title: "Paiement Rejeté ?",
+          title: "Paiement Rejeté ❌",
           message: `Votre preuve de paiement a été rejetée. Raison: ${adminNotes || 'Non spécifiée'}`,
           type: "payment",
           link: "/Dashboard",
           is_read: false
         });
 
-        // Get user info for email
-        const userList = await base44.entities.User.list();
-        const rejectedUser = userList.find(u => u.id === proof.user_id);
-        
-        if (rejectedUser) {
+        if (proofUser) {
           await SendEmail({
-            to: rejectedUser.email,
-            subject: "? Preuve de paiement rejetée",
-            body: `Bonjour ${rejectedUser.full_name},\n\nVotre preuve de paiement de ${proof.amount?.toLocaleString()} FCFA a été rejetée par notre équipe.\n\nRaison du rejet: ${adminNotes || 'Non spécifiée'}\n\nVeuillez soumettre une nouvelle preuve de paiement valide.\n\nCordialement,\nL'équipe EventCrafter`
+            to: proofUser.email,
+            subject: "❌ Preuve de paiement rejetée",
+            body: `Bonjour ${proofUser.full_name},\n\nVotre preuve de paiement de ${proof.amount?.toLocaleString()} FCFA a été rejetée par notre équipe.\n\nRaison du rejet: ${adminNotes || 'Non spécifiée'}\n\nVeuillez soumettre une nouvelle preuve de paiement valide.\n\nCordialement,\nL'équipe EventCrafter`
           });
         }
 
@@ -231,7 +259,7 @@ export default function PaymentProofValidation() {
       // Notification via cloche
       await base44.entities.Notification.create({
         user_id: proof.user_id,
-        title: "Paiement Rejeté ?",
+        title: "Paiement Rejeté ❌",
         message: `Votre preuve de paiement de ${proof.amount?.toLocaleString()} FCFA a été rejetée. Raison: ${proof.admin_notes || 'Non spécifiée'}. Veuillez soumettre une nouvelle preuve valide.`,
         type: "payment",
         link: "/ClientDashboard",
@@ -245,15 +273,15 @@ export default function PaymentProofValidation() {
       if (rejectedUser) {
         await SendEmail({
           to: rejectedUser.email,
-          subject: "? Preuve de paiement rejetée - Action requise",
+          subject: "❌ Preuve de paiement rejetée - Action requise",
           body: `Bonjour ${rejectedUser.full_name},
 
 Votre preuve de paiement de ${proof.amount?.toLocaleString()} FCFA a été rejetée par notre équipe.
 
-?? Référence: ${proof.proof_code}
-? Raison du rejet: ${proof.admin_notes || 'Non spécifiée'}
+📌 Référence: ${proof.proof_code}
+❌ Raison du rejet: ${proof.admin_notes || 'Non spécifiée'}
 
-?? Action requise: Veuillez soumettre une nouvelle preuve de paiement valide via votre tableau de bord.
+⚠️ Action requise: Veuillez soumettre une nouvelle preuve de paiement valide via votre tableau de bord.
 
 Cordialement,
 L'équipe EventCrafter`
@@ -261,7 +289,7 @@ L'équipe EventCrafter`
       }
 
       toast({ 
-        title: "? Notification envoyée", 
+        title: "✅ Notification envoyée", 
         description: "L'utilisateur a été notifié du rejet (cloche + email)",
         duration: 4000
       });
@@ -289,7 +317,7 @@ L'équipe EventCrafter`
       });
 
       toast({ 
-        title: "? Réouvert pour réexamen", 
+        title: "✅ Réouvert pour réexamen", 
         description: "La preuve de paiement est de nouveau en attente",
         duration: 4000
       });
@@ -403,7 +431,7 @@ L'équipe EventCrafter`
                     onError={(e) => {
                       console.error("Failed to load image:", selectedProof.proof_image_url);
                       e.target.style.display = 'none';
-                      e.target.parentElement.innerHTML += '<div class="p-8 text-center text-red-500 border border-red-200 rounded-lg bg-red-50"><p>? Impossible de charger l\'image</p><p class="text-sm mt-2">' + selectedProof.proof_image_url + '</p></div>';
+                      e.target.parentElement.innerHTML += '<div class="p-8 text-center text-red-500 border border-red-200 rounded-lg bg-red-50"><p>⚠️ Impossible de charger l\'image</p><p class="text-sm mt-2">' + selectedProof.proof_image_url + '</p></div>';
                     }}
                   />
                 ) : (
@@ -478,7 +506,7 @@ L'équipe EventCrafter`
                 <div>
                   <div className={`p-4 rounded-lg ${selectedProof.status === 'approved' ? 'bg-green-50' : 'bg-red-50'}`}>
                     <p className="font-semibold mb-1">
-                      {selectedProof.status === 'approved' ? '? Approuvé' : '? Rejeté'}
+                      {selectedProof.status === 'approved' ? '✅ Approuvé' : '❌ Rejeté'}
                     </p>
                     <p className="text-sm">Validé le: {new Date(selectedProof.validated_date).toLocaleString()}</p>
                     {selectedProof.admin_notes && (
