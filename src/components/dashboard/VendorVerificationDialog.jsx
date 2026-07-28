@@ -31,7 +31,7 @@ export default function VendorVerificationDialog({ profile, user, onUpdate }) {
             if (!profile?.id) {
                 toast({ 
                     title: "Erreur", 
-                    description: "Veuillez d'abord crÈer votre profil prestataire.", 
+                    description: "Veuillez d'abord cr√©er votre profil prestataire.", 
                     variant: "destructive" 
                 });
                 setLoading(false);
@@ -50,11 +50,11 @@ export default function VendorVerificationDialog({ profile, user, onUpdate }) {
                 client_message: message
             });
 
-            // Save uploaded docs to profile
-            const currentDocs = profile.verification_docs || [];
+            // Save uploaded docs to profile (meme champ que VendorProfileForm.jsx : verification_documents)
+            const currentDocs = profile.verification_documents || [];
             await base44.entities.VendorProfile.update(profile.id, {
                 verification_status: 'pending',
-                verification_docs: [...currentDocs, ...uploadedDocs]
+                verification_documents: [...currentDocs, ...uploadedDocs]
             });
 
             // Notify all admins via notification bell AND email
@@ -65,23 +65,23 @@ export default function VendorVerificationDialog({ profile, user, onUpdate }) {
                 // Notification dans la cloche
                 await base44.entities.Notification.create({
                     user_id: admin.id,
-                    title: "Nouvelle demande de vÈrification",
-                    message: `${profile.business_name || user.full_name} a demandÈ la vÈrification de son compte prestataire avec ${uploadedDocs.length} document(s)`,
+                    title: "Nouvelle demande de v√©rification",
+                    message: `${profile.business_name || user.full_name} a demand√© la v√©rification de son compte prestataire avec ${uploadedDocs.length} document(s)`,
                     type: "system",
                     link: "/AdminDashboard",
                     is_read: false
                 });
 
-                // Email ‡ l'admin
+                // Email a l'admin
                 await SendEmail({
                     to: admin.email,
-                    subject: "?? Nouvelle demande de vÈrification prestataire",
-                    body: `Bonjour ${admin.full_name},\n\nUne nouvelle demande de vÈrification a ÈtÈ soumise:\n\nPrestataire: ${profile.business_name || user.full_name}\nDocuments fournis: ${uploadedDocs.length}\nMessage: ${message}\n\nCliquez ici pour valider: ${window.location.origin}/AdminDashboard\n\nCordialement,\nL'Èquipe EventCrafter`
+                    subject: "üîî Nouvelle demande de v√©rification prestataire",
+                    body: `Bonjour ${admin.full_name},\n\nUne nouvelle demande de v√©rification a √©t√© soumise:\n\nPrestataire: ${profile.business_name || user.full_name}\nDocuments fournis: ${uploadedDocs.length}\nMessage: ${message}\n\nCliquez ici pour valider: ${window.location.origin}/AdminDashboard\n\nCordialement,\nL'√©quipe EventCrafter`
                 });
             }
 
             toast({ 
-                title: "Demande envoyÈe", 
+                title: "Demande envoy√©e", 
                 description: "Un administrateur vous contactera sous peu avec les instructions." 
             });
 
@@ -107,29 +107,29 @@ export default function VendorVerificationDialog({ profile, user, onUpdate }) {
                 icon: XCircle,
                 color: "text-gray-500",
                 bg: "bg-gray-100",
-                text: "NON V…RIFI…",
-                description: "Votre entreprise n'est pas encore vÈrifiÈe"
+                text: "NON V√âRIFI√â",
+                description: "Votre entreprise n'est pas encore v√©rifi√©e"
             },
             pending: {
                 icon: Clock,
                 color: "text-yellow-600",
                 bg: "bg-yellow-100",
                 text: "EN ATTENTE",
-                description: "VÈrification en cours de traitement"
+                description: "V√©rification en cours de traitement"
             },
             verified: {
                 icon: CheckCircle2,
                 color: "text-green-600",
                 bg: "bg-green-100",
-                text: "V…RIFI…",
-                description: "Votre entreprise est vÈrifiÈe"
+                text: "V√âRIFI√â",
+                description: "Votre entreprise est v√©rifi√©e"
             },
             rejected: {
                 icon: XCircle,
                 color: "text-red-600",
                 bg: "bg-red-100",
-                text: "REJET…",
-                description: "VÈrification refusÈe"
+                text: "REJET√â",
+                description: "V√©rification refus√©e"
             }
         };
         return info[status] || info.unverified;
@@ -153,7 +153,7 @@ export default function VendorVerificationDialog({ profile, user, onUpdate }) {
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Shield className="w-5 h-5 text-rose-600" />
-                        VÈrification Prestataire
+                        V√©rification Prestataire
                     </DialogTitle>
                     <DialogDescription>
                         {statusInfo.description}
@@ -164,47 +164,47 @@ export default function VendorVerificationDialog({ profile, user, onUpdate }) {
                     {canRequest ? (
                         <>
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                                <h4 className="font-semibold text-blue-900 mb-2">Avantages de la vÈrification :</h4>
+                                <h4 className="font-semibold text-blue-900 mb-2">Avantages de la v√©rification :</h4>
                                 <ul className="text-sm text-blue-800 space-y-1">
-                                    <li>? Badge vÈrifiÈ visible sur vos services</li>
-                                    <li>? Confiance accrue des clients</li>
-                                    <li>? Meilleur positionnement dans les recherches</li>
-                                    <li>? AccËs ‡ des opportunitÈs premium</li>
-                                    <li>? Taux de conversion plus ÈlevÈ</li>
+                                    <li>‚úì Badge v√©rifi√© visible sur vos services</li>
+                                    <li>‚úì Confiance accrue des clients</li>
+                                    <li>‚úì Meilleur positionnement dans les recherches</li>
+                                    <li>‚úì Acc√®s √† des opportunit√©s premium</li>
+                                    <li>‚úì Taux de conversion plus √©lev√©</li>
                                 </ul>
                             </div>
 
                             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                                <h4 className="font-semibold text-amber-900 mb-2">?? Documents requis pour la vÈrification :</h4>
+                                <h4 className="font-semibold text-amber-900 mb-2">üìã Documents requis pour la v√©rification :</h4>
                                 <ul className="text-xs text-amber-800 space-y-1">
-                                    <li>ï CNI (Carte Nationale d'IdentitÈ)</li>
-                                    <li>ï NUI (NumÈro Unique d'Identification)</li>
-                                    <li>ï NumÈro de registre de commerce</li>
-                                    <li>ï ACF valide (Attestation de ConformitÈ Fiscale)</li>
-                                    <li>ï NumÈro de tÈlÈphone</li>
-                                    <li>ï Deux photos 4*4</li>
-                                    <li>ï Plans de localisation (domicile et bureau)</li>
-                                    <li>ï Engagement sur l'honneur</li>
-                                    <li>ï DÈpÙt de garantie dans compte bancaire</li>
-                                    <li>ï DÈsignation de 03 personnes de rÈfÈrence</li>
+                                    <li>‚Ä¢ CNI (Carte Nationale d'Identit√©)</li>
+                                    <li>‚Ä¢ NUI (Num√©ro Unique d'Identification)</li>
+                                    <li>‚Ä¢ Num√©ro de registre de commerce</li>
+                                    <li>‚Ä¢ ACF valide (Attestation de Conformit√© Fiscale)</li>
+                                    <li>‚Ä¢ Num√©ro de t√©l√©phone</li>
+                                    <li>‚Ä¢ Deux photos 4x4</li>
+                                    <li>‚Ä¢ Plans de localisation (domicile et bureau)</li>
+                                    <li>‚Ä¢ Engagement sur l'honneur</li>
+                                    <li>‚Ä¢ D√©p√¥t de garantie dans compte bancaire</li>
+                                    <li>‚Ä¢ D√©signation de 03 personnes de r√©f√©rence</li>
                                 </ul>
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Expliquez votre demande</label>
                                 <Textarea 
-                                    placeholder="Bonjour, je souhaite faire vÈrifier mon entreprise pour gagner en crÈdibilitÈ..."
+                                    placeholder="Bonjour, je souhaite faire v√©rifier mon entreprise pour gagner en cr√©dibilit√©..."
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     rows={3}
                                 />
                                 <p className="text-xs text-amber-600 font-medium">
-                                    ?? PrÈparez tous les documents listÈs ci-dessus avant de soumettre votre demande.
+                                    ‚ö†Ô∏è Pr√©parez tous les documents list√©s ci-dessus avant de soumettre votre demande.
                                 </p>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Documents de vÈrification</label>
+                                <label className="text-sm font-medium">Documents de v√©rification</label>
                                 <input 
                                     type="file" 
                                     id="dialog-verification-docs"
@@ -224,7 +224,7 @@ export default function VendorVerificationDialog({ profile, user, onUpdate }) {
                                             const urls = results.map(r => r.file_url);
                                             
                                             setUploadedDocs([...uploadedDocs, ...urls]);
-                                            toast({ title: "Documents uploadÈs" });
+                                            toast({ title: "Documents upload√©s" });
                                         } catch (error) {
                                             toast({ title: "Erreur d'upload", variant: "destructive" });
                                         } finally {
@@ -247,7 +247,7 @@ export default function VendorVerificationDialog({ profile, user, onUpdate }) {
                                 {uploadedDocs.length > 0 && (
                                     <div className="space-y-1">
                                         <p className="text-xs text-green-600 font-medium">
-                                            {uploadedDocs.length} document(s) prÍt(s) ‡ envoyer
+                                            {uploadedDocs.length} document(s) pr√™t(s) √† envoyer
                                         </p>
                                     </div>
                                 )}
@@ -275,7 +275,7 @@ export default function VendorVerificationDialog({ profile, user, onUpdate }) {
                                 {profile?.verification_status === 'pending' && 
                                     "Votre demande est en cours de traitement. Consultez vos notifications."}
                                 {profile?.verification_status === 'verified' && 
-                                    "FÈlicitations ! Votre entreprise est vÈrifiÈe."}
+                                    "F√©licitations ! Votre entreprise est v√©rifi√©e."}
                             </p>
                         </div>
                     )}
