@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/apiClient';
+import { SendEmail } from '@/api/integrations';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -102,6 +103,16 @@ export default function DisputeManagement() {
         link: '/ClientDashboard',
         is_read: false
       });
+
+      // Email en plus de la notification cloche
+      const recipient = users[userId];
+      if (recipient?.email) {
+        await SendEmail({
+          to: recipient.email,
+          subject: '⚖️ Message de l\'administration EventCrafter',
+          body: `Bonjour ${recipient.full_name || ''},\n\nL'administration EventCrafter vous a envoyé le message suivant concernant un litige en cours:\n\n${message}\n\nCordialement,\nL'équipe EventCrafter`
+        });
+      }
     },
     onSuccess: () => {
       toast({ title: 'Message envoyé', description: 'La partie a été contactée' });
@@ -222,6 +233,18 @@ export default function DisputeManagement() {
             link: '/VendorDashboard',
             is_read: false
           });
+
+          // Email au prestataire : conséquence importante (suspension/pénalité), doit être notifié par email
+          const vendorUser = users[booking.planner_id];
+          if (vendorUser?.email) {
+            await SendEmail({
+              to: vendorUser.email,
+              subject: newDisputesLost >= 3 ? '🚨 Compte suspendu suite à un litige' : '⚠️ Litige résolu en votre défaveur',
+              body: newDisputesLost >= 3
+                ? `Bonjour ${vendorUser.full_name},\n\nVotre compte a été suspendu après ${newDisputesLost} litiges perdus.\n\nVeuillez contacter l'administration EventCrafter pour plus d'informations.\n\nCordialement,\nL'équipe EventCrafter`
+                : `Bonjour ${vendorUser.full_name},\n\nUn litige concernant l'une de vos prestations a été résolu en votre défaveur.\n\nConséquences : vos boosts actifs sont suspendus et votre note a été réduite.\nTotal de litiges perdus : ${newDisputesLost}/3\n\nCordialement,\nL'équipe EventCrafter`
+            });
+          }
         }
       }
 
@@ -248,6 +271,13 @@ export default function DisputeManagement() {
             link: '/ClientDashboard',
             is_read: false
           });
+
+          // Email : remboursement en cours, information financière importante
+          await SendEmail({
+            to: clientUser.email,
+            subject: '✅ Litige résolu - Remboursement en cours',
+            body: `Bonjour ${clientUser.full_name},\n\nVotre litige a été résolu par notre équipe.\n\nUn remboursement de ${(parseFloat(amount) || booking.total_amount)?.toLocaleString()} FCFA sera traité prochainement.\n\nCordialement,\nL'équipe EventCrafter`
+          });
         }
       }
 
@@ -272,6 +302,16 @@ export default function DisputeManagement() {
           link: '/VendorDashboard',
           is_read: false
         });
+
+        // Email : fonds libérés, information financière importante
+        const vendorUser = users[booking.planner_id];
+        if (vendorUser?.email) {
+          await SendEmail({
+            to: vendorUser.email,
+            subject: '✅ Litige résolu en votre faveur - Paiement libéré',
+            body: `Bonjour ${vendorUser.full_name},\n\nLe litige concernant votre prestation a été résolu en votre faveur.\n\nLes fonds correspondants ont été libérés vers votre compte.\n\nCordialement,\nL'équipe EventCrafter`
+          });
+        }
       }
 
       // Mettre à jour le statut du booking selon le type de résolution

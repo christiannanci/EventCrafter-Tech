@@ -63,7 +63,7 @@ export default function AdminPayouts() {
       // In real implementation, this would trigger email integration again
       try {
            await SendEmail({
-               to: "admin@eventcrafter.com",
+               to: "admin@eventcraftercm.com",
                subject: "URGENT: Stale Payouts Pending",
                body: `There are ${items.length} payouts pending for more than 48 hours. Please login to process them immediately.`
            });
@@ -119,6 +119,17 @@ export default function AdminPayouts() {
             is_read: false
         });
 
+        // Email au vendeur (confirmation financière importante)
+        const allUsers = await base44.entities.User.list();
+        const vendorUser = allUsers.find(u => u.id === payout.provider_id);
+        if (vendorUser) {
+            await SendEmail({
+                to: vendorUser.email,
+                subject: "✅ Paiement approuvé",
+                body: `Bonjour ${vendorUser.full_name},\n\nVotre paiement de ${payout.amount_paid?.toLocaleString()} FCFA (référence ${payout.payment_code}) a été approuvé et ajouté à votre solde.\n\nNuméro de pièce de caisse : ${voucherNumber}\n\nCordialement,\nL'équipe EventCrafter`
+            });
+        }
+
         toast.success("Payout approved and balance updated");
         fetchData();
     } catch (e) {
@@ -158,6 +169,17 @@ export default function AdminPayouts() {
                   link: "/Dashboard",
                   is_read: false
               });
+
+              // Email au client (confirmation financière importante)
+              const allUsers = await base44.entities.User.list();
+              const clientUser = allUsers.find(u => u.id === refund.client_id);
+              if (clientUser) {
+                  await SendEmail({
+                      to: clientUser.email,
+                      subject: "✅ Remboursement traité",
+                      body: `Bonjour ${clientUser.full_name},\n\nVotre remboursement de ${refund.amount_refunded?.toLocaleString()} FCFA (référence ${refund.refund_code}) a été traité.\n\nCordialement,\nL'équipe EventCrafter`
+                  });
+              }
           }
 
           toast.success("Refund processed successfully");
