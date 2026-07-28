@@ -272,7 +272,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="first_name">First Name (Prénom) *</Label>
+                            <Label htmlFor="first_name">First Name (PrÃ©nom) *</Label>
                             <div className="relative">
                                 <User className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
                                 <Input 
