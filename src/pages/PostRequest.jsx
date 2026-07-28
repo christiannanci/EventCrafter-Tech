@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from '@/components/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { NotificationService } from '@/components/NotificationService';
 
 export default function PostRequest() {
   const { t } = useLanguage();
@@ -126,13 +127,16 @@ export default function PostRequest() {
         }
 
         if (canNotify) {
-          await base44.entities.Notification.create({
-            user_id: vendorId,
-            title: `Nouvelle demande: ${data.event_type}`,
-            message: `Un client recherche ${data.service_category} pour un événement le ${date ? format(date, 'dd/MM/yyyy') : 'date TBD'}. Localisation: ${data.location}`,
+          const notifTitle = `Nouvelle demande: ${data.event_type}`;
+          const notifMessage = `Un client recherche ${data.service_category} pour un événement le ${date ? format(date, 'dd/MM/yyyy') : 'date TBD'}. Localisation: ${data.location}`;
+
+          // Notification in-app + email (NotificationService gère les deux)
+          await NotificationService.sendToVendor({
+            vendorId,
+            title: notifTitle,
+            message: notifMessage,
             type: 'post_request',
-            link: '/VendorDashboard',
-            is_read: false
+            link: '/VendorDashboard'
           });
         }
       }
