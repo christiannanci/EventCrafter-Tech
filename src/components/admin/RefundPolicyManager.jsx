@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/apiClient';
+import { SendEmail } from '@/api/integrations';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -104,6 +105,17 @@ export default function RefundPolicyManager() {
             type: "system",
             is_read: false
           });
+
+          // Email : confirmation financière importante
+          const allUsers = await base44.entities.User.list();
+          const vendorUser = allUsers.find(u => u.id === request.vendor_id);
+          if (vendorUser) {
+            await SendEmail({
+              to: vendorUser.email,
+              subject: "💰 Remboursement approuvé",
+              body: `Bonjour ${vendorUser.full_name},\n\nVotre demande de remboursement concernant un lead a été approuvée.\n\n${request.unlock_type === 'reward_credit' ? 'Votre crédit bonus a été restauré.' : 'Votre portefeuille a été crédité.'}\n\nCordialement,\nL'équipe EventCrafter`
+            });
+          }
         }
       }
     },
@@ -388,7 +400,7 @@ function RefundRequestCard({ request, onReview }) {
           <Badge className={
             request.unlock_type === 'reward_credit' ? 'bg-amber-500' : 'bg-blue-500'
           }>
-            {request.unlock_type === 'reward_credit' ? 'Crédit Bonus' : `$${request.amount_paid}`}
+            {request.unlock_type === 'reward_credit' ? 'Crédit Bonus' : `${request.amount_paid?.toLocaleString()} FCFA`}
           </Badge>
         </div>
       </CardHeader>
