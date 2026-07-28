@@ -12,8 +12,8 @@ import { Shield, Upload, X, Loader2, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * DisputeReplyDialog ó Permet ‡ la partie adverse (vendor ou client) 
- * de soumettre son contre-argument face ‡ un litige ouvert contre elle.
+ * DisputeReplyDialog - Permet √† la partie adverse (vendor ou client) 
+ * de soumettre son contre-argument face √† un litige ouvert contre elle.
  * 
  * Props:
  *  - open: boolean
@@ -61,9 +61,9 @@ export default function DisputeReplyDialog({ open, onOpenChange, booking, userTy
         urls.push(file_url);
       }
       setPreuveUrls(prev => [...prev, ...urls]);
-      toast({ title: `${files.length} fichier(s) ajoutÈ(s)` });
+      toast({ title: `${files.length} fichier(s) ajout√©(s)` });
     } catch {
-      toast({ title: 'Erreur de tÈlÈchargement', variant: 'destructive' });
+      toast({ title: 'Erreur de t√©l√©chargement', variant: 'destructive' });
     } finally {
       setUploading(false);
     }
@@ -75,7 +75,7 @@ export default function DisputeReplyDialog({ open, onOpenChange, booking, userTy
       return;
     }
     if (!dispute) {
-      toast({ title: 'Aucun litige actif trouvÈ', variant: 'destructive' });
+      toast({ title: 'Aucun litige actif trouv√©', variant: 'destructive' });
       return;
     }
 
@@ -83,7 +83,7 @@ export default function DisputeReplyDialog({ open, onOpenChange, booking, userTy
     try {
       const party = userType === 'vendor' ? 'PRESTATAIRE' : 'CLIENT';
       const currentReply = dispute.description || '';
-      const updatedDescription = `${currentReply}\n\n---\n[R…PONSE ${party}]\n${description}`;
+      const updatedDescription = `${currentReply}\n\n---\n[R√âPONSE ${party}]\n${description}`;
 
       const currentEvidences = dispute.report_url ? dispute.report_url.split(',') : [];
       const allEvidences = [...currentEvidences, ...preuveUrls].filter(Boolean);
@@ -99,21 +99,30 @@ export default function DisputeReplyDialog({ open, onOpenChange, booking, userTy
       for (const admin of admins) {
         await base44.entities.Notification.create({
           user_id: admin.id,
-          title: `?? RÈponse au Litige ${dispute.dispute_code}`,
-          message: `La partie adverse (${party}) a soumis son contre-argument. Dossier ‡ revoir.`,
+          title: `‚öñÔ∏è R√©ponse au Litige ${dispute.dispute_code}`,
+          message: `La partie adverse (${party}) a soumis son contre-argument. Dossier √† revoir.`,
           type: 'system',
           link: '/AdminDashboard?tab=disputes',
           is_read: false
         });
+
+        // Email : une r√©ponse a √©t√© soumise, le dossier n√©cessite un nouvel examen
+        if (admin.email) {
+          await SendEmail({
+            to: admin.email,
+            subject: `‚öñÔ∏è R√©ponse au litige ${dispute.dispute_code}`,
+            body: `La partie adverse (${party}) a soumis son contre-argument sur le litige ${dispute.dispute_code}.\n\nLe dossier est √† revoir : ${window.location.origin}/AdminDashboard?tab=disputes\n\nCordialement,\nL'√©quipe EventCrafter`
+          });
+        }
       }
 
-      toast({ title: 'RÈponse soumise', description: 'L\'administration a ÈtÈ notifiÈe.' });
+      toast({ title: 'R√©ponse soumise', description: 'L\'administration a √©t√© notifi√©e.' });
       setDescription('');
       setPreuveUrls([]);
       onOpenChange(false);
       if (onSuccess) onSuccess();
     } catch (error) {
-      toast({ title: 'Erreur', description: 'Impossible de soumettre la rÈponse', variant: 'destructive' });
+      toast({ title: 'Erreur', description: 'Impossible de soumettre la r√©ponse', variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -125,10 +134,10 @@ export default function DisputeReplyDialog({ open, onOpenChange, booking, userTy
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Shield className="w-6 h-6 text-blue-600" />
-            Soumettre votre RÈponse au Litige
+            Soumettre votre R√©ponse au Litige
           </DialogTitle>
           <DialogDescription>
-            Un litige a ÈtÈ ouvert contre vous. Donnez votre version des faits et fournissez des preuves.
+            Un litige a √©t√© ouvert contre vous. Donnez votre version des faits et fournissez des preuves.
           </DialogDescription>
         </DialogHeader>
 
@@ -139,7 +148,7 @@ export default function DisputeReplyDialog({ open, onOpenChange, booking, userTy
         ) : !dispute ? (
           <div className="py-8 text-center text-stone-500 bg-stone-50 rounded-lg">
             <AlertTriangle className="w-10 h-10 text-amber-400 mx-auto mb-2" />
-            <p>Aucun litige actif trouvÈ pour cette rÈservation.</p>
+            <p>Aucun litige actif trouv√© pour cette r√©servation.</p>
           </div>
         ) : (
           <div className="space-y-6 py-4">
@@ -147,23 +156,23 @@ export default function DisputeReplyDialog({ open, onOpenChange, booking, userTy
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Badge className="bg-red-100 text-red-800">{dispute.dispute_code}</Badge>
-                <span className="text-xs text-red-600">InitiÈ par : {dispute.initiator === 'client' ? 'le Client' : 'le Prestataire'}</span>
+                <span className="text-xs text-red-600">Initi√© par : {dispute.initiator === 'client' ? 'le Client' : 'le Prestataire'}</span>
               </div>
               <p className="text-sm text-red-700 whitespace-pre-wrap">{dispute.description?.split('\n\n---\n')[0]}</p>
             </div>
 
-            {/* Votre rÈponse */}
+            {/* Votre r√©ponse */}
             <div className="space-y-2">
               <Label className="text-base font-semibold">Votre version des faits *</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Expliquez votre point de vue, ce qui s'est rÈellement passÈ, et pourquoi vous n'Ítes pas en tort..."
+                placeholder="Expliquez votre point de vue, ce qui s'est r√©ellement pass√©, et pourquoi vous n'√™tes pas en tort..."
                 rows={6}
                 className="resize-none"
               />
               <p className="text-xs text-stone-500">
-                Soyez prÈcis et factuel. …vitez les accusations sans preuves.
+                Soyez pr√©cis et factuel. √âvitez les accusations sans preuves.
               </p>
             </div>
 
@@ -182,7 +191,7 @@ export default function DisputeReplyDialog({ open, onOpenChange, booking, userTy
                 />
                 <label htmlFor="reply-proofs" className="cursor-pointer flex flex-col items-center gap-2">
                   {uploading ? (
-                    <><Loader2 className="w-8 h-8 text-stone-400 animate-spin" /><p className="text-sm">TÈlÈchargement...</p></>
+                    <><Loader2 className="w-8 h-8 text-stone-400 animate-spin" /><p className="text-sm">T√©l√©chargement...</p></>
                   ) : (
                     <><Upload className="w-8 h-8 text-stone-400" /><p className="text-sm text-stone-600">Cliquez pour ajouter des fichiers</p></>
                   )}
@@ -221,7 +230,7 @@ export default function DisputeReplyDialog({ open, onOpenChange, booking, userTy
             {submitting ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Envoi...</>
             ) : (
-              <><Shield className="w-4 h-4 mr-2" />Soumettre ma RÈponse</>
+              <><Shield className="w-4 h-4 mr-2" />Soumettre ma R√©ponse</>
             )}
           </Button>
         </DialogFooter>

@@ -71,17 +71,16 @@ export default function ServiceCompletionPrompt({ dossier, userType, onComplete 
 
       // Notification à l'autre partie
       if (userType === 'vendor') {
-        // Notifier le client
+        // Notifier le client (notification + email, comme côté vendeur)
         const allUsers = await base44.entities.User.list();
         const clientUser = allUsers.find(u => u.email === currentBooking.created_by);
         if (clientUser) {
-          await base44.entities.Notification.create({
-            user_id: clientUser.id,
+          await NotificationService.sendToClient({
+            clientId: clientUser.id,
             title: '✅ Service Marqué Terminé',
             message: `Le prestataire a confirmé la fin du service. Laissez votre avis !`,
             type: 'completion',
-            link: '/ClientDashboard',
-            is_read: false
+            link: '/ClientDashboard'
           });
         }
       } else {

@@ -30,17 +30,17 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
   });
 
   const motifs = [
-    { value: 'retard', label: 'Retard', desc: 'Prestation en retard ou non livrÈe ‡ temps' },
+    { value: 'retard', label: 'Retard', desc: 'Prestation en retard ou non livr√©e √† temps' },
     { value: 'non_respect_prestation', label: 'Non-respect de la prestation', desc: 'Service non conforme aux attentes' },
-    { value: 'comportement', label: 'Comportement', desc: 'Comportement inappropriÈ' },
-    { value: 'non_respect_codes_culturels', label: 'Non-respect des codes culturels', desc: 'Traditions ou rites non respectÈs' },
-    { value: 'non_paiement', label: 'Non-paiement', desc: 'Client n\'a pas payÈ (prestataires uniquement)' },
+    { value: 'comportement', label: 'Comportement', desc: 'Comportement inappropri√©' },
+    { value: 'non_respect_codes_culturels', label: 'Non-respect des codes culturels', desc: 'Traditions ou rites non respect√©s' },
+    { value: 'non_paiement', label: 'Non-paiement', desc: 'Client n\'a pas pay√© (prestataires uniquement)' },
   ];
 
   const attentes = [
-    { value: 'remboursement', label: '?? Remboursement', desc: 'Demander un remboursement total ou partiel' },
-    { value: 'excuses', label: '?? Excuses', desc: 'Demander des excuses formelles' },
-    { value: 'finalisation', label: '? Finalisation du travail', desc: 'Demander l\'achËvement de la prestation' },
+    { value: 'remboursement', label: 'üí∏ Remboursement', desc: 'Demander un remboursement total ou partiel' },
+    { value: 'excuses', label: 'üôè Excuses', desc: 'Demander des excuses formelles' },
+    { value: 'finalisation', label: '‚úÖ Finalisation du travail', desc: 'Demander l\'ach√®vement de la prestation' },
   ];
 
   const handleFileUpload = async (e) => {
@@ -58,11 +58,11 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
         ...prev,
         preuveUrls: [...prev.preuveUrls, ...uploadedUrls]
       }));
-      toast({ title: 'Fichiers tÈlÈchargÈs', description: `${files.length} fichier(s) ajoutÈ(s)` });
+      toast({ title: 'Fichiers t√©l√©charg√©s', description: `${files.length} fichier(s) ajout√©(s)` });
     } catch (error) {
       toast({ 
-        title: 'Erreur de tÈlÈchargement',
-        description: 'Impossible de tÈlÈcharger les fichiers',
+        title: 'Erreur de t√©l√©chargement',
+        description: 'Impossible de t√©l√©charger les fichiers',
         variant: 'destructive'
       });
     } finally {
@@ -81,7 +81,7 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
     if (!formData.description.trim()) {
       toast({ 
         title: 'Description requise',
-        description: 'Veuillez dÈcrire le problËme',
+        description: 'Veuillez d√©crire le probl√®me',
         variant: 'destructive'
       });
       return;
@@ -89,23 +89,23 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
 
     setSubmitting(true);
     try {
-      // RÈcupÈrer le contrat associÈ
+      // R√©cup√©rer le contrat associ√©
       const contracts = await base44.entities.Contract.filter({ booking_id: booking.id });
       const contract = contracts[0];
 
       if (!contract) {
         toast({ 
           title: 'Pas de contrat',
-          description: 'Aucun contrat trouvÈ pour cette rÈservation',
+          description: 'Aucun contrat trouv√© pour cette r√©servation',
           variant: 'destructive'
         });
         return;
       }
 
-      // GÈnÈrer un code unique
+      // G√©n√©rer un code unique
       const disputeCode = `DSP-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 
-      // CrÈer le litige
+      // Cr√©er le litige
       const dispute = await base44.entities.Dispute.create({
         dispute_code: disputeCode,
         booking_id: booking.id,
@@ -117,14 +117,14 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
         is_closed: false
       });
 
-      // Sauvegarder les preuves en tant que mÈtadonnÈes (dans un champ texte)
+      // Sauvegarder les preuves en tant que m√©tadonn√©es (dans un champ texte)
       if (formData.preuveUrls.length > 0) {
         await base44.entities.Dispute.update(dispute.id, {
           report_url: formData.preuveUrls.join(',')
         });
       }
 
-      // OUVERTURE: Statut passe ‡ "?? En Litige" et BLOCAGE des paiements
+      // OUVERTURE: Statut passe √† "En Litige" et BLOCAGE des paiements
       await base44.entities.Booking.update(booking.id, {
         status: 'disputed'
       });
@@ -139,23 +139,32 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
       for (const tx of vendorTransactions) {
         await base44.entities.Transaction.update(tx.id, {
           status: 'blocked',
-          description: tx.description + ' [BLOQU… - LITIGE EN COURS]'
+          description: tx.description + ' [BLOQU√â - LITIGE EN COURS]'
         });
       }
 
-      // ALERTE FLASH: Notification prioritaire immÈdiate aux admins
+      // ALERTE FLASH: Notification prioritaire imm√©diate aux admins
       const allUsers = await base44.entities.User.list();
       const admins = allUsers.filter(u => u.role === 'admin');
       
       for (const admin of admins) {
         await base44.entities.Notification.create({
           user_id: admin.id,
-          title: '?? ALERTE FLASH - NOUVEAU LITIGE',
-          message: `${disputeCode} - ${motifs.find(m => m.value === formData.motif)?.label}. Paiements BLOQU…S. Arbitrage requis immÈdiatement.`,
+          title: 'üö® ALERTE FLASH - NOUVEAU LITIGE',
+          message: `${disputeCode} - ${motifs.find(m => m.value === formData.motif)?.label}. Paiements BLOQU√âS. Arbitrage requis imm√©diatement.`,
           type: 'dispute_alert_flash',
           link: '/AdminDashboard?tab=disputes',
           is_read: false
         });
+
+        // Email : alerte prioritaire n√©cessitant un arbitrage imm√©diat
+        if (admin.email) {
+          await SendEmail({
+            to: admin.email,
+            subject: `üö® ALERTE FLASH - Nouveau litige ${disputeCode}`,
+            body: `Un nouveau litige requiert un arbitrage imm√©diat.\n\nCode: ${disputeCode}\nMotif: ${motifs.find(m => m.value === formData.motif)?.label}\n\nLes paiements ont √©t√© bloqu√©s en attendant la r√©solution.\n\nAcc√©dez au dossier: ${window.location.origin}/AdminDashboard?tab=disputes\n\nCordialement,\nL'√©quipe EventCrafter`
+          });
+        }
       }
 
       // Notifier l'autre partie
@@ -163,17 +172,27 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
       if (otherPartyId) {
         await base44.entities.Notification.create({
           user_id: otherPartyId,
-          title: '?? Litige SignalÈ',
-          message: `Un litige a ÈtÈ ouvert concernant votre prestation. Code: ${disputeCode}`,
+          title: '‚ö†Ô∏è Litige Signal√©',
+          message: `Un litige a √©t√© ouvert concernant votre prestation. Code: ${disputeCode}`,
           type: 'dispute',
           link: userType === 'client' ? '/VendorDashboard?tab=dossiers' : '/ClientDashboard?tab=events',
           is_read: false
         });
+
+        // Email √† l'autre partie : un litige la concerne directement, information urgente
+        const otherPartyUser = allUsers.find(u => u.id === otherPartyId);
+        if (otherPartyUser?.email) {
+          await SendEmail({
+            to: otherPartyUser.email,
+            subject: `‚ö†Ô∏è Un litige a √©t√© signal√© - ${disputeCode}`,
+            body: `Bonjour ${otherPartyUser.full_name || ''},\n\nUn litige a √©t√© ouvert concernant votre r√©servation.\n\nCode: ${disputeCode}\n\nLes paiements associ√©s sont temporairement bloqu√©s le temps de l'arbitrage. Notre √©quipe va examiner le dossier.\n\nCordialement,\nL'√©quipe EventCrafter`
+          });
+        }
       }
 
       toast({
-        title: 'Litige signalÈ',
-        description: `Code: ${disputeCode}. Notre Èquipe va examiner votre demande.`
+        title: 'Litige signal√©',
+        description: `Code: ${disputeCode}. Notre √©quipe va examiner votre demande.`
       });
 
       setFormData({
@@ -186,7 +205,7 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
       onOpenChange(false);
       if (onSuccess) onSuccess();
     } catch (error) {
-      console.error('Erreur crÈation litige:', error);
+      console.error('Erreur cr√©ation litige:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de signaler le litige',
@@ -206,7 +225,7 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
             Signaler un Incident
           </DialogTitle>
           <DialogDescription>
-            DÈcrivez le problËme rencontrÈ. Notre Èquipe examinera votre demande sous 24-48h.
+            D√©crivez le probl√®me rencontr√©. Notre √©quipe examinera votre demande sous 24-48h.
           </DialogDescription>
         </DialogHeader>
 
@@ -229,22 +248,22 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
 
           {/* Description */}
           <div className="space-y-2">
-            <Label className="text-base font-semibold">2. Description dÈtaillÈe *</Label>
+            <Label className="text-base font-semibold">2. Description d√©taill√©e *</Label>
             <Textarea
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="DÈcrivez prÈcisÈment ce qui s'est passÈ, quand, et pourquoi cela pose problËme..."
+              placeholder="D√©crivez pr√©cis√©ment ce qui s'est pass√©, quand, et pourquoi cela pose probl√®me..."
               rows={6}
               className="resize-none"
             />
             <p className="text-xs text-stone-500">
-              Soyez aussi prÈcis que possible pour aider notre Èquipe ‡ comprendre la situation
+              Soyez aussi pr√©cis que possible pour aider notre √©quipe √† comprendre la situation
             </p>
           </div>
 
           {/* Preuves */}
           <div className="space-y-2">
-            <Label className="text-base font-semibold">3. Preuves (photos, captures d'Ècran)</Label>
+            <Label className="text-base font-semibold">3. Preuves (photos, captures d'√©cran)</Label>
             <div className="border-2 border-dashed border-stone-300 rounded-lg p-4 text-center hover:border-stone-400 transition-colors">
               <input
                 type="file"
@@ -259,13 +278,13 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
                 {uploading ? (
                   <>
                     <Loader2 className="w-8 h-8 text-stone-400 animate-spin" />
-                    <p className="text-sm text-stone-600">TÈlÈchargement...</p>
+                    <p className="text-sm text-stone-600">T√©l√©chargement...</p>
                   </>
                 ) : (
                   <>
                     <Upload className="w-8 h-8 text-stone-400" />
                     <p className="text-sm text-stone-600">
-                      Cliquez pour tÈlÈcharger des fichiers
+                      Cliquez pour t√©l√©charger des fichiers
                     </p>
                     <p className="text-xs text-stone-500">
                       Images uniquement, max 10 fichiers
@@ -275,7 +294,7 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
               </label>
             </div>
 
-            {/* Liste des preuves uploadÈes */}
+            {/* Liste des preuves upload√©es */}
             {formData.preuveUrls.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-3">
                 {formData.preuveUrls.map((url, idx) => (
@@ -325,8 +344,8 @@ export default function DisputeDialog({ open, onOpenChange, booking, userType, o
                     Litige Culturel Sensible
                   </p>
                   <p className="text-xs text-amber-700">
-                    Ce type de signalement sera traitÈ avec une attention particuliËre par notre Èquipe. 
-                    Les prestataires ayant des badges culturels vÈrifiÈs seront notifiÈs de l'impact sur leur certification.
+                    Ce type de signalement sera trait√© avec une attention particuli√®re par notre √©quipe. 
+                    Les prestataires ayant des badges culturels v√©rifi√©s seront notifi√©s de l'impact sur leur certification.
                   </p>
                 </div>
               </div>
