@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { base44, supabase } from "@/api/apiClient";
+import { SendEmail } from "@/api/integrations";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -164,6 +165,21 @@ export default function ServiceDetails() {
           is_read: false
       });
 
+      // Email au vendeur : nouvelle demande de reservation, action requise
+      try {
+        const allUsersForEmail = await base44.entities.User.list();
+        const vendorUserForEmail = allUsersForEmail.find(u => u.id === plannerId);
+        if (vendorUserForEmail) {
+          await SendEmail({
+            to: vendorUserForEmail.email,
+            subject: "Nouvelle demande de reservation",
+            body: `Bonjour ${vendorUserForEmail.full_name || ''},\n\nVous avez une nouvelle demande de reservation pour "${service.title}" le ${format(bookingDate, 'PPP')}.\n\nConnectez-vous a votre tableau de bord pour repondre.\n\nCordialement,\nL'equipe EventCrafter`
+          });
+        }
+      } catch (emailError) {
+        console.error("Erreur envoi email (non bloquant):", emailError);
+      }
+
       setBookingSuccess(true);
     } catch (error) {
       console.error("Booking failed", error);
@@ -189,7 +205,7 @@ export default function ServiceDetails() {
             controls
           >
             <source src={service.image_url} type="video/mp4" />
-            Votre navigateur ne supporte pas la vidéo.
+            Votre navigateur ne supporte pas la vidÃ©o.
           </video>
         ) : (
           <img 
@@ -227,7 +243,7 @@ export default function ServiceDetails() {
                   playsInline
                 >
                   <source src={service.video_url} type="video/mp4" />
-                  Votre navigateur ne supporte pas la vidéo.
+                  Votre navigateur ne supporte pas la vidÃ©o.
                 </video>
               </section>
             )}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from "@/api/apiClient";
+import { SendEmail } from "@/api/integrations";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -114,7 +115,7 @@ export default function ClientDashboard() {
   }, []);
 
   useEffect(() => {
-    // Charger les données du formulaire sauvegardées si l'utilisateur vient de se connecter
+    // Charger les donnÃ©es du formulaire sauvegardÃ©es si l'utilisateur vient de se connecter
     if (user) {
       const pendingForm = localStorage.getItem('pending_event_form');
       if (pendingForm) {
@@ -124,8 +125,8 @@ export default function ClientDashboard() {
           setEventDate(formData.eventDate || '');
           setEventDescription(formData.eventDescription || '');
           toast({ 
-            title: "Informations restaurées", 
-            description: "Vos données d'événement ont été récupérées" 
+            title: "Informations restaurÃ©es", 
+            description: "Vos donnÃ©es d'Ã©vÃ©nement ont Ã©tÃ© rÃ©cupÃ©rÃ©es" 
           });
         } catch (e) {
           console.error('Failed to load pending form', e);
@@ -189,7 +190,7 @@ export default function ClientDashboard() {
     mutationFn: (bookingId) => base44.entities.Booking.delete(bookingId),
     onSuccess: () => {
       queryClient.invalidateQueries(['bookings']);
-      toast({ title: "Service retiré" });
+      toast({ title: "Service retirÃ©" });
     },
   });
 
@@ -203,7 +204,7 @@ export default function ClientDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['events', 'bookings']);
-      toast({ title: "Événement supprimé" });
+      toast({ title: "Ã‰vÃ©nement supprimÃ©" });
     },
   });
 
@@ -316,6 +317,21 @@ export default function ClientDashboard() {
             link: "/VendorDashboard",
             is_read: false
           });
+
+          // Email au vendeur : nouvelle demande de reservation, action requise
+          try {
+            const allUsersForEmail = await base44.entities.User.list();
+            const vendorUserForEmail = allUsersForEmail.find(u => u.id === vendorId);
+            if (vendorUserForEmail) {
+              await SendEmail({
+                to: vendorUserForEmail.email,
+                subject: "Nouvelle demande de reservation",
+                body: `Bonjour ${vendorUserForEmail.full_name || ''},\n\n${user.full_name || user.email} souhaite reserver votre service "${fullService.title}" pour l'evenement "${eventName}".\n\nConnectez-vous a votre tableau de bord pour repondre.\n\nCordialement,\nL'equipe EventCrafter`
+              });
+            }
+          } catch (emailError) {
+            console.error("Erreur envoi email (non bloquant):", emailError);
+          }
         } catch (notifError) {
           console.error("Erreur creation notification (non bloquant):", notifError);
         }
@@ -414,9 +430,9 @@ export default function ClientDashboard() {
       <AlertDialog open={!!deletingEvent} onOpenChange={(open) => !open && setDeletingEvent(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer l'événement ?</AlertDialogTitle>
+            <AlertDialogTitle>Supprimer l'Ã©vÃ©nement ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action supprimera l'événement et tous les services associés. Cette action est irréversible.
+              Cette action supprimera l'Ã©vÃ©nement et tous les services associÃ©s. Cette action est irrÃ©versible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -439,7 +455,7 @@ export default function ClientDashboard() {
           <AlertDialogHeader>
             <AlertDialogTitle>Retirer ce service ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Le service sera retiré de votre événement. Cette action est irréversible.
+              Le service sera retirÃ© de votre Ã©vÃ©nement. Cette action est irrÃ©versible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -460,11 +476,11 @@ export default function ClientDashboard() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="mb-6 overflow-x-auto -mx-4 px-4">
         <TabsList className="w-max min-w-full justify-start bg-stone-100 p-1">
-          <TabsTrigger value="contact_cart" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">🛒 Panier</TabsTrigger>
-          <TabsTrigger value="my_bookings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">📅 Événements</TabsTrigger>
-          <TabsTrigger value="my_requests" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">📋 Demandes</TabsTrigger>
-          <TabsTrigger value="client_profile" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">👤 Profil</TabsTrigger>
-          <TabsTrigger value="reviews" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">⭐ Avis</TabsTrigger>
+          <TabsTrigger value="contact_cart" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ›’ Panier</TabsTrigger>
+          <TabsTrigger value="my_bookings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ“… Ã‰vÃ©nements</TabsTrigger>
+          <TabsTrigger value="my_requests" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ“‹ Demandes</TabsTrigger>
+          <TabsTrigger value="client_profile" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ‘¤ Profil</TabsTrigger>
+          <TabsTrigger value="reviews" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">â­ Avis</TabsTrigger>
         </TabsList>
         </div>
 
@@ -501,7 +517,7 @@ export default function ClientDashboard() {
                           <h4 className="font-semibold text-stone-900">{service.title}</h4>
                           <p className="text-sm text-stone-500">{service.city}</p>
                           <p className="text-sm font-bold text-rose-600 mt-1">
-                            À partir de {service.price_min?.toLocaleString()} FCFA
+                            Ã€ partir de {service.price_min?.toLocaleString()} FCFA
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -523,7 +539,7 @@ export default function ClientDashboard() {
                               } else {
                                 const newConv = await base44.entities.Conversation.create({
                                   participants: [String(user.id), String(vendorId)],
-                                  last_message: "Conversation démarrée",
+                                  last_message: "Conversation dÃ©marrÃ©e",
                                   last_message_at: new Date().toISOString()
                                 });
                                 window.location.href = `/Chat?conversationId=${newConv.id}`;
@@ -549,10 +565,10 @@ export default function ClientDashboard() {
                   </div>
 
                   <div className="border-t pt-6 space-y-4">
-                    <h3 className="font-semibold text-lg">Créer un Événement</h3>
+                    <h3 className="font-semibold text-lg">CrÃ©er un Ã‰vÃ©nement</h3>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Nom de l'événement *</label>
+                      <label className="text-sm font-medium">Nom de l'Ã©vÃ©nement *</label>
                       <input 
                         type="text"
                         placeholder="Ex: Mon Mariage 2025"
@@ -563,7 +579,7 @@ export default function ClientDashboard() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Date de l'événement *</label>
+                      <label className="text-sm font-medium">Date de l'Ã©vÃ©nement *</label>
                       <input 
                         type="date"
                         value={eventDate}
@@ -576,7 +592,7 @@ export default function ClientDashboard() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Description (optionnel)</label>
                       <textarea 
-                        placeholder="Détails sur votre événement..."
+                        placeholder="DÃ©tails sur votre Ã©vÃ©nement..."
                         value={eventDescription}
                         onChange={(e) => setEventDescription(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md min-h-[80px]"
@@ -589,17 +605,17 @@ export default function ClientDashboard() {
                       disabled={createEventMutation.isPending || !eventName?.trim() || !eventDate}
                     >
                       {createEventMutation.isPending ? (
-                        <>Création en cours...</>
+                        <>CrÃ©ation en cours...</>
                       ) : (
                         <>
                           <CalendarCheck className="w-4 h-4 mr-2" />
-                          Créer Événement avec {cart.length} Service{cart.length > 1 ? 's' : ''}
+                          CrÃ©er Ã‰vÃ©nement avec {cart.length} Service{cart.length > 1 ? 's' : ''}
                         </>
                       )}
                     </Button>
                     {(!eventName?.trim() || !eventDate) && (
                       <p className="text-xs text-amber-600 mt-2">
-                        Vos informations seront conservées après connexion
+                        Vos informations seront conservÃ©es aprÃ¨s connexion
                       </p>
                     )}
                   </div>
@@ -629,7 +645,7 @@ export default function ClientDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Megaphone className="w-5 h-5" />
-                Mes Demandes Postées
+                Mes Demandes PostÃ©es
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -644,20 +660,20 @@ export default function ClientDashboard() {
                             <p className="text-sm text-stone-500">{lead.service_category}</p>
                           </div>
                           <Badge className={lead.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-stone-100 text-stone-800'}>
-                            {lead.status === 'open' ? 'Ouverte' : 'Fermée'}
+                            {lead.status === 'open' ? 'Ouverte' : 'FermÃ©e'}
                           </Badge>
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex items-center gap-2 text-stone-600">
                             <CalendarCheck className="w-4 h-4" />
-                            {lead.event_date ? format(new Date(lead.event_date), 'dd MMMM yyyy', { locale: fr }) : 'Date non spécifiée'}
+                            {lead.event_date ? format(new Date(lead.event_date), 'dd MMMM yyyy', { locale: fr }) : 'Date non spÃ©cifiÃ©e'}
                           </div>
-                          <p className="text-stone-600">📍 {lead.location}</p>
-                          {lead.budget && <p className="text-stone-600">💰 {lead.budget}</p>}
+                          <p className="text-stone-600">ðŸ“ {lead.location}</p>
+                          {lead.budget && <p className="text-stone-600">ðŸ’° {lead.budget}</p>}
                           <p className="text-stone-700 mt-2">{lead.description}</p>
                         </div>
                         <div className="mt-4 text-xs text-stone-400">
-                          Postée le {format(new Date(lead.created_date), 'dd/MM/yyyy à HH:mm')}
+                          PostÃ©e le {format(new Date(lead.created_date), 'dd/MM/yyyy Ã  HH:mm')}
                         </div>
                       </CardContent>
                     </Card>
@@ -667,7 +683,7 @@ export default function ClientDashboard() {
                 <div className="text-center py-12">
                   <Megaphone className="w-12 h-12 text-stone-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-stone-900">Aucune demande</h3>
-                  <p className="text-stone-500 mb-6">Vous n'avez pas encore posté de demande de service.</p>
+                  <p className="text-stone-500 mb-6">Vous n'avez pas encore postÃ© de demande de service.</p>
                   <Button asChild className="bg-rose-600 hover:bg-rose-700">
                     <a href="/PostRequest">
                       <Plus className="w-4 h-4 mr-2" />
@@ -724,7 +740,7 @@ export default function ClientDashboard() {
               onSuccess={() => {
                 setSelectedPaymentBooking(null);
                 queryClient.invalidateQueries(['bookings']);
-                toast({ title: "Paiement effectué avec succès!" });
+                toast({ title: "Paiement effectuÃ© avec succÃ¨s!" });
               }}
             />
           )}
@@ -771,7 +787,7 @@ export default function ClientDashboard() {
                                 className="text-red-600 focus:text-red-600"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Supprimer l'événement
+                                Supprimer l'Ã©vÃ©nement
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -786,7 +802,7 @@ export default function ClientDashboard() {
                            const service = services[booking.service_id];
                            const vendor = vendors[booking.planner_id];
 
-                           // Créer un dossier pour le prompt de clôture
+                           // CrÃ©er un dossier pour le prompt de clÃ´ture
                            const dossier = {
                              id: booking.id,
                              bookingId: booking.id,
@@ -798,7 +814,7 @@ export default function ClientDashboard() {
 
                            return (
                              <div key={booking.id} className="p-4 hover:bg-stone-50 transition-colors space-y-4">
-                               {/* Prompt de clôture si événement passé */}
+                               {/* Prompt de clÃ´ture si Ã©vÃ©nement passÃ© */}
                                <ServiceCompletionPrompt 
                                  dossier={dossier}
                                  userType="client"
@@ -859,7 +875,7 @@ export default function ClientDashboard() {
                                         }}
                                       >
                                         <FileSignature className="w-4 h-4 mr-2" />
-                                        Gérer Contrat
+                                        GÃ©rer Contrat
                                       </Button>
 
                                       {booking.status !== 'draft' && (
@@ -905,7 +921,7 @@ export default function ClientDashboard() {
                         </div>
                       ) : (
                         <div className="p-8 text-center text-stone-500">
-                          Aucun service ajouté à cet événement
+                          Aucun service ajoutÃ© Ã  cet Ã©vÃ©nement
                         </div>
                       )}
                     </CardContent>
@@ -917,8 +933,8 @@ export default function ClientDashboard() {
             <Card>
               <CardContent className="p-20 text-center">
                 <CalendarCheck className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-stone-900">Aucun événement</h3>
-                <p className="text-stone-500 mb-6">Créez votre premier événement en ajoutant des services à votre panier.</p>
+                <h3 className="text-lg font-medium text-stone-900">Aucun Ã©vÃ©nement</h3>
+                <p className="text-stone-500 mb-6">CrÃ©ez votre premier Ã©vÃ©nement en ajoutant des services Ã  votre panier.</p>
                 <Button asChild>
                   <a href="/Marketplace">Explorer les Services</a>
                 </Button>
@@ -987,8 +1003,8 @@ export default function ClientDashboard() {
                ) : (
                  <div className="p-20 text-center">
                    <CalendarCheck className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                   <h3 className="text-lg font-medium text-stone-900">Aucune réservation</h3>
-                   <p className="text-stone-500 mb-6">Explorez la plateforme pour trouver des prestataires pour votre prochain événement.</p>
+                   <h3 className="text-lg font-medium text-stone-900">Aucune rÃ©servation</h3>
+                   <p className="text-stone-500 mb-6">Explorez la plateforme pour trouver des prestataires pour votre prochain Ã©vÃ©nement.</p>
                    <Button asChild>
                      <a href="/Marketplace">Explorer les Services</a>
                    </Button>
