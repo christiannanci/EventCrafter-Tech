@@ -37,9 +37,9 @@ export default function Pricing() {
         } else {
              // Default static plans if entity is empty
              setPlans([
-                { id: "free", name: "Basic", price: 0, description: "Essential tools.", features: ["Standard Listing"], icon: Shield },
-                { id: "premium", name: "Premium", price: 10000, description: "Better visibility.", features: ["Featured Listing"], icon: Star, popular: true },
-                { id: "gold", name: "Gold", price: 25000, description: "VIP treatment.", features: ["Top of Search"], icon: Zap }
+                { id: "free", name: "Basic", price: 0, description: "Outils essentiels.", features: ["Listing Standard"], icon: Shield },
+                { id: "premium", name: "Premium", price: 10000, description: "Meilleure visibilité.", features: ["Listing en Vedette"], icon: Star, popular: true },
+                { id: "gold", name: "Gold", price: 25000, description: "Traitement VIP.", features: ["Top des Recherches"], icon: Zap }
              ]);
         }
 
@@ -64,8 +64,8 @@ export default function Pricing() {
 
     // Mock Payment Process
     toast({
-      title: "Processing Payment...",
-      description: "Please wait while we secure your subscription.",
+      title: "Traitement du paiement...",
+      description: "Veuillez patienter pendant que nous sécurisons votre abonnement.",
     });
 
     setTimeout(async () => {
@@ -85,12 +85,12 @@ export default function Pricing() {
                  user_id: user.id,
                  plan: plan,
                  subscription_status: "active",
-                 business_name: user.first_name + "'s Business",
+                 business_name: "Entreprise de " + user.first_name,
                  phone: ""
                });
              }
              setCurrentPlan(plan);
-             toast({ title: "Plan Updated", description: "You are now on the Free plan." });
+             toast({ title: "Plan mis à jour", description: "Vous êtes maintenant sur le plan Gratuit." });
              return;
         }
 
@@ -133,7 +133,7 @@ export default function Pricing() {
              due_date: startDate.toISOString(),
              recipient_id: user.id,
              items: [{
-                 description: `${plan} Plan Subscription (30 Days)`,
+                 description: `Abonnement ${plan} (30 jours)`,
                  quantity: 1,
                  unit_price: price,
                  total: price
@@ -152,8 +152,8 @@ export default function Pricing() {
       } catch (error) {
         console.error(error);
         toast({
-          title: "Error",
-          description: "Something went wrong. Please try again.",
+          title: "Erreur",
+          description: "Une erreur est survenue. Veuillez réessayer.",
           variant: "destructive"
         });
       }
@@ -165,10 +165,10 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-stone-50 py-20 px-4">
       <div className="text-center max-w-3xl mx-auto mb-16">
-        <h1 className="text-4xl font-bold text-stone-900 mb-4">Choose Your Plan</h1>
+        <h1 className="text-4xl font-bold text-stone-900 mb-4">Choisissez Votre Plan</h1>
         <p className="text-xl text-stone-500">
-          Unlock more business with our tailored subscription tiers. 
-          Upgrade anytime to reach more clients.
+          Développez votre activité avec nos abonnements sur mesure. 
+          Passez à un plan supérieur à tout moment pour toucher plus de clients.
         </p>
       </div>
 
@@ -177,7 +177,7 @@ export default function Pricing() {
           <Card key={plan.id} className={`relative flex flex-col ${plan.popular ? 'border-rose-500 border-2 shadow-xl' : 'hover:shadow-lg transition-shadow'}`}>
             {plan.popular && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-rose-500 text-white px-4 py-1 rounded-full text-sm font-bold">
-                Most Popular
+                Le Plus Populaire
               </div>
             )}
             <CardHeader>
@@ -190,7 +190,7 @@ export default function Pricing() {
             <CardContent className="flex-grow">
               <div className="mb-6">
                 <span className="text-4xl font-bold text-stone-900">{formatPrice(plan.price)}</span>
-                <span className="text-stone-500 text-sm font-medium"> / month</span>
+                <span className="text-stone-500 text-sm font-medium"> / mois</span>
               </div>
               <ul className="space-y-3">
                 {plan.features.map((feature, i) => (
@@ -208,7 +208,7 @@ export default function Pricing() {
                 onClick={() => handleSubscribe(plan.id, plan.price)}
                 disabled={currentPlan === plan.id}
               >
-                {currentPlan === plan.id ? "Current Plan" : `Upgrade to ${plan.name}`}
+                {currentPlan === plan.id ? "Plan Actuel" : `Passer à ${plan.name}`}
               </Button>
             </CardFooter>
           </Card>

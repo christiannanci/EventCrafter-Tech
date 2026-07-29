@@ -227,15 +227,15 @@ export default function PostRequest() {
                       <SelectValue placeholder="Sélectionner le type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Wedding">Wedding</SelectItem>
-                      <SelectItem value="Birthday">Birthday</SelectItem>
-                      <SelectItem value="Corporate">Corporate Event</SelectItem>
-                      <SelectItem value="Conference">Conference</SelectItem>
+                      <SelectItem value="Wedding">Mariage</SelectItem>
+                      <SelectItem value="Birthday">Anniversaire</SelectItem>
+                      <SelectItem value="Corporate">Événement d'Entreprise</SelectItem>
+                      <SelectItem value="Conference">Conférence</SelectItem>
                       <SelectItem value="Baby Shower">Baby Shower</SelectItem>
-                      <SelectItem value="Graduation">Graduation</SelectItem>
-                      <SelectItem value="Religious">Religious Event</SelectItem>
-                      <SelectItem value="Funeral">Funeral</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
+                      <SelectItem value="Graduation">Remise de Diplôme</SelectItem>
+                      <SelectItem value="Religious">Cérémonie Religieuse</SelectItem>
+                      <SelectItem value="Funeral">Funérailles</SelectItem>
+                      <SelectItem value="Other">Autre</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

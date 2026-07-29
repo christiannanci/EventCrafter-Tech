@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { base44, supabase } from "@/api/apiClient";
+import { base44, supabase } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -201,7 +201,13 @@ export default function Chat() {
     const messageContent = newMessage;
     setNewMessage("");
 
-    // Pas d'ajout optimiste : le message arrivera via le channel Realtime une fois confirme en base
+    setMessages([...messages, {
+      conversation_id: activeConversation.id,
+      sender_id: currentUser.id,
+      content: messageContent,
+      created_date: new Date().toISOString()
+    }]);
+    setTimeout(scrollToBottom, 100);
 
     try {
       await base44.entities.Message.create({

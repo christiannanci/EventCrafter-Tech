@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import SEOHead from '@/components/SEOHead';
@@ -72,10 +72,10 @@ export default function Home() {
           ]);
 
           const enrichedFeedbacks = publicFeedbacks.map(f => {
-            let displayName = "User", displayLocation = "", avatarUrl = null;
+            let displayName = "Utilisateur", displayLocation = "", avatarUrl = null;
             if (f.user_role === 'provider') {
               const profile = vendorProfiles.find(p => p.user_id === f.user_id);
-              if (profile) { displayName = profile.business_name || "Provider"; displayLocation = profile.city || ""; avatarUrl = profile.profile_image; }
+              if (profile) { displayName = profile.business_name || "Prestataire"; displayLocation = profile.city || ""; avatarUrl = profile.profile_image; }
             } else {
               const profile = clientProfiles.find(p => p.user_id === f.user_id);
               if (profile) { displayName = profile.pseudo || profile.first_name || "Client"; displayLocation = profile.city || ""; }
@@ -130,10 +130,10 @@ export default function Home() {
                      setSelectedSubCategory("all"); // Reset subcategory on category change
                  }}>
                      <SelectTrigger className="h-12 border-stone-200 bg-stone-50 focus:bg-white">
-                         <SelectValue placeholder="Category" />
+                         <SelectValue placeholder="Catégorie" />
                      </SelectTrigger>
                      <SelectContent>
-                         <SelectItem value="all">All Categories</SelectItem>
+                         <SelectItem value="all">Toutes les catégories</SelectItem>
                          {serviceTypes.map(t => (
                              <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>
                          ))}
@@ -146,10 +146,10 @@ export default function Home() {
                  <div className="w-full sm:w-40 lg:w-48 flex-shrink-0 animate-in fade-in slide-in-from-left-2">
                      <Select value={selectedSubCategory} onValueChange={setSelectedSubCategory}>
                          <SelectTrigger className="h-12 border-stone-200 bg-stone-50 focus:bg-white">
-                             <SelectValue placeholder="Sub-Category" />
+                             <SelectValue placeholder="Sous-catégorie" />
                          </SelectTrigger>
                          <SelectContent>
-                             <SelectItem value="all">All Sub-Categories</SelectItem>
+                             <SelectItem value="all">Toutes les sous-catégories</SelectItem>
                              {functions
                                  .filter(f => {
                                      const cat = serviceTypes.find(t => t.name === selectedCategory);
@@ -193,7 +193,7 @@ export default function Home() {
                             size="icon"
                             className={`h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 ${showAdvanced ? 'bg-rose-50 text-rose-600' : 'text-stone-400'}`}
                             onClick={() => setShowAdvanced(!showAdvanced)}
-                            title="Advanced Filters"
+                            title="Filtres avancés"
                         >
                             <SlidersHorizontal className="w-5 h-5" />
                         </Button>
@@ -222,10 +222,10 @@ export default function Home() {
                      {/* Cultural */}
                      <Select value={filterCultural} onValueChange={setFilterCultural}>
                         <SelectTrigger className="bg-stone-50 border-stone-200">
-                            <SelectValue placeholder="Cultural Affinity" />
+                            <SelectValue placeholder="Affinité culturelle" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Any Culture</SelectItem>
+                            <SelectItem value="all">Toute culture</SelectItem>
                             {["Aire Sawa", "Aire Grassfields", "Aire Fang-Béti", "Grand Nord (Soudano-Sahélien)", "Bamiléké", "Bamoun", "Bakweri"].map(z => (
                                 <SelectItem key={z} value={z}>{z}</SelectItem>
                             ))}
@@ -235,11 +235,11 @@ export default function Home() {
                      {/* Language */}
                      <Select value={filterLanguage} onValueChange={setFilterLanguage}>
                         <SelectTrigger className="bg-stone-50 border-stone-200">
-                            <SelectValue placeholder="Language" />
+                            <SelectValue placeholder="Langue" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Any Language</SelectItem>
-                            {["Français", "English", "Pidgin", "Local Dialects"].map(l => (
+                            <SelectItem value="all">Toute langue</SelectItem>
+                            {["Français", "Anglais", "Pidgin", "Dialectes locaux"].map(l => (
                                 <SelectItem key={l} value={l}>{l}</SelectItem>
                             ))}
                         </SelectContent>
@@ -251,8 +251,8 @@ export default function Home() {
                             <SelectValue placeholder="Religion / Tradition" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Any Tradition</SelectItem>
-                            {["Christian", "Muslim", "Traditional/Ancestral", "Secular"].map(r => (
+                            <SelectItem value="all">Toute tradition</SelectItem>
+                            {["Chrétien", "Musulman", "Traditionnel/Ancestral", "Laïc"].map(r => (
                                 <SelectItem key={r} value={r}>{r}</SelectItem>
                             ))}
                         </SelectContent>
@@ -263,7 +263,7 @@ export default function Home() {
                         className={`flex items-center justify-between px-4 rounded-md border cursor-pointer transition-colors h-10 ${filterDiaspora ? 'bg-rose-50 border-rose-200' : 'bg-stone-50 border-stone-200'}`}
                         onClick={() => setFilterDiaspora(!filterDiaspora)}
                      >
-                        <span className={`text-sm ${filterDiaspora ? 'text-rose-700 font-medium' : 'text-stone-600'}`}>Diaspora Ready</span>
+                        <span className={`text-sm ${filterDiaspora ? 'text-rose-700 font-medium' : 'text-stone-600'}`}>Spécial Diaspora</span>
                         <div className={`w-3 h-3 rounded-full ${filterDiaspora ? 'bg-rose-600' : 'bg-stone-300'}`} />
                      </div>
                  </div>
@@ -320,7 +320,7 @@ export default function Home() {
           <div className="flex justify-between items-end mb-6 sm:mb-12">
             <div>
               <h2 className="text-xl sm:text-3xl font-bold text-stone-900 mb-1 sm:mb-2">
-                  {selectedCountry ? `Recommended in ${selectedCountry}` : t('home.featuredPlanners')}
+                  {selectedCountry ? `Recommandé en ${selectedCountry}` : t('home.featuredPlanners')}
               </h2>
               <p className="text-stone-500">
                   {t('home.featuredSubtitle')}
@@ -408,14 +408,14 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="font-bold text-xl">Sarah N.</div>
-                  <div className="text-stone-400">Decorator in Douala</div>
+                  <div className="text-stone-400">Décoratrice à Douala</div>
                 </div>
               </div>
               <p className="text-stone-300 italic text-lg leading-relaxed">
-                "Since joining Event Crafter, I've booked 4 weddings in just one month! The platform makes it so easy to manage bookings and get paid."
+                "Depuis que j'ai rejoint EventCrafter, j'ai réservé 4 mariages en un seul mois ! La plateforme rend la gestion des réservations et les paiements très simples."
               </p>
               <div className="mt-6 flex items-center gap-2 text-rose-400 font-medium">
-                <CheckCircle2 className="w-5 h-5" /> Verified Vendor
+                <CheckCircle2 className="w-5 h-5" /> Prestataire Vérifié
               </div>
             </div>
           </div>
@@ -427,8 +427,8 @@ export default function Home() {
         <section className="py-10 sm:py-20 bg-white">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-6 sm:mb-12">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-2 sm:mb-4">Community Feedback</h2>
-                    <p className="text-stone-500">See what our providers and clients are saying about their experience.</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-2 sm:mb-4">Avis de la Communauté</h2>
+                    <p className="text-stone-500">Découvrez ce que nos prestataires et clients disent de leur expérience.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
                     {testimonials.map((review, idx) => (
@@ -440,7 +440,7 @@ export default function Home() {
                                 </p>
                                 {review.benefits_experienced && (
                                     <div className="mb-6 p-3 bg-rose-50/50 rounded-lg text-sm text-rose-800">
-                                        <span className="font-bold block text-rose-600 mb-1">Key Benefit:</span>
+                                        <span className="font-bold block text-rose-600 mb-1">Avantage clé :</span>
                                         {review.benefits_experienced}
                                     </div>
                                 )}

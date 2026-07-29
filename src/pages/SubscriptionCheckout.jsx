@@ -41,7 +41,7 @@ export default function SubscriptionCheckout() {
                 await fetchData(membershipId);
             } catch (error) {
                 console.error(error);
-                toast({ title: "Error", description: "Could not load subscription details", variant: "destructive" });
+                toast({ title: "Erreur", description: "Impossible de charger les détails de l'abonnement", variant: "destructive" });
             } finally {
                 setLoading(false);
             }
@@ -82,10 +82,10 @@ export default function SubscriptionCheckout() {
             });
 
             await fetchData(membership.id);
-            toast({ title: "Contract Signed", description: "You can now proceed to payment." });
+            toast({ title: "Contrat signé", description: "Vous pouvez maintenant procéder au paiement." });
             setShowContract(false);
         } catch (error) {
-            toast({ title: "Error signing", variant: "destructive" });
+            toast({ title: "Erreur de signature", variant: "destructive" });
         } finally {
             setSigning(false);
         }
@@ -123,12 +123,12 @@ export default function SubscriptionCheckout() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-rose-600">
                             <AlertCircle className="w-5 h-5" />
-                            Subscription Not Found
+                            Abonnement Introuvable
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-stone-500 mb-4">Unable to load subscription details. Please try again.</p>
-                        <Button onClick={() => navigate('/Pricing')} className="w-full">Back to Pricing</Button>
+                        <p className="text-stone-500 mb-4">Impossible de charger les détails de l'abonnement. Veuillez réessayer.</p>
+                        <Button onClick={() => navigate('/Pricing')} className="w-full">Retour aux Tarifs</Button>
                     </CardContent>
                 </Card>
             </div>
@@ -141,8 +141,8 @@ export default function SubscriptionCheckout() {
     return (
         <div className="min-h-screen bg-stone-50 py-12 px-4">
             <div className="max-w-3xl mx-auto">
-                <h1 className="text-3xl font-bold text-stone-900 mb-2">Complete Your Subscription</h1>
-                <p className="text-stone-500 mb-8">Please review and sign the contract, then pay the invoice to activate your {membership?.membership_type_code} plan.</p>
+                <h1 className="text-3xl font-bold text-stone-900 mb-2">Finalisez Votre Abonnement</h1>
+                <p className="text-stone-500 mb-8">Veuillez examiner et signer le contrat, puis payer la facture pour activer votre plan {membership?.membership_type_code}.</p>
 
                 <div className="grid gap-6">
                     {/* Step 1: Contract */}
@@ -152,10 +152,10 @@ export default function SubscriptionCheckout() {
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isContractSigned ? "bg-green-600 text-white" : "bg-stone-900 text-white"}`}>
                                     {isContractSigned ? <CheckCircle2 className="w-5 h-5" /> : "1"}
                                 </div>
-                                Sign Subscription Contract
+                                Signer le Contrat d'Abonnement
                             </CardTitle>
                             <CardDescription>
-                                Review terms and conditions for your {membership?.membership_type_code} membership.
+                                Consultez les conditions de votre abonnement {membership?.membership_type_code}.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -163,45 +163,45 @@ export default function SubscriptionCheckout() {
                                 <div className="flex items-center gap-3">
                                     <FileSignature className="w-5 h-5 text-stone-400" />
                                     <div>
-                                        <p className="font-medium text-sm">Contract #{contract?.contract_number}</p>
-                                        <p className="text-xs text-stone-500">Generated on {contract ? format(new Date(contract.created_date), 'PPP') : ''}</p>
+                                        <p className="font-medium text-sm">Contrat n°{contract?.contract_number}</p>
+                                        <p className="text-xs text-stone-500">Généré le {contract ? format(new Date(contract.created_date), 'PPP') : ''}</p>
                                     </div>
                                 </div>
                                 {isContractSigned ? (
-                                    <Button variant="ghost" disabled className="text-green-600">Signed</Button>
+                                    <Button variant="ghost" disabled className="text-green-600">Signé</Button>
                                 ) : (
                                     <Dialog open={showContract} onOpenChange={setShowContract}>
                                         <DialogTrigger asChild>
-                                            <Button>Review & Sign</Button>
+                                            <Button>Examiner et Signer</Button>
                                         </DialogTrigger>
                                         <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
                                             <DialogHeader>
-                                                <DialogTitle>Subscription Contract</DialogTitle>
+                                                <DialogTitle>Contrat d'Abonnement</DialogTitle>
                                             </DialogHeader>
                                             <ScrollArea className="flex-grow p-4 border rounded bg-stone-50 text-sm">
-                                                <h3 className="font-bold mb-2">TERMS OF SERVICE</h3>
+                                                <h3 className="font-bold mb-2">CONDITIONS D'UTILISATION</h3>
                                                 <p className="whitespace-pre-wrap mb-4">
                                                     {contract?.jurisdiction_clause}
                                                 </p>
-                                                <h3 className="font-bold mb-2">CANCELLATION POLICY</h3>
+                                                <h3 className="font-bold mb-2">POLITIQUE D'ANNULATION</h3>
                                                 <p className="whitespace-pre-wrap mb-4">
                                                     {contract?.cancellation_terms}
                                                 </p>
-                                                <h3 className="font-bold mb-2">FEES & PAYMENT</h3>
+                                                <h3 className="font-bold mb-2">FRAIS ET PAIEMENT</h3>
                                                 <p className="whitespace-pre-wrap">
                                                     {contract?.commission_clause}
                                                 </p>
                                                 <div className="mt-8 pt-4 border-t">
-                                                    <p className="font-bold">Plan: {membership?.membership_type_code?.toUpperCase()}</p>
-                                                    <p>Amount: {membership?.amount?.toLocaleString()} {membership?.currency}</p>
-                                                    <p>Duration: {membership?.duration_days} Days</p>
+                                                    <p className="font-bold">Plan : {membership?.membership_type_code?.toUpperCase()}</p>
+                                                    <p>Montant : {membership?.amount?.toLocaleString()} {membership?.currency}</p>
+                                                    <p>Durée : {membership?.duration_days} jours</p>
                                                 </div>
                                             </ScrollArea>
                                             <div className="pt-4 flex justify-end gap-2">
-                                                <Button variant="outline" onClick={() => setShowContract(false)}>Cancel</Button>
+                                                <Button variant="outline" onClick={() => setShowContract(false)}>Annuler</Button>
                                                 <Button onClick={handleSignContract} disabled={signing}>
                                                     {signing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                    Accept & Sign
+                                                    Accepter et Signer
                                                 </Button>
                                             </div>
                                         </DialogContent>
@@ -218,10 +218,10 @@ export default function SubscriptionCheckout() {
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isPaid ? "bg-green-600 text-white" : !isContractSigned ? "bg-stone-300 text-stone-500" : "bg-stone-900 text-white"}`}>
                                     {isPaid ? <CheckCircle2 className="w-5 h-5" /> : "2"}
                                 </div>
-                                Pay Invoice
+                                Payer la Facture
                             </CardTitle>
                              <CardDescription>
-                                Secure payment for your subscription.
+                                Paiement sécurisé pour votre abonnement.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -229,19 +229,19 @@ export default function SubscriptionCheckout() {
                                  <div className="flex items-center gap-3">
                                     <CreditCard className="w-5 h-5 text-stone-400" />
                                     <div>
-                                        <p className="font-medium text-sm">Invoice #{invoice?.invoice_number}</p>
-                                        <p className="text-xs text-stone-500">Amount: {invoice?.amount?.toLocaleString()} {invoice?.currency}</p>
+                                        <p className="font-medium text-sm">Facture n°{invoice?.invoice_number}</p>
+                                        <p className="text-xs text-stone-500">Montant : {invoice?.amount?.toLocaleString()} {invoice?.currency}</p>
                                     </div>
                                 </div>
                                 {isPaid ? (
-                                     <Button variant="ghost" disabled className="text-green-600">Paid</Button>
+                                     <Button variant="ghost" disabled className="text-green-600">Payée</Button>
                                 ) : (
                                     <>
                                         <Button 
                                             disabled={!isContractSigned} 
                                             onClick={() => setShowPayment(true)}
                                         >
-                                            Pay Now
+                                            Payer Maintenant
                                         </Button>
                                         <PaymentModal 
                                             booking={null} // Not a booking payment
@@ -252,7 +252,7 @@ export default function SubscriptionCheckout() {
                                                 setShowPayment(false);
                                                 handlePaymentComplete();
                                             }}
-                                            label={`Pay ${invoice?.amount?.toLocaleString()} ${invoice?.currency}`}
+                                            label={`Payer ${invoice?.amount?.toLocaleString()} ${invoice?.currency}`}
                                         />
                                     </>
                                 )}

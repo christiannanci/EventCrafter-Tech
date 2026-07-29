@@ -132,7 +132,7 @@ export default function VendorProfile() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-amber-600" />
-                  Verification Documents
+                  Documents de Vérification
                 </CardTitle>
                 <CardDescription>Soumettez votre demande de vérification de compte</CardDescription>
               </div>
@@ -179,7 +179,7 @@ export default function VendorProfile() {
                     if (files.length === 0) return;
 
                     try {
-                      toast({ title: "Uploading documents..." });
+                      toast({ title: "Téléchargement des documents..." });
                       const uploadPromises = files.map(file => UploadFile({ file }));
                       const results = await Promise.all(uploadPromises);
                       const urls = results.map(r => r.file_url);

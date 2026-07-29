@@ -151,15 +151,15 @@ export default function ServiceDetails() {
         event_date: finalDate.toISOString(),
         status: "pending",
         notes: selectedSlot 
-            ? `Time Slot: ${format(finalDate, 'HH:mm')} - ${format(parseISO(selectedSlot.end_time), 'HH:mm')}\n\n${bookingNotes}`
+            ? `Créneau : ${format(finalDate, 'HH:mm')} - ${format(parseISO(selectedSlot.end_time), 'HH:mm')}\n\n${bookingNotes}`
             : bookingNotes
       });
       
       // Create notification for planner
       await base44.entities.Notification.create({
           user_id: plannerId,
-          title: "New Booking Request",
-          message: `You have a new booking request for ${service.title} on ${format(bookingDate, 'PPP')}.`,
+          title: "Nouvelle demande de réservation",
+          message: `Vous avez une nouvelle demande de réservation pour ${service.title} le ${format(bookingDate, 'PPP')}.`,
           type: "booking",
           link: "/Dashboard",
           is_read: false
@@ -188,7 +188,7 @@ export default function ServiceDetails() {
     }
   };
 
-  if (!service) return <div className="p-20 text-center animate-pulse">Loading details...</div>;
+  if (!service) return <div className="p-20 text-center animate-pulse">Chargement des détails...</div>;
 
   return (
     <div className="bg-white min-h-screen pb-20">
@@ -205,7 +205,7 @@ export default function ServiceDetails() {
             controls
           >
             <source src={service.image_url} type="video/mp4" />
-            Votre navigateur ne supporte pas la vidÃ©o.
+            Votre navigateur ne supporte pas la vidéo.
           </video>
         ) : (
           <img 
@@ -243,7 +243,7 @@ export default function ServiceDetails() {
                   playsInline
                 >
                   <source src={service.video_url} type="video/mp4" />
-                  Votre navigateur ne supporte pas la vidÃ©o.
+                  Votre navigateur ne supporte pas la vidéo.
                 </video>
               </section>
             )}
@@ -254,7 +254,7 @@ export default function ServiceDetails() {
               <div className="space-y-6">
                   {service.description && (
                     <div>
-                        <h3 className="text-lg font-semibold text-stone-800 mb-2">Overview</h3>
+                        <h3 className="text-lg font-semibold text-stone-800 mb-2">Aperçu</h3>
                         <div className="prose prose-stone max-w-none text-stone-600 leading-relaxed whitespace-pre-line">
                             {service.description}
                         </div>
@@ -263,7 +263,7 @@ export default function ServiceDetails() {
                   
                   {service.description_details && (
                     <div>
-                        <h3 className="text-lg font-semibold text-stone-800 mb-2">Service Details & Methodology</h3>
+                        <h3 className="text-lg font-semibold text-stone-800 mb-2">Détails du Service & Méthodologie</h3>
                         <div className="prose prose-stone max-w-none text-stone-600 leading-relaxed whitespace-pre-line">
                             {service.description_details}
                         </div>
@@ -272,7 +272,7 @@ export default function ServiceDetails() {
 
                   {service.description_terms && (
                     <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
-                        <h3 className="text-lg font-semibold text-amber-900 mb-2">Terms & Prerequisites</h3>
+                        <h3 className="text-lg font-semibold text-amber-900 mb-2">Conditions & Prérequis</h3>
                         <div className="prose prose-sm max-w-none text-amber-900/80 leading-relaxed whitespace-pre-line">
                             {service.description_terms}
                         </div>
@@ -290,7 +290,7 @@ export default function ServiceDetails() {
                                     <div className="p-1.5 bg-amber-100 text-amber-700 rounded-lg">
                                         <ShieldCheck className="w-4 h-4" />
                                     </div>
-                                    <h3 className="font-bold text-stone-900">Cultural & Traditional</h3>
+                                    <h3 className="font-bold text-stone-900">Culturel & Traditionnel</h3>
                                 </div>
                                 {service.cultural_zones?.length > 0 && (
                                     <div className="flex flex-wrap gap-2 mb-2">
@@ -315,7 +315,7 @@ export default function ServiceDetails() {
                                     <div>
                                         <div className="flex items-center gap-2 mb-2">
                                             <Globe className="w-4 h-4 text-blue-600" />
-                                            <h4 className="font-semibold text-sm text-stone-800">Languages</h4>
+                                            <h4 className="font-semibold text-sm text-stone-800">Langues</h4>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {service.spoken_languages.map((lang, i) => (
@@ -332,7 +332,7 @@ export default function ServiceDetails() {
                                     <div>
                                         <div className="flex items-center gap-2 mb-2">
                                             <BookOpen className="w-4 h-4 text-purple-600" />
-                                            <h4 className="font-semibold text-sm text-stone-800">Religious Compatibility</h4>
+                                            <h4 className="font-semibold text-sm text-stone-800">Compatibilité Religieuse</h4>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {service.religious_compatibility.map((rel, i) => (
@@ -351,8 +351,8 @@ export default function ServiceDetails() {
                                   <div className="flex items-center gap-3 bg-green-50 p-3 rounded-lg border border-green-100">
                                       <Plane className="w-5 h-5 text-green-600" />
                                       <div>
-                                          <span className="block font-bold text-green-800 text-sm">Diaspora Friendly</span>
-                                          <span className="text-xs text-green-700">Available to work with clients from abroad</span>
+                                          <span className="block font-bold text-green-800 text-sm">Adapté à la Diaspora</span>
+                                          <span className="text-xs text-green-700">Disponible pour travailler avec des clients à l'étranger</span>
                                       </div>
                                   </div>
                               </div>
@@ -366,7 +366,7 @@ export default function ServiceDetails() {
             <section className="bg-stone-50 p-6 rounded-2xl border border-stone-100">
               <h3 className="font-semibold text-lg mb-4">{t('serviceDetails.whatsIncluded')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {['Consultation included', 'Customized planning', 'Vendor coordination', 'Day-of supervision', 'Budget management'].map((item, i) => (
+                {['Consultation incluse', 'Planification personnalisée', 'Coordination des prestataires', 'Supervision le jour J', 'Gestion du budget'].map((item, i) => (
                   <div key={i} className="flex items-center text-stone-600">
                     <Check className="w-4 h-4 text-green-500 mr-2" />
                     {item}
@@ -473,7 +473,7 @@ export default function ServiceDetails() {
                                      );
                                  } else {
                                      // No explicit slots, standard booking
-                                     return <p className="text-xs text-stone-500 italic mb-2">Full day availability (Standard)</p>;
+                                     return <p className="text-xs text-stone-500 italic mb-2">Disponibilité journée complète (Standard)</p>;
                                  }
                              })()}
                           </div>
@@ -546,7 +546,7 @@ export default function ServiceDetails() {
                      } else {
                        const newConv = await base44.entities.Conversation.create({
                          participants: [String(session.user.id), String(service.planner_id)],
-                         last_message: "Started a conversation",
+                         last_message: "A démarré une conversation",
                          last_message_at: new Date().toISOString()
                        });
                        window.location.href = `/Chat?conversationId=${newConv.id}`;
