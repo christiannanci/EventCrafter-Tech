@@ -20,7 +20,7 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
         abbreviation: "",
         description: "",
         media_type: "image",
-        media_url: "" // Optional
+        media_url: ""
     });
 
     const handleMediaUpload = async (e) => {
@@ -31,9 +31,9 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
             setUploadingMedia(true);
             const result = await UploadFile({ file });
             setFormData({...formData, media_url: result.file_url});
-            toast({ title: "Media uploaded", description: "Your media has been uploaded successfully." });
+            toast({ title: "Média téléchargé", description: "Votre média a été téléchargé avec succès." });
         } catch (error) {
-            toast({ title: "Upload failed", description: "Failed to upload media. Please try again.", variant: "destructive" });
+            toast({ title: "Échec du téléchargement", description: "Le média n'a pas pu être téléchargé. Réessayez.", variant: "destructive" });
         } finally {
             setUploadingMedia(false);
         }
@@ -41,13 +41,12 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
 
     const handleSubmit = async () => {
         if (!formData.name || !formData.abbreviation || !formData.description) {
-            toast({ title: "Error", description: "Please fill in all required fields", variant: "destructive" });
+            toast({ title: "Erreur", description: "Veuillez remplir tous les champs requis", variant: "destructive" });
             return;
         }
 
         setLoading(true);
         try {
-            // Generate basic codes if not provided by admin
             const code = "SRV_" + formData.abbreviation.toUpperCase().replace(/[^A-Z0-9]/g, '');
             const typeCode = "CAT_USER_REQ";
 
@@ -59,8 +58,8 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
             });
 
             toast({ 
-                title: "Request Submitted", 
-                description: "Your service type suggestion has been sent for admin approval." 
+                title: "Demande Soumise", 
+                description: "Votre suggestion de type de service a été envoyée pour approbation par un administrateur." 
             });
             setIsOpen(false);
             setFormData({ name: "", abbreviation: "", description: "", media_type: "image", media_url: "" });
@@ -68,7 +67,7 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
 
         } catch (error) {
             console.error("Submission failed", error);
-            toast({ title: "Error", description: "Failed to submit request.", variant: "destructive" });
+            toast({ title: "Erreur", description: "Échec de la soumission de la demande.", variant: "destructive" });
         } finally {
             setLoading(false);
         }
@@ -78,22 +77,22 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 h-8 px-2">
-                    <PlusCircle className="w-3 h-3 mr-1" /> Suggest New
+                    <PlusCircle className="w-3 h-3 mr-1" /> Suggérer un Nouveau Type
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Suggest New Service Type</DialogTitle>
+                    <DialogTitle>Suggérer un Nouveau Type de Service</DialogTitle>
                     <DialogDescription>
-                        Can't find your category? Suggest a new one. It will be visible once approved by an admin.
+                        Vous ne trouvez pas votre catégorie ? Suggérez-en une nouvelle. Elle sera visible une fois approuvée par un administrateur.
                     </DialogDescription>
                 </DialogHeader>
                 
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label>Service Name *</Label>
+                        <Label>Nom du Service *</Label>
                         <Input 
-                            placeholder="e.g. Drone Photography" 
+                            placeholder="ex. Photographie par Drone" 
                             value={formData.name}
                             onChange={(e) => setFormData({...formData, name: e.target.value})}
                         />
@@ -101,16 +100,16 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
                     
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Abbreviation (3-4 chars) *</Label>
+                            <Label>Abréviation (3-4 caractères) *</Label>
                             <Input 
-                                placeholder="e.g. DRON" 
+                                placeholder="ex. DRON" 
                                 maxLength={5}
                                 value={formData.abbreviation}
                                 onChange={(e) => setFormData({...formData, abbreviation: e.target.value.toUpperCase()})}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Media Type</Label>
+                            <Label>Type de Média</Label>
                              <Select 
                                 value={formData.media_type}
                                 onValueChange={val => setFormData({...formData, media_type: val})}
@@ -120,7 +119,7 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="image">Image</SelectItem>
-                                    <SelectItem value="video">Video</SelectItem>
+                                    <SelectItem value="video">Vidéo</SelectItem>
                                     <SelectItem value="audio">Audio</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -130,14 +129,14 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
                     <div className="space-y-2">
                         <Label>Description *</Label>
                         <Textarea 
-                            placeholder="Describe what this service entails..."
+                            placeholder="Décrivez en quoi consiste ce service..."
                             value={formData.description}
                             onChange={(e) => setFormData({...formData, description: e.target.value})}
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Illustration Media (Optional)</Label>
+                        <Label>Média d'Illustration (Optionnel)</Label>
                         <div className="flex items-center gap-3">
                             <input 
                                 type="file" 
@@ -153,22 +152,22 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
                                 onClick={() => document.getElementById('servicetype-media-upload').click()}
                                 disabled={uploadingMedia}
                             >
-                                {uploadingMedia ? "Uploading..." : formData.media_url ? "Change Media" : "Upload Media"}
+                                {uploadingMedia ? "Téléchargement..." : formData.media_url ? "Changer le Média" : "Télécharger un Média"}
                             </Button>
                         </div>
                         {formData.media_url && (
                             <div className="text-xs text-green-600 flex items-center gap-1">
-                                <CheckCircle2 className="w-3 h-3" /> Media uploaded successfully
+                                <CheckCircle2 className="w-3 h-3" /> Média téléchargé avec succès
                             </div>
                         )}
                     </div>
                 </div>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+                    <Button variant="outline" onClick={() => setIsOpen(false)}>Annuler</Button>
                     <Button onClick={handleSubmit} disabled={loading} className="bg-rose-600">
                         {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                        Submit Request
+                        Soumettre la Demande
                     </Button>
                 </DialogFooter>
             </DialogContent>

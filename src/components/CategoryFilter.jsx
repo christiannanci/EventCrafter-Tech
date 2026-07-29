@@ -8,7 +8,7 @@ import { base44 } from "@/api/apiClient";
 export default function CategoryFilter({ selected, onSelect }) {
   const { t } = useLanguage();
   const [categories, setCategories] = React.useState([
-    { id: 'all', label: t('categories.All') || 'All Services' }
+    { id: 'all', label: t('categories.All') || 'Tous les Services' }
   ]);
 
   React.useEffect(() => {
@@ -23,7 +23,7 @@ export default function CategoryFilter({ selected, onSelect }) {
         }));
         
         setCategories([
-          { id: 'all', label: t('categories.All') || 'All Services' },
+          { id: 'all', label: t('categories.All') || 'Tous les Services' },
           ...mapped
         ]);
       } catch (err) {

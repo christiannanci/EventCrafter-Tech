@@ -16,18 +16,17 @@ export default function ServiceReceptionDialog({ booking, open, onOpenChange, on
     const [loading, setLoading] = useState(false);
     const [contract, setContract] = useState(null);
     const [formData, setFormData] = useState({
-        reception_type: "complete", // partial, complete
+        reception_type: "complete",
         client_satisfied: true,
         observations: "",
         payment_authorized: true,
-        payment_quota: 100, // 100%
+        payment_quota: 100,
         dispute_opened: false
     });
 
     useEffect(() => {
         const fetchContract = async () => {
             if (booking && open) {
-                // Find contract for this booking
                 const contracts = await base44.entities.Contract.filter({ booking_id: booking.id });
                 if (contracts && contracts.length > 0) {
                     setContract(contracts[0]);
@@ -40,13 +39,12 @@ export default function ServiceReceptionDialog({ booking, open, onOpenChange, on
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!contract) {
-            toast({ title: "Error", description: "No contract found for this booking.", variant: "destructive" });
+            toast({ title: "Erreur", description: "Aucun contrat trouvé pour cette réservation.", variant: "destructive" });
             return;
         }
 
         setLoading(true);
         try {
-            // 1. Create Reception Record
             const reception = await base44.entities.ServiceReception.create({
                 contract_id: contract.id,
                 booking_id: booking.id,
@@ -55,54 +53,32 @@ export default function ServiceReceptionDialog({ booking, open, onOpenChange, on
                 payment_quota: parseFloat(formData.payment_quota)
             });
 
-            // 2. Trigger Logic based on inputs
             if (formData.dispute_opened) {
-                // Open Dispute
                 await base44.entities.Booking.update(booking.id, { status: 'disputed' });
                 await base44.entities.Dispute.create({
                     dispute_code: `LIT-${Date.now()}`,
                     booking_id: booking.id,
                     contract_id: contract.id,
-                    reception_id: reception.id, // we created 'reception' const above in the previous edit block, but wait - in ServiceReceptionDialog I might have missed capturing the reception result. 
-                    // Ah, looking at my previous edit in ServiceReceptionDialog:
-                    // I used `await base44.entities.ServiceReception.create({...})` but didn't assign it to a variable in the snippet I see in snapshot?
-                    // Actually, I need to make sure I capture the ID. 
-                    // Let's assume the previous `create` call returns the object.
-                    // Wait, I am editing the `ServiceReceptionDialog` file again.
-                    // I need to ensure `reception` is available.
-                    
+                    reception_id: reception.id,
                     nature: "client_dissatisfaction",
                     initiator: "client",
-                    description: formData.observations || "Client reported dissatisfaction during reception.",
+                    description: formData.observations || "Le client a signalé une insatisfaction lors de la réception.",
                     is_resolved: false,
                     is_closed: false
                 });
-                toast({ title: "Dispute Opened", description: "The booking has been flagged for dispute resolution." });
+                toast({ title: "Litige Ouvert", description: "La réservation a été signalée pour résolution de litige." });
 
             } else if (formData.payment_authorized) {
-                // Authorize Payment
-                // If complete reception and 100% payment
                 if (formData.reception_type === 'complete' && formData.payment_quota === 100) {
                      await base44.entities.Booking.update(booking.id, { status: 'completed' });
                      
-                     // Create Provider Payout Request (Pending Admin Approval)
-                     // Calculate amounts
                      const totalAmount = contract.contract_amount || booking.total_amount || 0;
-                     const commissionRate = 0.05; // 5% platform fee
+                     const commissionRate = 0.05;
                      const commission = totalAmount * commissionRate;
                      const netAmount = totalAmount - commission;
 
-                     // Find invoice (assuming one exists or create a placeholder ref)
                      const invoices = await base44.entities.Invoice.filter({ booking_id: booking.id });
-                     const invoiceId = invoices.length > 0 ? invoices[0].id : "INV-MISSING"; // Should handle better in real app
-
-                     const reception = await base44.entities.ServiceReception.create({
-                        contract_id: contract.id,
-                        booking_id: booking.id,
-                        reception_date: new Date().toISOString(),
-                        ...formData,
-                        payment_quota: parseFloat(formData.payment_quota)
-                    });
+                     const invoiceId = invoices.length > 0 ? invoices[0].id : "INV-MISSING";
 
                      await base44.entities.ProviderPayout.create({
                         payment_code: `PAY-${Date.now()}`,
@@ -113,44 +89,37 @@ export default function ServiceReceptionDialog({ booking, open, onOpenChange, on
                         payment_nature: formData.reception_type === 'complete' ? 'total' : 'partial',
                         amount_paid: netAmount,
                         admin_fee: commission,
-                        remaining_amount: 0, // Simplified for total payment
+                        remaining_amount: 0,
                         payment_date: new Date().toISOString(),
                         transaction_status: 'pending_approval'
                      });
 
-                     // Send Email to Admin (Placeholder for Admin Email)
-                     // In real app, configure this via environment or fetch actual admin
-                     const adminEmail = "admin@eventcrafter.com"; 
-                     
+                     // Notifier tous les admins réels (au lieu d'un email en dur sur le mauvais domaine)
                      try {
-                        await SendEmail({
-                           to: adminEmail,
-                           subject: "New Payout Request Pending Approval",
-                           body: `A new payout request (Code: ${netAmount} FCFA) has been created by provider ${booking.planner_id} for Booking ${booking.id}. Please review in Admin Dashboard.`
-                        });
+                        const allUsers = await base44.entities.User.list();
+                        const admins = allUsers.filter(u => u.role === 'admin');
+                        for (const admin of admins) {
+                            await SendEmail({
+                               to: admin.email,
+                               subject: "Nouvelle demande de paiement en attente d'approbation",
+                               body: `Bonjour ${admin.full_name},\n\nUne nouvelle demande de paiement (${netAmount.toLocaleString()} FCFA) a été créée par le prestataire ${booking.planner_id} pour la réservation ${booking.id}.\n\nVeuillez l'examiner dans le tableau de bord admin.\n\nCordialement,\nL'équipe EventCrafter`
+                            });
+                        }
                      } catch(err) {
                         console.error("Failed to email admin", err);
                      }
 
-                     toast({ title: "Service Accepted", description: "Payout request sent to Admin for approval." });
+                     toast({ title: "Service Accepté", description: "Demande de paiement envoyée à l'administration pour approbation." });
                 } else {
-                    // Partial reception or partial payment
-                    // Update booking status? Maybe keep it in 'delivered' or move to 'partially_accepted'? 
-                    // Or 'warranty_period' if that fits.
-                    // For now, let's keep it 'delivered' or move to 'completed' if user considers it done enough.
-                    // If partial payment authorized, maybe we release that amount.
-                    // Simplified: Just mark completed if satisfied, else dispute.
                     if (formData.reception_type === 'partial') {
-                        toast({ title: "Partial Reception Recorded", description: "Feedback recorded. Status updated." });
-                        // Maybe don't complete booking yet if partial?
+                        toast({ title: "Réception Partielle Enregistrée", description: "Avis enregistré. Statut mis à jour." });
                     } else {
                          await base44.entities.Booking.update(booking.id, { status: 'completed' });
-                         toast({ title: "Service Accepted", description: "Payment authorized." });
+                         toast({ title: "Service Accepté", description: "Paiement autorisé." });
                     }
                 }
             } else {
-                // Not authorized, but no dispute? Weird state. Maybe just feedback.
-                toast({ title: "Reception Recorded", description: "Feedback saved." });
+                toast({ title: "Réception Enregistrée", description: "Avis sauvegardé." });
             }
 
             if (onSuccess) onSuccess();
@@ -158,7 +127,7 @@ export default function ServiceReceptionDialog({ booking, open, onOpenChange, on
 
         } catch (error) {
             console.error("Reception failed", error);
-            toast({ title: "Error", description: "Failed to submit reception.", variant: "destructive" });
+            toast({ title: "Erreur", description: "Échec de la soumission de la réception.", variant: "destructive" });
         } finally {
             setLoading(false);
         }
@@ -168,9 +137,9 @@ export default function ServiceReceptionDialog({ booking, open, onOpenChange, on
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Service Reception & Validation</DialogTitle>
+                    <DialogTitle>Réception & Validation du Service</DialogTitle>
                     <DialogDescription>
-                        Confirm receipt of service for contract #{contract?.contract_number || '...'}
+                        Confirmez la réception du service pour le contrat n°{contract?.contract_number || '...'}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -178,7 +147,7 @@ export default function ServiceReceptionDialog({ booking, open, onOpenChange, on
                     
                     <div className="grid grid-cols-2 gap-4">
                          <div className="space-y-2">
-                            <Label>Reception Type</Label>
+                            <Label>Type de Réception</Label>
                             <Select 
                                 value={formData.reception_type} 
                                 onValueChange={val => setFormData({...formData, reception_type: val})}
@@ -187,13 +156,13 @@ export default function ServiceReceptionDialog({ booking, open, onOpenChange, on
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="complete">Complete (Total)</SelectItem>
-                                    <SelectItem value="partial">Partial</SelectItem>
+                                    <SelectItem value="complete">Complète (Totale)</SelectItem>
+                                    <SelectItem value="partial">Partielle</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
-                             <Label>Client Satisfaction</Label>
+                             <Label>Satisfaction Client</Label>
                              <div className="flex items-center space-x-2 h-10">
                                  <Checkbox 
                                      id="satisfied" 
@@ -201,20 +170,20 @@ export default function ServiceReceptionDialog({ booking, open, onOpenChange, on
                                      onCheckedChange={(checked) => setFormData(prev => ({ 
                                          ...prev, 
                                          client_satisfied: checked,
-                                         dispute_opened: !checked // Auto toggle dispute hint
+                                         dispute_opened: !checked
                                      }))}
                                  />
                                  <label htmlFor="satisfied" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                     Satisfied with service
+                                     Satisfait du service
                                  </label>
                              </div>
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Observations / Remarks</Label>
+                        <Label>Observations / Remarques</Label>
                         <Textarea 
-                            placeholder="Details about the reception, quality of service, missing items..."
+                            placeholder="Détails sur la réception, qualité du service, éléments manquants..."
                             value={formData.observations}
                             onChange={e => setFormData({...formData, observations: e.target.value})}
                         />
@@ -228,7 +197,7 @@ export default function ServiceReceptionDialog({ booking, open, onOpenChange, on
                                     checked={formData.payment_authorized}
                                     onCheckedChange={(checked) => setFormData({...formData, payment_authorized: checked})}
                                 />
-                                <Label htmlFor="auth_pay" className="font-bold">Authorize Payment</Label>
+                                <Label htmlFor="auth_pay" className="font-bold">Autoriser le Paiement</Label>
                             </div>
                             {formData.payment_authorized && (
                                 <div className="flex items-center gap-2">
@@ -253,20 +222,20 @@ export default function ServiceReceptionDialog({ booking, open, onOpenChange, on
                                 className="data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
                             />
                             <Label htmlFor="dispute" className={`font-bold ${formData.dispute_opened ? "text-red-600" : ""}`}>
-                                Open Dispute (Litige)
+                                Ouvrir un Litige
                             </Label>
                         </div>
                         {formData.dispute_opened && (
                              <div className="text-xs text-red-500 flex items-center gap-1">
                                  <AlertTriangle className="w-3 h-3" />
-                                 This will freeze funds and alert support.
+                                 Ceci va bloquer les fonds et alerter le support.
                              </div>
                         )}
                     </div>
 
                     <DialogFooter>
                         <Button type="submit" disabled={loading || !contract} className={formData.dispute_opened ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}>
-                            {loading ? <Loader2 className="animate-spin mr-2" /> : formData.dispute_opened ? "Submit Dispute" : "Validate Reception"}
+                            {loading ? <Loader2 className="animate-spin mr-2" /> : formData.dispute_opened ? "Soumettre le Litige" : "Valider la Réception"}
                         </Button>
                     </DialogFooter>
                 </form>

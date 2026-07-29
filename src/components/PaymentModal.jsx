@@ -8,7 +8,7 @@ import { CreditCard, Loader2, CheckCircle2, Smartphone, ShieldCheck } from "luci
 import { useToast } from "@/components/ui/use-toast";
 import { NotificationService } from '@/components/NotificationService';
 
-export default function PaymentModal({ booking, invoice, onPaymentComplete, label = "Proceed to Payment", open, onOpenChange }) {
+export default function PaymentModal({ booking, invoice, onPaymentComplete, label = "Procéder au Paiement", open, onOpenChange }) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = open !== undefined ? open : internalOpen;
   const setIsOpen = onOpenChange || setInternalOpen;
@@ -145,13 +145,13 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
         <DialogTrigger asChild>
           <Button className="bg-[#2C2C2C] hover:bg-black text-white">
             <CreditCard className="w-4 h-4 mr-2" />
-            Pay {amountToPay?.toLocaleString()} FCFA
+            Payer {amountToPay?.toLocaleString()} FCFA
           </Button>
         </DialogTrigger>
       )}
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Secure Payment (Escrow)</DialogTitle>
+          <DialogTitle>Paiement Sécurisé (Escrow)</DialogTitle>
         </DialogHeader>
 
         {success ? (
@@ -167,15 +167,15 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
             <div className="bg-stone-50 p-4 rounded-lg mb-4">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-stone-500">Service</span>
-                <span className="font-medium text-stone-900">{booking?.service_title || invoice?.type === 'subscription' ? 'Subscription Payment' : 'Event Service'}</span>
+                <span className="font-medium text-stone-900">{booking?.service_title || invoice?.type === 'subscription' ? 'Paiement Abonnement' : 'Service Événementiel'}</span>
               </div>
               <div className="flex justify-between text-lg font-bold">
-                <span>{invoice ? `Invoice ${invoice.invoice_number}` : 'Total'}</span>
+                <span>{invoice ? `Facture ${invoice.invoice_number}` : 'Total'}</span>
                 <span>{amountToPay?.toLocaleString()} FCFA</span>
               </div>
               {booking && (
                 <div className="mt-2 text-xs text-stone-500 flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-green-600" /> Funds held in escrow until event completion
+                  <ShieldCheck className="w-3 h-3 text-green-600" /> Fonds détenus en séquestre jusqu'à la fin de l'événement
                 </div>
               )}
             </div>
@@ -222,10 +222,10 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
 
                         <div className="pt-2 border-t border-orange-200">
                           <p className="text-xs text-stone-700">
-                            <strong>Amount to send:</strong> {amountToPay?.toLocaleString()} FCFA
+                            <strong>Montant à envoyer :</strong> {amountToPay?.toLocaleString()} FCFA
                           </p>
                           <p className="text-xs text-stone-600 mt-1">
-                            After transfer, click "Confirm Payment" below. Our team will verify and activate your payment within 24 hours.
+                            Après le transfert, cliquez sur "Confirmer le Paiement" ci-dessous. Notre équipe vérifiera et activera votre paiement sous 24 heures.
                           </p>
                         </div>
                       </div>
@@ -255,7 +255,7 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
                             <div className="relative inline-block">
                               <img
                                 src={proofImage}
-                                alt="Proof"
+                                alt="Preuve"
                                 className="max-h-64 mx-auto rounded-lg border-2 border-green-200 shadow-md"
                                 onError={(e) => {
                                   console.error("Image failed to load:", proofImage);
@@ -331,10 +331,10 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
                 <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700 h-11 mt-6" disabled={loading}>
                   {loading ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Traitement en cours...
                     </>
                   ) : (
-                    `Confirm Payment of ${amountToPay?.toLocaleString()} FCFA`
+                    `Confirmer le Paiement de ${amountToPay?.toLocaleString()} FCFA`
                   )}
                 </Button>
               </form>
@@ -344,4 +344,4 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
       </DialogContent>
     </Dialog>
   );
-} 
+}

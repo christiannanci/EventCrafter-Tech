@@ -13,21 +13,17 @@ export default function LogInteractionDialog({ booking, currentUser }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     
-    // Default State
     const [formData, setFormData] = useState({
         interaction_type: "text",
         duration_minutes: "",
         deal_concluded: false,
         notes: "",
-        date: new Date().toISOString().slice(0, 16) // datetime-local format
+        date: new Date().toISOString().slice(0, 16)
     });
 
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            // Determine IDs
-            // Trusting booking.planner_id for provider.
-            // Using booking.client_id if exists, otherwise created_by (email) as fallback identifier
             const clientId = booking.client_id || booking.created_by; 
             const providerId = booking.planner_id;
 
@@ -43,7 +39,6 @@ export default function LogInteractionDialog({ booking, currentUser }) {
             });
 
             setOpen(false);
-            // Reset form
             setFormData({
                 interaction_type: "text",
                 duration_minutes: "",
@@ -62,17 +57,17 @@ export default function LogInteractionDialog({ booking, currentUser }) {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-stone-500 hover:text-stone-700 hover:bg-stone-100">
-                    <History className="w-4 h-4 mr-2" /> Log Activity
+                    <History className="w-4 h-4 mr-2" /> Journaliser une Activité
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Log Interaction / Activity</DialogTitle>
+                    <DialogTitle>Journaliser une Interaction / Activité</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Date & Time</Label>
+                            <Label>Date & Heure</Label>
                             <Input 
                                 type="datetime-local" 
                                 value={formData.date}
@@ -89,20 +84,20 @@ export default function LogInteractionDialog({ booking, currentUser }) {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="text">Message / Text</SelectItem>
-                                    <SelectItem value="audio">Audio Call</SelectItem>
-                                    <SelectItem value="video">Video Call</SelectItem>
-                                    <SelectItem value="visit">Physical Visit</SelectItem>
+                                    <SelectItem value="text">Message / Texte</SelectItem>
+                                    <SelectItem value="audio">Appel Audio</SelectItem>
+                                    <SelectItem value="video">Appel Vidéo</SelectItem>
+                                    <SelectItem value="visit">Visite Physique</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
                     
                     <div className="space-y-2">
-                         <Label>Duration (minutes)</Label>
+                         <Label>Durée (minutes)</Label>
                          <Input 
                             type="number" 
-                            placeholder="e.g. 15"
+                            placeholder="ex. 15"
                             value={formData.duration_minutes}
                             onChange={e => setFormData({...formData, duration_minutes: e.target.value})}
                          />
@@ -115,14 +110,14 @@ export default function LogInteractionDialog({ booking, currentUser }) {
                             onCheckedChange={c => setFormData({...formData, deal_concluded: c})}
                         />
                         <Label htmlFor="deal" className="cursor-pointer text-sm font-medium">
-                            Did this interaction result in a deal/agreement?
+                            Cette interaction a-t-elle abouti à un accord ?
                         </Label>
                     </div>
 
                     <div className="space-y-2">
                         <Label>Notes</Label>
                         <Textarea 
-                            placeholder="Summary of the conversation..."
+                            placeholder="Résumé de la conversation..."
                             value={formData.notes}
                             onChange={e => setFormData({...formData, notes: e.target.value})}
                         />
@@ -130,7 +125,7 @@ export default function LogInteractionDialog({ booking, currentUser }) {
                 </div>
                 <DialogFooter>
                     <Button onClick={handleSubmit} disabled={loading}>
-                        {loading ? "Saving..." : "Save Log"}
+                        {loading ? "Enregistrement..." : "Enregistrer"}
                     </Button>
                 </DialogFooter>
             </DialogContent>
