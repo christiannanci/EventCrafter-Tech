@@ -107,21 +107,12 @@ function LayoutContent({ children }) {
     { name: t("nav.marketplace"), path: "/Marketplace", icon: Search },
     { name: t("nav.inspiration"), path: "/Inspiration", icon: null },
     { name: t("nav.tools"), path: "/Tools", icon: null },
-    { name: "Post Request", path: "/PostRequest", icon: null },
+    { name: "Publier une Demande", path: "/PostRequest", icon: null },
   ], [t]);
 
-  // Add Dashboard to main nav if user has client or vendor profile
-  const clientNavLinks = React.useMemo(() => {
-    let mainNavLinks = [...navLinks];
-    if (hasClientProfile) {
-      mainNavLinks = [{ name: t("nav.dashboard"), path: "/ClientDashboard", icon: LayoutDashboard }, ...mainNavLinks];
-    }
-    return mainNavLinks;
-  }, [navLinks, hasClientProfile, hasVendorProfile, t]);
-
   const languages = [
-    { code: 'en', label: 'English' },
-    { code: 'fr', label: 'Francais' },
+    { code: 'en', label: 'Anglais' },
+    { code: 'fr', label: 'Français' },
     { code: 'pcm', label: 'Pidgin' },
   ];
 
@@ -141,14 +132,14 @@ function LayoutContent({ children }) {
               <span className="text-2xl font-['Poppins'] font-bold tracking-tight text-[#2C2C2C]">
                 Event<span className="text-[#FF6B35] relative">
                   Crafter
-                  <span className="absolute -top-1 -right-2 text-[#F4C542] text-xs">?</span>
+                  <span className="absolute -top-1 -right-2 text-[#F4C542] text-xs">★</span>
                 </span>
               </span>
             </Link>
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-8">
-              {clientNavLinks.map((link) => (
+              {navLinks.map((link) => (
                 <Link 
                   key={link.path}
                   to={createPageUrl(link.path.replace('/', ''))}
@@ -171,7 +162,7 @@ function LayoutContent({ children }) {
                       <Link to={createPageUrl('AdminDashboard')}>
                           <Button variant="ghost" className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-100">
                               <Shield className="w-4 h-4 mr-2" />
-                              Back Office
+                              Back-Office
                           </Button>
                       </Link>
                   )}
@@ -182,12 +173,12 @@ function LayoutContent({ children }) {
                         <span className="mr-2">{user.full_name || user.email}</span>
                         {hasVendorProfile && hasClientProfile && (
                           <>
-                            <Badge className="bg-purple-500 text-white text-[10px] px-1.5 py-0 mr-1">VENDOR</Badge>
+                            <Badge className="bg-purple-500 text-white text-[10px] px-1.5 py-0 mr-1">VENDEUR</Badge>
                             <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">CLIENT</Badge>
                           </>
                         )}
                         {hasVendorProfile && !hasClientProfile && (
-                          <Badge className="bg-purple-500 text-white text-[10px] px-1.5 py-0">VENDOR</Badge>
+                          <Badge className="bg-purple-500 text-white text-[10px] px-1.5 py-0">VENDEUR</Badge>
                         )}
                         {!hasVendorProfile && hasClientProfile && (
                           <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">CLIENT</Badge>
@@ -199,7 +190,7 @@ function LayoutContent({ children }) {
                         <DropdownMenuItem asChild>
                           <Link to={createPageUrl('VendorDashboard')} className="cursor-pointer">
                             <LayoutDashboard className="w-4 h-4 mr-2" />
-                            Business Dashboard
+                            Tableau de Bord Professionnel
                           </Link>
                         </DropdownMenuItem>
                       )}
@@ -208,6 +199,14 @@ function LayoutContent({ children }) {
                           <Link to={createPageUrl('VendorProfile')} className="cursor-pointer">
                             <LayoutDashboard className="w-4 h-4 mr-2" />
                             Mon Profil
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                      {hasClientProfile && (
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('ClientDashboard')} className="cursor-pointer">
+                            <LayoutDashboard className="w-4 h-4 mr-2" />
+                            Tableau de Bord
                           </Link>
                         </DropdownMenuItem>
                       )}
@@ -226,7 +225,7 @@ function LayoutContent({ children }) {
                           <p className="text-xs text-stone-500 mb-2">Pays</p>
                           <Select value={selectedCountry || ''} onValueChange={setSelectedCountry}>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Selectionner pays" />
+                              <SelectValue placeholder="Sélectionner un pays" />
                             </SelectTrigger>
                             <SelectContent>
                               {countries.map((c) => (
@@ -310,7 +309,7 @@ function LayoutContent({ children }) {
             {isMenuOpen && (
               <div className="md:hidden bg-white border-b border-[#F4C542]/20 animate-in slide-in-from-top-5">
                 <div className="px-4 pt-2 pb-6 space-y-2">
-                  {clientNavLinks.map((link) => (
+                  {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={createPageUrl(link.path.replace('/', ''))}
@@ -329,7 +328,7 @@ function LayoutContent({ children }) {
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <LayoutDashboard className="w-4 h-4" />
-                      Business Dashboard
+                      Tableau de Bord Professionnel
                     </Link>
                   )}
                   {hasVendorProfile && (
@@ -340,6 +339,16 @@ function LayoutContent({ children }) {
                     >
                       <LayoutDashboard className="w-4 h-4" />
                       Mon Profil
+                    </Link>
+                  )}
+                  {hasClientProfile && (
+                    <Link 
+                      to={createPageUrl('ClientDashboard')}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Tableau de Bord
                     </Link>
                   )}
                   {hasClientProfile && (
@@ -415,11 +424,11 @@ function LayoutContent({ children }) {
                 </span>
               </div>
               <p className="text-stone-500 max-w-sm">
-                The ultimate marketplace for all your event needs. From planners to photographers, we have it all.
+                La marketplace ultime pour tous vos besoins événementiels. Des organisateurs aux photographes, nous avons tout ce qu'il vous faut.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Platform</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Plateforme</h3>
               <ul className="space-y-2 text-stone-500">
                 <li><Link to={createPageUrl("Marketplace")} className="hover:text-[#FF6B35]">{t("nav.marketplace")}</Link></li>
                 <li><Link to={createPageUrl("About")} className="hover:text-[#FF6B35]">{t("nav.howItWorks")}</Link></li>
@@ -434,21 +443,20 @@ function LayoutContent({ children }) {
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Legal</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Juridique</h3>
               <ul className="space-y-2 text-stone-500">
                 <li><Link to={createPageUrl("TermsOfService")} className="hover:text-[#FF6B35]">CGU</Link></li>
-                <li><Link to={createPageUrl("PrivacyPolicy")} className="hover:text-[#FF6B35]">Confidentialite</Link></li>
-                <li><Link to={createPageUrl("LegalNotice")} className="hover:text-[#FF6B35]">Mentions legales</Link></li>
+                <li><Link to={createPageUrl("PrivacyPolicy")} className="hover:text-[#FF6B35]">Confidentialité</Link></li>
+                <li><Link to={createPageUrl("LegalNotice")} className="hover:text-[#FF6B35]">Mentions légales</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Contact</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Contacts</h3>
               <ul className="space-y-2 text-stone-500">
                 <li>founder@eventcraftercm.com</li>
                 <li>hello@eventcraftercm.com</li>
                 <li>support@eventcraftercm.com</li>
                 <li>vendor@eventcraftercm.com</li>
-                <li>partnerships@eventcraftercm.com</li>
                 <li className="mt-3 pt-3 border-t border-stone-200">+237 670 93 43 78</li>
                 <li>+237 690 17 31 93</li>
               </ul>
@@ -456,7 +464,7 @@ function LayoutContent({ children }) {
           </div>
           <div className="mt-12 pt-8 border-t border-stone-100 text-center text-stone-400 text-sm">
           <p className="mb-2">{t('about.legalInfo')}</p>
-          Copyright 2026 Event Crafter Marketplace. All rights reserved.
+          © 2026 EventCrafter Marketplace. Tous droits réservés.
           </div>
         </div>
       </footer>
