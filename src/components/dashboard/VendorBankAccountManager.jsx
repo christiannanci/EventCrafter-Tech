@@ -49,7 +49,7 @@ export default function VendorBankAccountManager({ user }) {
 
     const handleSave = async () => {
         if (!newAccount.account_label || !newAccount.account_number) {
-            toast({ title: "Error", description: "Label and Account Number are required", variant: "destructive" });
+            toast({ title: "Erreur", description: "L'intitulé et le numéro de compte sont requis", variant: "destructive" });
             return;
         }
 
@@ -63,10 +63,10 @@ export default function VendorBankAccountManager({ user }) {
 
             if (isEditing && editId) {
                 await base44.entities.VendorBankAccount.update(editId, payload);
-                toast({ title: "Updated", description: "Payment method updated successfully" });
+                toast({ title: "Mis à jour", description: "Moyen de paiement mis à jour avec succès" });
             } else {
                 await base44.entities.VendorBankAccount.create(payload);
-                toast({ title: "Added", description: "Payment method added successfully" });
+                toast({ title: "Ajouté", description: "Moyen de paiement ajouté avec succès" });
             }
             
             setIsOpen(false);
@@ -74,17 +74,17 @@ export default function VendorBankAccountManager({ user }) {
             fetchAccounts();
         } catch (error) {
             console.error(error);
-            toast({ title: "Error", description: "Operation failed", variant: "destructive" });
+            toast({ title: "Erreur", description: "L'opération a échoué", variant: "destructive" });
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
-        if (!confirm("Are you sure you want to delete this payment method?")) return;
+        if (!confirm("Êtes-vous sûr de vouloir supprimer ce moyen de paiement ?")) return;
         try {
             await base44.entities.VendorBankAccount.delete(id);
-            toast({ title: "Deleted", description: "Payment method removed" });
+            toast({ title: "Supprimé", description: "Moyen de paiement retiré" });
             fetchAccounts();
         } catch (error) {
             console.error(error);
@@ -132,24 +132,24 @@ export default function VendorBankAccountManager({ user }) {
         <Card className="mt-8">
             <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                    <CardTitle>Business Payment Accounts</CardTitle>
-                    <CardDescription>Manage your business bank accounts and mobile money wallets for payouts.</CardDescription>
+                    <CardTitle>Comptes de Paiement Professionnels</CardTitle>
+                    <CardDescription>Gérez vos comptes bancaires professionnels et portefeuilles mobile money pour les paiements.</CardDescription>
                 </div>
                 <Dialog open={isOpen} onOpenChange={(val) => { setIsOpen(val); if(!val) resetForm(); }}>
                     <DialogTrigger asChild>
                         <Button size="sm" className="bg-rose-600 hover:bg-rose-700">
-                            <Plus className="w-4 h-4 mr-2" /> Add Account
+                            <Plus className="w-4 h-4 mr-2" /> Ajouter un Compte
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-md">
                         <DialogHeader>
-                            <DialogTitle>{isEditing ? "Edit Account" : "Add Payment Account"}</DialogTitle>
+                            <DialogTitle>{isEditing ? "Modifier le Compte" : "Ajouter un Compte de Paiement"}</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
-                                <Label>Account Label (Intitulé)</Label>
+                                <Label>Intitulé du Compte</Label>
                                 <Input 
-                                    placeholder="e.g. Business Savings" 
+                                    placeholder="ex. Épargne Professionnelle" 
                                     value={newAccount.account_label}
                                     onChange={(e) => setNewAccount({...newAccount, account_label: e.target.value})}
                                 />
@@ -166,18 +166,18 @@ export default function VendorBankAccountManager({ user }) {
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="bank_account">Bank Account</SelectItem>
+                                            <SelectItem value="bank_account">Compte Bancaire</SelectItem>
                                             <SelectItem value="mobile_money">Mobile Money</SelectItem>
-                                            <SelectItem value="credit_card">Credit Card</SelectItem>
+                                            <SelectItem value="credit_card">Carte de Crédit</SelectItem>
                                             <SelectItem value="paypal">PayPal</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
+                                            <SelectItem value="other">Autre</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Domiciliation (Bank Name)</Label>
+                                    <Label>Domiciliation (Nom de la Banque)</Label>
                                     <Input 
-                                        placeholder="e.g. UBA, MTN" 
+                                        placeholder="ex. UBA, MTN" 
                                         value={newAccount.bank_name}
                                         onChange={(e) => setNewAccount({...newAccount, bank_name: e.target.value})}
                                     />
@@ -185,9 +185,9 @@ export default function VendorBankAccountManager({ user }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Account Number</Label>
+                                <Label>Numéro de Compte</Label>
                                 <Input 
-                                    placeholder="e.g. 1234567890" 
+                                    placeholder="ex. 1234567890" 
                                     value={newAccount.account_number}
                                     onChange={(e) => setNewAccount({...newAccount, account_number: e.target.value})}
                                 />
@@ -195,7 +195,7 @@ export default function VendorBankAccountManager({ user }) {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Associated Phone</Label>
+                                    <Label>Téléphone Associé</Label>
                                     <Input 
                                         placeholder="+237..." 
                                         value={newAccount.associated_phone}
@@ -203,7 +203,7 @@ export default function VendorBankAccountManager({ user }) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Priority (1 = Highest)</Label>
+                                    <Label>Priorité (1 = Plus Élevée)</Label>
                                     <Input 
                                         type="number"
                                         min="1"
@@ -214,7 +214,7 @@ export default function VendorBankAccountManager({ user }) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Notification Email</Label>
+                                <Label>Email de Notification</Label>
                                 <Input 
                                     type="email"
                                     placeholder="notify@example.com" 
@@ -224,7 +224,7 @@ export default function VendorBankAccountManager({ user }) {
                             </div>
 
                             <Button className="w-full bg-rose-600" onClick={handleSave} disabled={loading}>
-                                {loading ? "Saving..." : "Save Account"}
+                                {loading ? "Enregistrement..." : "Enregistrer le Compte"}
                             </Button>
                         </div>
                     </DialogContent>
@@ -242,7 +242,7 @@ export default function VendorBankAccountManager({ user }) {
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h4 className="font-semibold text-stone-900">{account.account_label}</h4>
-                                            {account.priority === 1 && <Badge variant="secondary" className="text-xs">Primary</Badge>}
+                                            {account.priority === 1 && <Badge variant="secondary" className="text-xs">Principal</Badge>}
                                         </div>
                                         <p className="text-sm text-stone-500 font-medium">{account.bank_name} • {account.account_number}</p>
                                         <div className="flex gap-4 mt-1 text-xs text-stone-400">
@@ -265,7 +265,7 @@ export default function VendorBankAccountManager({ user }) {
                 ) : (
                     <div className="text-center py-8 text-stone-500">
                         <Wallet className="w-12 h-12 mx-auto mb-3 text-stone-300" />
-                        <p>No business payment methods added yet.</p>
+                        <p>Aucun moyen de paiement professionnel ajouté pour le moment.</p>
                     </div>
                 )}
             </CardContent>

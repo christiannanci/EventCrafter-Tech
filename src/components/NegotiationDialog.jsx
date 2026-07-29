@@ -19,7 +19,7 @@ export default function NegotiationDialog({ booking, isClient, onConfirm }) {
   const [formData, setFormData] = useState({
     unit_price: booking.requested_unit_price || 0,
     quantity: booking.quantity || 1,
-    unit_measure: booking.unit_measure || 'Unit',
+    unit_measure: booking.unit_measure || 'Unité',
     condition_1: booking.condition_1 || '',
     condition_2: booking.condition_2 || '',
     condition_3: booking.condition_3 || '',
@@ -128,28 +128,28 @@ export default function NegotiationDialog({ booking, isClient, onConfirm }) {
       <DialogTrigger asChild>
         {isClient ? (
              <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                <Check className="w-4 h-4 mr-2" /> Review & Accept Offer
+                <Check className="w-4 h-4 mr-2" /> Examiner et Accepter l'Offre
              </Button>
         ) : (
             <Button size="sm" variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
-                <Calculator className="w-4 h-4 mr-2" /> {booking.status === 'offer_submitted' ? 'Update Offer' : 'Submit Offer'}
+                <Calculator className="w-4 h-4 mr-2" /> {booking.status === 'offer_submitted' ? 'Modifier l\'Offre' : 'Soumettre une Offre'}
             </Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{isClient ? "Review Offer Details" : "Submit Service Offer"}</DialogTitle>
+          <DialogTitle>{isClient ? "Examiner les Détails de l'Offre" : "Soumettre une Offre de Service"}</DialogTitle>
         </DialogHeader>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
             {/* Pricing Section */}
             <div className="space-y-4">
                 <h4 className="font-semibold text-stone-900 flex items-center gap-2">
-                    <Calculator className="w-4 h-4" /> Pricing & Quantity
+                    <Calculator className="w-4 h-4" /> Tarification & Quantité
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label>Unit Price (FCFA)</Label>
+                        <Label>Prix Unitaire (FCFA)</Label>
                         <Input 
                             type="number" 
                             value={formData.unit_price}
@@ -158,7 +158,7 @@ export default function NegotiationDialog({ booking, isClient, onConfirm }) {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label>Quantity</Label>
+                        <Label>Quantité</Label>
                         <Input 
                             type="number" 
                             value={formData.quantity}
@@ -168,9 +168,9 @@ export default function NegotiationDialog({ booking, isClient, onConfirm }) {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <Label>Unit of Measure</Label>
+                    <Label>Unité de Mesure</Label>
                     <Input 
-                        placeholder="e.g. Hours, Pax, Days"
+                        placeholder="ex. Heures, Personnes, Jours"
                         value={formData.unit_measure}
                         onChange={e => setFormData({...formData, unit_measure: e.target.value})}
                         disabled={isClient}
@@ -179,15 +179,15 @@ export default function NegotiationDialog({ booking, isClient, onConfirm }) {
                 
                 <div className="bg-stone-50 p-4 rounded-lg mt-4">
                     <div className="flex justify-between mb-2">
-                        <span className="text-stone-500">Subtotal:</span>
+                        <span className="text-stone-500">Sous-total :</span>
                         <span className="font-medium">{totalAmount.toLocaleString()} FCFA</span>
                     </div>
                     <div className="flex justify-between mb-2 text-sm text-stone-400">
-                        <span>Platform Fee (5%):</span>
+                        <span>Frais de Plateforme (5%) :</span>
                         <span>{commission.toLocaleString()} FCFA</span>
                     </div>
                     <div className="flex justify-between pt-2 border-t border-stone-200 font-bold text-lg text-stone-900">
-                        <span>Total:</span>
+                        <span>Total :</span>
                         <span>{totalAmount.toLocaleString()} FCFA</span>
                     </div>
                 </div>
@@ -196,13 +196,13 @@ export default function NegotiationDialog({ booking, isClient, onConfirm }) {
             {/* Conditions Section */}
             <div className="space-y-4">
                 <h4 className="font-semibold text-stone-900 flex items-center gap-2">
-                    <FileText className="w-4 h-4" /> Terms & Conditions
+                    <FileText className="w-4 h-4" /> Conditions Générales
                 </h4>
                 <div className="space-y-3">
                     <div className="space-y-1">
                         <Label className="text-xs text-stone-500">Condition 1</Label>
                         <Input 
-                            placeholder="e.g. 50% deposit required"
+                            placeholder="ex. Acompte de 50% requis"
                             value={formData.condition_1}
                             onChange={e => setFormData({...formData, condition_1: e.target.value})}
                             disabled={isClient}
@@ -211,7 +211,7 @@ export default function NegotiationDialog({ booking, isClient, onConfirm }) {
                     <div className="space-y-1">
                         <Label className="text-xs text-stone-500">Condition 2</Label>
                         <Input 
-                            placeholder="e.g. Transportation included"
+                            placeholder="ex. Transport inclus"
                             value={formData.condition_2}
                             onChange={e => setFormData({...formData, condition_2: e.target.value})}
                             disabled={isClient}
@@ -220,7 +220,7 @@ export default function NegotiationDialog({ booking, isClient, onConfirm }) {
                     <div className="space-y-1">
                         <Label className="text-xs text-stone-500">Condition 3</Label>
                         <Input 
-                            placeholder="e.g. Overtime rate applies"
+                            placeholder="ex. Tarif heures supplémentaires applicable"
                             value={formData.condition_3}
                             onChange={e => setFormData({...formData, condition_3: e.target.value})}
                             disabled={isClient}
@@ -229,7 +229,7 @@ export default function NegotiationDialog({ booking, isClient, onConfirm }) {
                     <div className="space-y-1">
                         <Label className="text-xs text-stone-500">Condition 4</Label>
                         <Input 
-                            placeholder="e.g. Cancellation policy"
+                            placeholder="ex. Politique d'annulation"
                             value={formData.condition_4}
                             onChange={e => setFormData({...formData, condition_4: e.target.value})}
                             disabled={isClient}
@@ -240,9 +240,9 @@ export default function NegotiationDialog({ booking, isClient, onConfirm }) {
         </div>
 
         <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
             <Button onClick={handleSubmit} disabled={loading} className={isClient ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"}>
-                {loading ? "Processing..." : isClient ? "Accept Offer" : "Submit Offer"}
+                {loading ? "Traitement..." : isClient ? "Accepter l'Offre" : "Soumettre l'Offre"}
             </Button>
         </DialogFooter>
       </DialogContent>
