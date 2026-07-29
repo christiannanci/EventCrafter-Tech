@@ -15,7 +15,7 @@ export default function ProfileSelection() {
   const [step, setStep] = useState(1);
   const { toast } = useToast();
 
-  // Vérifier si l'utilisateur a déjà un profil
+  // VÃ©rifier si l'utilisateur a dÃ©jÃ  un profil
   React.useEffect(() => {
     const checkProfiles = async () => {
       try {
@@ -28,7 +28,7 @@ export default function ProfileSelection() {
         const vendorProfiles = await VendorProfile.filter({ user_id: user.id });
         const clientProfiles = await ClientProfile.filter({ user_id: user.id });
 
-        // Si l'utilisateur a déjà un profil, rediriger vers le bon dashboard
+        // Si l'utilisateur a dÃ©jÃ  un profil, rediriger vers le bon dashboard
         if (vendorProfiles.length > 0) {
           window.location.href = '/VendorDashboard';
           return;
@@ -38,7 +38,7 @@ export default function ProfileSelection() {
           return;
         }
 
-        // Sinon, continuer avec la sélection
+        // Sinon, continuer avec la sÃ©lection
         setChecking(false);
       } catch (e) {
         console.error('Error checking profiles:', e);
@@ -67,7 +67,7 @@ export default function ProfileSelection() {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Utilisateur non connecté');
+      if (!user) throw new Error('Utilisateur non connectÃ©');
 
       if (selectedType === 'client') {
         await ClientProfile.create({
@@ -84,7 +84,7 @@ export default function ProfileSelection() {
           created_by: user.email,
         });
 
-        toast({ title: "Profil Client créé!", description: "Bienvenue sur EventCrafter" });
+        toast({ title: "Profil Client crÃ©Ã© !", description: "Bienvenue sur EventCrafter" });
         window.location.href = '/ClientDashboard';
       } else {
         await VendorProfile.create({
@@ -101,12 +101,12 @@ export default function ProfileSelection() {
           created_by: user.email,
         });
 
-        toast({ title: "Profil Vendeur créé!", description: "Commencez à lister vos services" });
+        toast({ title: "Profil Vendeur crÃ©Ã© !", description: "Commencez Ã  lister vos services" });
         window.location.href = '/VendorDashboard';
       }
     } catch (error) {
       console.error("Error creating profile:", error);
-      toast({ title: "Erreur", description: error.message || "Impossible de créer le profil", variant: "destructive" });
+      toast({ title: "Erreur", description: error.message || "Impossible de crÃ©er le profil", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -128,7 +128,7 @@ export default function ProfileSelection() {
       <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 flex items-center justify-center p-4">
         <div className="max-w-4xl w-full">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-stone-900 mb-2">Bienvenue sur EventCrafter! ??</h1>
+            <h1 className="text-4xl font-bold text-stone-900 mb-2">Bienvenue sur EventCrafter ! ðŸŽ‰</h1>
             <p className="text-stone-600">Choisissez votre type de compte pour commencer</p>
           </div>
 
@@ -147,7 +147,7 @@ export default function ProfileSelection() {
                 </div>
                 <CardTitle className="text-2xl">Client</CardTitle>
                 <CardDescription className="text-base mt-2">
-                  Je cherche des prestataires pour mon événement
+                  Je cherche des prestataires pour mon Ã©vÃ©nement
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-stone-600">
@@ -157,11 +157,11 @@ export default function ProfileSelection() {
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Gérer vos événements et réservations</span>
+                  <span>GÃ©rer vos Ã©vÃ©nements et rÃ©servations</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Paiements sécurisés avec escrow</span>
+                  <span>Paiements sÃ©curisÃ©s avec escrow</span>
                 </div>
               </CardContent>
             </Card>
@@ -180,13 +180,13 @@ export default function ProfileSelection() {
                 </div>
                 <CardTitle className="text-2xl">Prestataire</CardTitle>
                 <CardDescription className="text-base mt-2">
-                  Je propose mes services événementiels
+                  Je propose mes services Ã©vÃ©nementiels
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-stone-600">
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Créer votre catalogue de services</span>
+                  <span>CrÃ©er votre catalogue de services</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -194,7 +194,7 @@ export default function ProfileSelection() {
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Gérer vos contrats et paiements</span>
+                  <span>GÃ©rer vos contrats et paiements</span>
                 </div>
               </CardContent>
             </Card>
@@ -221,17 +221,17 @@ export default function ProfileSelection() {
       <Card className="max-w-md w-full">
         <CardHeader>
           <CardTitle>
-            {selectedType === 'client' ? 'Créer votre profil Client' : 'Créer votre profil Prestataire'}
+            {selectedType === 'client' ? 'CrÃ©er votre profil Client' : 'CrÃ©er votre profil Prestataire'}
           </CardTitle>
           <CardDescription>
-            Complétez quelques informations pour commencer
+            ComplÃ©tez quelques informations pour commencer
           </CardDescription>
         </CardHeader>
         <CardContent>
           {selectedType === 'client' ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="first_name">Prénom *</Label>
+                <Label htmlFor="first_name">PrÃ©nom *</Label>
                 <Input
                   id="first_name"
                   value={clientData.first_name}
@@ -249,7 +249,7 @@ export default function ProfileSelection() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Téléphone *</Label>
+                <Label htmlFor="phone">TÃ©lÃ©phone *</Label>
                 <Input
                   id="phone"
                   placeholder="+237 6..."
@@ -280,7 +280,7 @@ export default function ProfileSelection() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Téléphone *</Label>
+                <Label htmlFor="phone">TÃ©lÃ©phone *</Label>
                 <Input
                   id="phone"
                   placeholder="+237 6..."
@@ -293,7 +293,7 @@ export default function ProfileSelection() {
                 <Label htmlFor="city">Ville *</Label>
                 <Input
                   id="city"
-                  placeholder="Douala, Yaoundé..."
+                  placeholder="Douala, YaoundÃ©..."
                   value={vendorData.city}
                   onChange={(e) => setVendorData({...vendorData, city: e.target.value})}
                   required
@@ -314,7 +314,7 @@ export default function ProfileSelection() {
               )}
               className="flex-1 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700"
             >
-              {loading ? 'Création...' : 'Créer mon profil'}
+              {loading ? 'CrÃ©ation...' : 'CrÃ©er mon profil'}
             </Button>
           </div>
         </CardContent>
