@@ -3,18 +3,18 @@ import { supabase } from '@/api/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, MailCheck } from 'lucide-react';
+import { Loader2, MailCheck, Eye, EyeOff } from 'lucide-react';
 
 // Mot de passe : au moins 8 caractères, une majuscule, une minuscule, un chiffre
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-// Téléphone camerounais : +237 suivi de 9 chiffres (ou format local 6XXXXXXXX / 2XXXXXXXX)
-const PHONE_REGEX = /^(\+237)?[26]\d{8}$/;
+// Le téléphone n'est plus soumis à un format particulier : tout numéro est accepté.
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState('');
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -28,11 +28,7 @@ export default function Login() {
       setError('Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.');
       return false;
     }
-    const cleanedPhone = phone.replace(/\s/g, '');
-    if (!PHONE_REGEX.test(cleanedPhone)) {
-      setError('Veuillez saisir un numéro de téléphone camerounais valide (ex: 670934378 ou +237670934378).');
-      return false;
-    }
+    // Aucune exigence de format sur le numéro de téléphone : tout numéro est accepté, y compris vide.
     return true;
   };
 
@@ -155,13 +151,12 @@ export default function Login() {
 
           {isRegister && (
             <div>
-              <label className="text-sm font-medium text-stone-700">Numéro de téléphone</label>
+              <label className="text-sm font-medium text-stone-700">Numéro de téléphone (optionnel)</label>
               <Input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="670 93 43 78"
-                required
+                placeholder="Votre numéro de téléphone"
                 className="mt-1"
               />
             </div>
@@ -169,15 +164,26 @@ export default function Login() {
 
           <div>
             <label className="text-sm font-medium text-stone-700">Mot de passe</label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              minLength={8}
-              className="mt-1"
-            />
+            <div className="relative mt-1">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                minLength={8}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                tabIndex={-1}
+                aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
             {isRegister && (
               <p className="text-xs text-stone-400 mt-1">
                 Au moins 8 caractères, une majuscule, une minuscule et un chiffre.
