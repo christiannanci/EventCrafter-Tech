@@ -10,6 +10,27 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
+const TYPE_LABELS = {
+  booking: 'Réservation',
+  payment: 'Paiement',
+  admin_alert: 'Alerte Admin',
+  system: 'Système',
+  dispute: 'Litige',
+  message: 'Message',
+  post_request: 'Demande',
+  verification_approved: 'Vérification',
+  verification_rejected: 'Vérification',
+  verification_response: 'Vérification',
+  contract: 'Contrat',
+  completion: 'Terminé',
+  dispute_resolved: 'Litige',
+  dispute_alert_flash: 'Litige',
+  admin_message: 'Admin',
+  payment_reminder: 'Rappel',
+  admin_action: 'Admin',
+  alert: 'Alerte'
+};
+
 export default function NotificationBell({ user }) {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
@@ -43,8 +64,8 @@ export default function NotificationBell({ user }) {
                    systemAlerts.push({
                        id: 'sys-payouts',
                        type: 'admin_alert',
-                       title: 'Pending Payouts',
-                       message: `${actionablePayouts.length} payout(s) waiting for approval.`,
+                       title: 'Paiements en Attente',
+                       message: `${actionablePayouts.length} paiement(s) en attente d'approbation.`,
                        created_date: new Date().toISOString(),
                        is_read: false,
                        link: '/AdminPayouts'
@@ -55,8 +76,8 @@ export default function NotificationBell({ user }) {
                    systemAlerts.push({
                        id: 'sys-refunds',
                        type: 'admin_alert',
-                       title: 'Pending Refunds',
-                       message: `${actionableRefunds.length} refund(s) waiting for approval.`,
+                       title: 'Remboursements en Attente',
+                       message: `${actionableRefunds.length} remboursement(s) en attente d'approbation.`,
                        created_date: new Date().toISOString(),
                        is_read: false,
                        link: '/AdminPayouts'
@@ -154,7 +175,7 @@ export default function NotificationBell({ user }) {
             <h4 className="font-semibold text-sm">Notifications</h4>
             {unreadCount > 0 && (
                 <Button variant="ghost" size="sm" className="h-auto px-2 text-xs text-rose-600" onClick={markAllRead}>
-                    Mark all read
+                    Tout marquer comme lu
                 </Button>
             )}
         </div>
@@ -162,7 +183,7 @@ export default function NotificationBell({ user }) {
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-stone-400 p-4 text-center">
                 <Bell className="w-8 h-8 mb-2 opacity-20" />
-                <p className="text-sm">No notifications yet</p>
+                <p className="text-sm">Aucune notification pour le moment</p>
             </div>
           ) : (
             <div className="divide-y divide-stone-100">
@@ -182,7 +203,7 @@ export default function NotificationBell({ user }) {
                             n.type === 'admin_alert' ? "bg-rose-100 text-rose-700 animate-pulse" :
                             "bg-stone-100 text-stone-700"
                         )}>
-                            {n.type}
+                            {TYPE_LABELS[n.type] || n.type}
                         </span>
                         <span className="text-[10px] text-stone-400 whitespace-nowrap">
                             {new Date(n.created_date).toLocaleDateString()}

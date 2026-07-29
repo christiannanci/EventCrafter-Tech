@@ -74,12 +74,12 @@ export default function ReviewsSection({ serviceId, serviceTitle, onReviewAdded 
     }
   };
 
-  if (loading) return <div className="py-8 text-center text-stone-400">Loading reviews...</div>;
+  if (loading) return <div className="py-8 text-center text-stone-400">Chargement des avis...</div>;
 
   return (
     <section>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-stone-900">Reviews</h2>
+        <h2 className="text-2xl font-bold text-stone-900">Avis</h2>
         <div className="flex items-center gap-1">
           <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
           <span className="font-bold text-lg">
@@ -87,14 +87,14 @@ export default function ReviewsSection({ serviceId, serviceTitle, onReviewAdded 
               ? ((reviews || []).reduce((a, b) => a + (b?.rating || 0), 0) / (reviews || []).length).toFixed(1) 
               : "0.0"}
           </span>
-          <span className="text-stone-400">({reviews.length} reviews)</span>
+          <span className="text-stone-400">({reviews.length} avis)</span>
         </div>
       </div>
 
       {/* Review Form */}
       {user ? (
         <div className="bg-stone-50 p-6 rounded-xl mb-8 border border-stone-100">
-          <h3 className="font-semibold mb-4">Write a Review</h3>
+          <h3 className="font-semibold mb-4">Écrire un Avis</h3>
           <div className="flex items-center gap-2 mb-4">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -110,13 +110,13 @@ export default function ReviewsSection({ serviceId, serviceTitle, onReviewAdded 
             ))}
             <span className="text-sm text-stone-500 ml-2">
               {newReview.rating === 5 ? "Excellent" : 
-               newReview.rating === 4 ? "Good" :
-               newReview.rating === 3 ? "Average" :
-               newReview.rating === 2 ? "Poor" : "Terrible"}
+               newReview.rating === 4 ? "Bien" :
+               newReview.rating === 3 ? "Moyen" :
+               newReview.rating === 2 ? "Faible" : "Mauvais"}
             </span>
           </div>
           <Textarea
-            placeholder={`Share your experience with ${serviceTitle}...`}
+            placeholder={`Partagez votre expérience avec ${serviceTitle}...`}
             value={newReview.comment}
             onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
             className="mb-4 bg-white"
@@ -127,21 +127,21 @@ export default function ReviewsSection({ serviceId, serviceTitle, onReviewAdded 
               disabled={submitting || !newReview.comment.trim()}
               className="bg-rose-600 hover:bg-rose-700"
             >
-              {submitting ? "Posting..." : "Post Review"}
+              {submitting ? "Publication..." : "Publier l'Avis"}
             </Button>
           </div>
         </div>
       ) : (
         <div className="bg-stone-50 p-6 rounded-xl mb-8 text-center border border-stone-100">
-          <p className="text-stone-500 mb-2">Please sign in to leave a review.</p>
-          <Button variant="outline" onClick={() => base44.auth.redirectToLogin()}>Sign In</Button>
+          <p className="text-stone-500 mb-2">Veuillez vous connecter pour laisser un avis.</p>
+          <Button variant="outline" onClick={() => base44.auth.redirectToLogin()}>Se Connecter</Button>
         </div>
       )}
 
       {/* Reviews List */}
       <div className="space-y-6">
         {(!reviews || reviews.length === 0) ? (
-          <p className="text-stone-500 italic text-center py-4">No reviews yet. Be the first to review!</p>
+          <p className="text-stone-500 italic text-center py-4">Aucun avis pour le moment. Soyez le premier à donner votre avis !</p>
         ) : (
           (reviews || []).map((review) => review && (
             <div key={review.id} className="border-b border-stone-100 pb-6 last:border-0">
@@ -152,7 +152,7 @@ export default function ReviewsSection({ serviceId, serviceTitle, onReviewAdded 
                 <div>
                   <div className="font-medium">
                      {/* Note: In a real app we'd fetch the user's name from created_by or an include */}
-                     User
+                     Utilisateur
                   </div>
                   <div className="flex items-center text-xs text-stone-400 gap-2">
                     <span>{review?.created_date ? format(new Date(review.created_date), 'PPP') : ''}</span>
