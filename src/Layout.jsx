@@ -110,6 +110,15 @@ function LayoutContent({ children }) {
     { name: "Post Request", path: "/PostRequest", icon: null },
   ], [t]);
 
+  // Add Dashboard to main nav if user has client or vendor profile
+  const clientNavLinks = React.useMemo(() => {
+    let mainNavLinks = [...navLinks];
+    if (hasClientProfile) {
+      mainNavLinks = [{ name: t("nav.dashboard"), path: "/ClientDashboard", icon: LayoutDashboard }, ...mainNavLinks];
+    }
+    return mainNavLinks;
+  }, [navLinks, hasClientProfile, hasVendorProfile, t]);
+
   const languages = [
     { code: 'en', label: 'English' },
     { code: 'fr', label: 'Francais' },
@@ -139,7 +148,7 @@ function LayoutContent({ children }) {
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-8">
-              {navLinks.map((link) => (
+              {clientNavLinks.map((link) => (
                 <Link 
                   key={link.path}
                   to={createPageUrl(link.path.replace('/', ''))}
@@ -199,14 +208,6 @@ function LayoutContent({ children }) {
                           <Link to={createPageUrl('VendorProfile')} className="cursor-pointer">
                             <LayoutDashboard className="w-4 h-4 mr-2" />
                             Mon Profil
-                          </Link>
-                        </DropdownMenuItem>
-                      )}
-                      {hasClientProfile && (
-                        <DropdownMenuItem asChild>
-                          <Link to={createPageUrl('ClientDashboard')} className="cursor-pointer">
-                            <LayoutDashboard className="w-4 h-4 mr-2" />
-                            Tableau de Bord
                           </Link>
                         </DropdownMenuItem>
                       )}
@@ -309,7 +310,7 @@ function LayoutContent({ children }) {
             {isMenuOpen && (
               <div className="md:hidden bg-white border-b border-[#F4C542]/20 animate-in slide-in-from-top-5">
                 <div className="px-4 pt-2 pb-6 space-y-2">
-                  {navLinks.map((link) => (
+                  {clientNavLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={createPageUrl(link.path.replace('/', ''))}
@@ -339,16 +340,6 @@ function LayoutContent({ children }) {
                     >
                       <LayoutDashboard className="w-4 h-4" />
                       Mon Profil
-                    </Link>
-                  )}
-                  {hasClientProfile && (
-                    <Link 
-                      to={createPageUrl('ClientDashboard')}
-                      className="flex items-center gap-2 px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <LayoutDashboard className="w-4 h-4" />
-                      Tableau de Bord
                     </Link>
                   )}
                   {hasClientProfile && (
