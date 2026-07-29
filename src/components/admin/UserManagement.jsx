@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44, supabase } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,6 +20,7 @@ export default function UserManagement() {
     const fetchUsers = async () => {
         setLoading(true);
         try {
+            // Fetch all users - typically paginated, but for now list all or top 50
             const data = await base44.entities.User.list();
             setUsers(data);
         } catch (error) {
@@ -31,6 +32,7 @@ export default function UserManagement() {
 
     const handleRoleUpdate = async (userId, newRole) => {
         try {
+            // Determine system role and staff role based on selection
             let systemRole = 'user';
             let staffRole = 'none';
 
@@ -48,6 +50,8 @@ export default function UserManagement() {
                 staffRole = 'tech';
             }
 
+            // Mise a jour directe via Supabase (la policy is_admin() autorise
+            // un admin a modifier le role/staff_role de n'importe quel utilisateur)
             const { error: updateError } = await supabase
                 .from('app_user')
                 .update({ role: systemRole, staff_role: staffRole })
@@ -56,10 +60,10 @@ export default function UserManagement() {
             if (updateError) throw updateError;
 
             setUsers(users.map(u => u.id === userId ? { ...u, role: systemRole, staff_role: staffRole } : u));
-            toast.success("Role mis a jour avec succes");
+            toast.success("RÃ´le mis Ã  jour avec succÃ¨s");
         } catch (error) {
             console.error("Failed to update role", error);
-            toast.error("Erreur lors de la mise a jour du role");
+            toast.error("Erreur lors de la mise Ã  jour du rÃ´le");
         }
     };
 
@@ -81,11 +85,11 @@ export default function UserManagement() {
 
     const getRoleLabel = (value) => {
         const labels = {
-            admin_full: 'Admin Complet',
-            legal: 'Juriste',
-            sales: 'Commercial',
-            tech: 'Technicien',
-            none: 'Aucun role'
+            admin_full: 'ðŸ‘‘ Admin Complet',
+            legal: 'âš–ï¸ Juriste',
+            sales: 'ðŸ’¼ Commercial',
+            tech: 'ðŸ”§ Technicien',
+            none: 'ðŸ‘¤ Aucun rÃ´le'
         };
         return labels[value] || labels.none;
     };
@@ -97,9 +101,9 @@ export default function UserManagement() {
                     <div>
                         <CardTitle className="flex items-center gap-2">
                             <Users className="w-5 h-5" />
-                            Gestion des Roles Staff
+                            Gestion des RÃ´les Staff
                         </CardTitle>
-                        <CardDescription>Gerez les membres de l'equipe back office et leurs responsabilites.</CardDescription>
+                        <CardDescription>GÃ©rez les membres de l'Ã©quipe back office et leurs responsabilitÃ©s.</CardDescription>
                     </div>
                     <StaffInviteDialog onSuccess={fetchUsers} />
                 </div>
@@ -111,7 +115,7 @@ export default function UserManagement() {
                             <TableRow>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Email</TableHead>
-                                <TableHead>Role Back Office</TableHead>
+                                <TableHead>RÃ´le Back Office</TableHead>
                                 <TableHead>Action</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -136,11 +140,11 @@ export default function UserManagement() {
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="none">Aucun role</SelectItem>
-                                                    <SelectItem value="admin_full">Admin Complet</SelectItem>
-                                                    <SelectItem value="legal">Juriste</SelectItem>
-                                                    <SelectItem value="sales">Commercial</SelectItem>
-                                                    <SelectItem value="tech">Technicien</SelectItem>
+                                                    <SelectItem value="none">ðŸ‘¤ Aucun rÃ´le</SelectItem>
+                                                    <SelectItem value="admin_full">ðŸ‘‘ Admin Complet</SelectItem>
+                                                    <SelectItem value="legal">âš–ï¸ Juriste</SelectItem>
+                                                    <SelectItem value="sales">ðŸ’¼ Commercial</SelectItem>
+                                                    <SelectItem value="tech">ðŸ”§ Technicien</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </TableCell>

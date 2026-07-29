@@ -32,7 +32,7 @@ export default function AdminGeo() {
             setItems(data);
         } catch (e) {
             console.error(e);
-            toast({ title: "Error", description: "Failed to fetch data", variant: "destructive" });
+            toast({ title: "Erreur", description: "Impossible de récupérer les données", variant: "destructive" });
         } finally {
             setLoading(false);
         }
@@ -45,27 +45,27 @@ export default function AdminGeo() {
     const handleApprove = async (id) => {
         try {
             await entities[activeTab].update(id, { status: 'active' });
-            toast({ title: "Approved", description: "Location is now active." });
+            toast({ title: "Approuvé", description: "Le lieu est maintenant actif." });
             fetchPending();
         } catch (e) {
-            toast({ title: "Error", description: "Failed to approve", variant: "destructive" });
+            toast({ title: "Erreur", description: "Échec de l'approbation", variant: "destructive" });
         }
     };
 
     const handleReject = async (id) => {
-        if (!confirm("Are you sure you want to reject and delete this entry?")) return;
+        if (!confirm("Êtes-vous sûr de vouloir rejeter et supprimer cette entrée ?")) return;
         try {
             await entities[activeTab].delete(id);
-            toast({ title: "Rejected", description: "Entry deleted." });
+            toast({ title: "Rejeté", description: "Entrée supprimée." });
             fetchPending();
         } catch (e) {
-            toast({ title: "Error", description: "Failed to reject", variant: "destructive" });
+            toast({ title: "Erreur", description: "Échec du rejet", variant: "destructive" });
         }
     };
 
     return (
         <div className="container mx-auto py-12 px-4">
-            <h1 className="text-3xl font-bold mb-8">Geographical Data Approval</h1>
+            <h1 className="text-3xl font-bold mb-8">Approbation des Données Géographiques</h1>
             
             <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="flex flex-wrap h-auto gap-2 mb-8 bg-transparent">
@@ -80,30 +80,30 @@ export default function AdminGeo() {
                     <CardHeader>
                         <CardTitle className="capitalize flex items-center gap-2">
                             <MapPin className="w-5 h-5 text-rose-500" />
-                            Pending {activeTab}s
+                            {activeTab}s en attente
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         {loading ? (
                             <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
                         ) : items.length === 0 ? (
-                            <div className="text-center p-8 text-stone-500">No pending items found.</div>
+                            <div className="text-center p-8 text-stone-500">Aucun élément en attente trouvé.</div>
                         ) : (
                             <div className="space-y-4">
                                 {items.map(item => (
                                     <div key={item.id} className="flex items-center justify-between p-4 bg-stone-50 rounded-lg border">
                                         <div>
                                             <div className="font-bold text-lg">{item.name}</div>
-                                            <div className="text-sm text-stone-500 font-mono">Code: {item.code}</div>
-                                            {item.parent_code && <div className="text-xs text-stone-400">Parent: {item.parent_code}</div>}
-                                            <Badge variant="outline" className="mt-2 bg-yellow-50 text-yellow-700 border-yellow-200">Pending Approval</Badge>
+                                            <div className="text-sm text-stone-500 font-mono">Code : {item.code}</div>
+                                            {item.parent_code && <div className="text-xs text-stone-400">Parent : {item.parent_code}</div>}
+                                            <Badge variant="outline" className="mt-2 bg-yellow-50 text-yellow-700 border-yellow-200">En Attente d'Approbation</Badge>
                                         </div>
                                         <div className="flex gap-2">
                                             <Button size="sm" onClick={() => handleApprove(item.id)} className="bg-green-600 hover:bg-green-700">
-                                                <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
+                                                <CheckCircle2 className="w-4 h-4 mr-1" /> Approuver
                                             </Button>
                                             <Button size="sm" variant="destructive" onClick={() => handleReject(item.id)}>
-                                                <XCircle className="w-4 h-4 mr-1" /> Reject
+                                                <XCircle className="w-4 h-4 mr-1" /> Rejeter
                                             </Button>
                                         </div>
                                     </div>
