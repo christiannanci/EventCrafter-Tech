@@ -259,13 +259,13 @@ export default function VendorDashboard() {
           setBookings(prev => [newBooking, ...prev]);
           await NotificationService.sendToVendor({
             vendorId: user.id,
-            title: "Nouvelle Rservation",
+            title: "Nouvelle Réservation",
             message: `Vous avez recu une nouvelle reservation de ${newBooking.client_name || 'un client'} pour le ${new Date(newBooking.event_date).toLocaleDateString('fr-FR')}. Montant: ${newBooking.total_amount?.toLocaleString() || 'a negocier'} FCFA`,
             type: "booking",
             link: "/VendorDashboard?tab=bookings_received"
           });
           toast({ 
-            title: "?? Nouvelle Rservation !",
+            title: "🎉 Nouvelle Réservation !",
             description: `${newBooking.client_name || 'Un client'} a reserve pour le ${new Date(newBooking.event_date).toLocaleDateString('fr-FR')}`
           });
         }
@@ -308,19 +308,19 @@ export default function VendorDashboard() {
           const savedPercent = Math.round((1 - compressedSize / originalSize) * 100);
           
           toast({ 
-            title: `Image optimisee (${savedPercent}% rduit)`,
-            description: `${formatFileSize(originalSize)} ? ${formatFileSize(compressedSize)}`
+            title: `Image optimisee (${savedPercent}% réduit)`,
+            description: `${formatFileSize(originalSize)} → ${formatFileSize(compressedSize)}`
           });
         }
       
         const result = await UploadFile({ file: fileToUpload });
         setNewService({...newService, image_url: result.file_url});
-        toast({ title: "Image telechargee avec succs" });
+        toast({ title: "Image telechargee avec succès" });
         return true;
       });
     } catch (error) {
       toast({ 
-        title: error.message.includes('Rate limit') ? "?? Limite atteinte" : "Echec du telechargement",
+        title: error.message.includes('Rate limit') ? "⚠️ Limite atteinte" : "Echec du telechargement",
         description: error.message.includes('Rate limit') ? error.message : undefined,
         variant: "destructive" 
       });
@@ -337,7 +337,7 @@ export default function VendorDashboard() {
       setUploadingVideo(true);
       const result = await UploadFile({ file });
       setNewService({...newService, video_url: result.file_url});
-      toast({ title: "Video telechargee avec succs" });
+      toast({ title: "Video telechargee avec succès" });
     } catch (error) {
       toast({ 
         title: "Echec du telechargement", 
@@ -368,7 +368,7 @@ export default function VendorDashboard() {
       if (!validation.success) {
         const firstError = Object.values(validation.errors)[0];
         toast({ 
-          title: "Validation choue", 
+          title: "Validation échouée", 
           description: firstError,
           variant: "destructive" 
         });
