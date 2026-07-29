@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { base44 } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -52,8 +52,8 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
       });
 
       toast({
-        title: "Merci ! 🎉",
-        description: "Votre avis nous aide à améliorer la plateforme",
+        title: "Merci ! ðŸŽ‰",
+        description: "Votre avis nous aide Ã  amÃ©liorer la plateforme",
       });
 
       // Reset form
@@ -81,10 +81,10 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Star className="w-5 h-5 text-yellow-500" />
-            Notez Event Crafter
+            Notez EventCrafter
           </DialogTitle>
           <DialogDescription>
-            Votre avis nous aide à améliorer la plateforme
+            Votre avis nous aide Ã  amÃ©liorer la plateforme
           </DialogDescription>
         </DialogHeader>
 
@@ -117,7 +117,7 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
 
           {/* NPS */}
           <div className="space-y-3">
-            <Label className="text-sm font-semibold">Recommanderiez-vous Event Crafter ? (0-10)</Label>
+            <Label className="text-sm font-semibold">Recommanderiez-vous EventCrafter ? (0-10)</Label>
             <div className="grid grid-cols-6 gap-1">
               {Array.from({ length: 11 }, (_, i) => i).map((value) => (
                 <button
@@ -146,7 +146,7 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="feature_request" id="feature_request" />
-                <Label htmlFor="feature_request" className="text-sm font-normal cursor-pointer">Suggestion de fonctionnalité</Label>
+                <Label htmlFor="feature_request" className="text-sm font-normal cursor-pointer">Suggestion de fonctionnalitÃ©</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="bug_report" id="bug_report" />
