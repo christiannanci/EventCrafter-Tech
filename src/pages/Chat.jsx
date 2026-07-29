@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { base44, supabase } from "@/api/base44Client";
+﻿import React, { useState, useEffect, useRef } from 'react';
+import { base44, supabase } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -136,7 +136,7 @@ export default function Chat() {
         console.error("Chat init error", e);
         toast({
           title: "Erreur de chargement",
-          description: "Impossible de charger les conversations. Veuillez rafraîchir la page.",
+          description: "Impossible de charger les conversations. Veuillez rafraÃ®chir la page.",
           variant: "destructive"
         });
         setLoading(false);
@@ -236,7 +236,7 @@ export default function Chat() {
             const messagePreview = messageContent.length > 50 ? messageContent.substring(0, 50) + "..." : messageContent;
             await NotificationService.send({
               userId: recipientId,
-              title: "💬 Nouveau message",
+              title: "ðŸ’¬ Nouveau message",
               message: messagePreview,
               type: "message",
               link: `/Chat?conversationId=${activeConversation.id}`
@@ -248,7 +248,7 @@ export default function Chat() {
             const messagePreview = messageContent.length > 50 ? messageContent.substring(0, 50) + "..." : messageContent;
             await NotificationService.send({
               userId: admin.id,
-              title: "💬 Nouveau message",
+              title: "ðŸ’¬ Nouveau message",
               message: `${currentUser.full_name}: ${messagePreview}`,
               type: "message",
               link: `/Chat?conversationId=${activeConversation.id}`
@@ -262,8 +262,8 @@ export default function Chat() {
     } catch (error) {
       console.error("Send failed", error);
       toast({
-        title: "Échec de l'envoi",
-        description: "Le message n'a pas pu être envoyé. Vérifiez votre connexion.",
+        title: "Ã‰chec de l'envoi",
+        description: "Le message n'a pas pu Ãªtre envoyÃ©. VÃ©rifiez votre connexion.",
         variant: "destructive",
         duration: 4000
       });
@@ -413,3 +413,4 @@ export default function Chat() {
     </div>
   );
 }
+
