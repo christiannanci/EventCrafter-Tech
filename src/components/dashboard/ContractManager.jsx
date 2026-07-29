@@ -17,7 +17,7 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
     const [contract, setContract] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [providerName, setProviderName] = useState('Provider');
+    const [providerName, setProviderName] = useState('Prestataire');
     const [clientName, setClientName] = useState('Client');
 
     // Determines if current user is the provider or client
@@ -39,7 +39,7 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
             // Get provider name
             const vendorProfiles = await base44.entities.VendorProfile.filter({ user_id: booking.planner_id });
             if (vendorProfiles.length > 0) {
-                setProviderName(vendorProfiles[0].business_name || 'Provider');
+                setProviderName(vendorProfiles[0].business_name || 'Prestataire');
             }
 
             // Get client name
@@ -90,9 +90,9 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                     focal_point_contact: isClient ? currentUser.email : "", 
                     negotiated_unit_price: booking.requested_unit_price || 0,
                     quantity: booking.quantity || 1,
-                    negotiated_unit_measure: booking.unit_measure || "Unit",
+                    negotiated_unit_measure: booking.unit_measure || "Unité",
                     contract_amount: booking.total_amount || 0,
-                    payment_terms: "100% Escrow Release upon completion",
+                    payment_terms: "Libération à 100% de l'Escrow à la fin du service",
                     status: 'draft',
                     jurisdiction_clause: "En cas d'impasse dans les négociations ou de litige persistant, les tribunaux compétents seront ceux du ressort du siège social de la plateforme EventCrafter.",
                     cancellation_terms: "RESPONSABILITES ET ANNULATION :\n- Si l'échec du contrat est imputable au Client : Le Prestataire conserve les montants déjà versés à titre d'indemnité.\n- Si l'échec est imputable au Prestataire : Le Client sera remboursé des sommes versées (hors frais de service).\n- Conséquences financières : Toute annulation entraîne l'application des pénalités prévues aux CGU.",
@@ -118,10 +118,10 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
             let savedContract;
             if (contract) {
                 savedContract = await base44.entities.Contract.update(contract.id, formData);
-                toast({ title: "Contract Updated", description: "Changes saved successfully." });
+                toast({ title: "Contrat Mis à Jour", description: "Modifications sauvegardées avec succès." });
             } else {
                 savedContract = await base44.entities.Contract.create(formData);
-                toast({ title: "Contract Created", description: "Contract draft created." });
+                toast({ title: "Contrat Créé", description: "Brouillon de contrat créé." });
             }
             setContract(savedContract);
             setIsEditing(false);
@@ -185,7 +185,7 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
 
             const updated = await base44.entities.Contract.update(contract.id, updateData);
             setContract(updated);
-            toast({ title: "Signed", description: "You have signed the contract successfully." });
+            toast({ title: "Signé", description: "Vous avez signé le contrat avec succès." });
             if(onUpdate) onUpdate();
         } catch (error) {
             console.error("Sign failed", error);
@@ -207,21 +207,21 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
             <DialogTrigger asChild>
                 <Button size="sm" variant="outline" className="border-amber-200 text-amber-700 hover:bg-amber-50">
                     <FileSignature className="w-4 h-4 mr-2" /> 
-                    {booking.status === 'contract_pending' ? 'Manage Contract' : 'View Contract'}
+                    {booking.status === 'contract_pending' ? 'Gérer le Contrat' : 'Voir le Contrat'}
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="flex justify-between items-center">
-                        <span>Service Contract {contract ? `- ${contract.contract_number}` : '(New)'}</span>
+                        <span>Contrat de Service {contract ? `- ${contract.contract_number}` : '(Nouveau)'}</span>
                         {contract?.status === 'signed' && (
                              <span className="text-green-600 flex items-center text-sm bg-green-50 px-3 py-1 rounded-full border border-green-200">
-                                 <CheckCircle2 className="w-4 h-4 mr-2" /> Fully Signed
+                                 <CheckCircle2 className="w-4 h-4 mr-2" /> Entièrement Signé
                              </span>
                         )}
                         {contract?.status === 'pending_signatures' && (
                              <span className="text-amber-600 flex items-center text-sm bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-                                 <PenLine className="w-4 h-4 mr-2" /> Pending Signatures
+                                 <PenLine className="w-4 h-4 mr-2" /> En Attente de Signatures
                              </span>
                         )}
                     </DialogTitle>
@@ -231,50 +231,50 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                     <div className="space-y-6 max-w-3xl mx-auto bg-white p-8 shadow-sm min-h-full">
                         {/* Header Section */}
                         <div className="text-center border-b pb-6 mb-6">
-                            <h2 className="text-2xl font-bold text-stone-900 uppercase">Contract for Services</h2>
-                            <p className="text-stone-500 mt-2">Between <strong>{providerName}</strong> (Provider) and <strong>{clientName}</strong> (Client)</p>
+                            <h2 className="text-2xl font-bold text-stone-900 uppercase">Contrat pour Services</h2>
+                            <p className="text-stone-500 mt-2">Entre <strong>{providerName}</strong> (Prestataire) et <strong>{clientName}</strong> (Client)</p>
                         </div>
 
                         {/* Form Fields */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <Label>Contract Number</Label>
+                                <Label>Numéro de Contrat</Label>
                                 <Input disabled value={formData.contract_number || ''} />
                             </div>
                             <div className="space-y-2">
-                                <Label>Focal Point Name</Label>
+                                <Label>Nom du Point Focal</Label>
                                 <Input 
                                     value={formData.focal_point_name || ''} 
                                     onChange={e => setFormData({...formData, focal_point_name: e.target.value})}
                                     disabled={!isEditing}
-                                    placeholder="Name of contact person"
+                                    placeholder="Nom de la personne de contact"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Focal Point Contact</Label>
+                                <Label>Contact du Point Focal</Label>
                                 <Input 
                                     value={formData.focal_point_contact || ''} 
                                     onChange={e => setFormData({...formData, focal_point_contact: e.target.value})}
                                     disabled={!isEditing}
-                                    placeholder="Phone or Email"
+                                    placeholder="Téléphone ou Email"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Execution Delay</Label>
+                                <Label>Délai d'Exécution</Label>
                                 <Input 
                                     value={formData.execution_delay || ''} 
                                     onChange={e => setFormData({...formData, execution_delay: e.target.value})}
                                     disabled={!isEditing}
-                                    placeholder="e.g. 3 Days"
+                                    placeholder="ex. 3 jours"
                                 />
                             </div>
                         </div>
 
                         <div className="my-6 border-t pt-6">
-                            <h3 className="font-semibold text-lg mb-4">Delivery Details</h3>
+                            <h3 className="font-semibold text-lg mb-4">Détails de Livraison</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label>Delivery Date</Label>
+                                    <Label>Date de Livraison</Label>
                                     <Input 
                                         type="date"
                                         value={formData.delivery_date || ''} 
@@ -283,7 +283,7 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Neighborhood Code</Label>
+                                    <Label>Code de Quartier</Label>
                                     <Input 
                                         value={formData.delivery_neighborhood_code || ''} 
                                         onChange={e => setFormData({...formData, delivery_neighborhood_code: e.target.value})}
@@ -291,7 +291,7 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                                     />
                                 </div>
                                 <div className="col-span-full space-y-2">
-                                    <Label>Delivery Address</Label>
+                                    <Label>Adresse de Livraison</Label>
                                     <Input 
                                         value={formData.delivery_address || ''} 
                                         onChange={e => setFormData({...formData, delivery_address: e.target.value})}
@@ -302,10 +302,10 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                         </div>
 
                         <div className="my-6 border-t pt-6">
-                            <h3 className="font-semibold text-lg mb-4">Financials & Terms</h3>
+                            <h3 className="font-semibold text-lg mb-4">Finances & Conditions</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Unit Price</Label>
+                                    <Label>Prix Unitaire</Label>
                                     <Input 
                                         type="number"
                                         value={formData.negotiated_unit_price || ''} 
@@ -314,7 +314,7 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Quantity</Label>
+                                    <Label>Quantité</Label>
                                     <Input 
                                         type="number"
                                         value={formData.quantity || ''} 
@@ -323,7 +323,7 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Unit Measure</Label>
+                                    <Label>Unité de Mesure</Label>
                                     <Input 
                                         value={formData.negotiated_unit_measure || ''} 
                                         onChange={e => setFormData({...formData, negotiated_unit_measure: e.target.value})}
@@ -333,7 +333,7 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                             </div>
                             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label>Total Contract Amount</Label>
+                                    <Label>Montant Total du Contrat</Label>
                                     <Input 
                                         type="number"
                                         className="font-bold bg-stone-50"
@@ -343,7 +343,7 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Payment Terms</Label>
+                                    <Label>Conditions de Paiement</Label>
                                     <Input 
                                         value={formData.payment_terms || ''} 
                                         onChange={e => setFormData({...formData, payment_terms: e.target.value})}
@@ -354,10 +354,10 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                             
                             {/* Legal Clauses Section */}
                             <div className="my-6 border-t pt-6 bg-stone-50 p-4 rounded-md">
-                                <h3 className="font-semibold text-lg mb-4 text-stone-900">Legal Terms & Conditions</h3>
+                                <h3 className="font-semibold text-lg mb-4 text-stone-900">Conditions Légales</h3>
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label>Jurisdiction Clause (Juridiction Compétente)</Label>
+                                        <Label>Clause de Juridiction (Juridiction Compétente)</Label>
                                         <Textarea 
                                             value={formData.jurisdiction_clause || ''} 
                                             onChange={e => setFormData({...formData, jurisdiction_clause: e.target.value})}
@@ -366,7 +366,7 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Cancellation & Dispute Terms</Label>
+                                        <Label>Conditions d'Annulation et de Litige</Label>
                                         <Textarea 
                                             value={formData.cancellation_terms || ''} 
                                             onChange={e => setFormData({...formData, cancellation_terms: e.target.value})}
@@ -375,7 +375,7 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Platform Commission Clause</Label>
+                                        <Label>Clause de Commission Plateforme</Label>
                                         <Textarea 
                                             value={formData.commission_clause || ''} 
                                             onChange={e => setFormData({...formData, commission_clause: e.target.value})}
@@ -389,21 +389,21 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
                              {/* Accounts - Simpler input for now */}
                              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label>Client Account ID (Debit)</Label>
+                                    <Label>ID Compte Client (Débit)</Label>
                                     <Input 
                                         value={formData.client_account_id || ''} 
                                         onChange={e => setFormData({...formData, client_account_id: e.target.value})}
                                         disabled={!isEditing}
-                                        placeholder="Optional"
+                                        placeholder="Optionnel"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Provider Account ID (Credit)</Label>
+                                    <Label>ID Compte Prestataire (Crédit)</Label>
                                     <Input 
                                         value={formData.provider_account_id || ''} 
                                         onChange={e => setFormData({...formData, provider_account_id: e.target.value})}
                                         disabled={!isEditing}
-                                        placeholder="Optional"
+                                        placeholder="Optionnel"
                                     />
                                 </div>
                             </div>
@@ -433,23 +433,23 @@ export default function ContractManager({ booking, currentUser, onUpdate }) {
 
                         <div className="my-8 border-t pt-8 grid grid-cols-2 gap-12">
                             <div className="border-t-2 border-stone-300 pt-2">
-                                <p className="font-bold text-sm uppercase mb-1">Provider Signature</p>
+                                <p className="font-bold text-sm uppercase mb-1">Signature du Prestataire</p>
                                 {contract?.provider_signed_at ? (
                                     <div className="text-green-600 text-sm">
-                                        Signed on {format(new Date(contract.provider_signed_at), 'PPP p')}
+                                        Signé le {format(new Date(contract.provider_signed_at), 'PPP p')}
                                     </div>
                                 ) : (
-                                    <div className="text-stone-400 text-sm italic">Pending signature...</div>
+                                    <div className="text-stone-400 text-sm italic">En attente de signature...</div>
                                 )}
                             </div>
                             <div className="border-t-2 border-stone-300 pt-2">
-                                <p className="font-bold text-sm uppercase mb-1">Client Signature</p>
+                                <p className="font-bold text-sm uppercase mb-1">Signature du Client</p>
                                 {contract?.client_signed_at ? (
                                     <div className="text-green-600 text-sm">
-                                        Signed on {format(new Date(contract.client_signed_at), 'PPP p')}
+                                        Signé le {format(new Date(contract.client_signed_at), 'PPP p')}
                                     </div>
                                 ) : (
-                                    <div className="text-stone-400 text-sm italic">Pending signature...</div>
+                                    <div className="text-stone-400 text-sm italic">En attente de signature...</div>
                                 )}
                             </div>
                         </div>

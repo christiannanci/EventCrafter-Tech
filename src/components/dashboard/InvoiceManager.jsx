@@ -97,7 +97,7 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
                 status: 'issued',
                 items: [
                     {
-                        description: `${newInvoice.type === 'global' ? 'Full Service' : 'Partial Payment'} - ${booking.event_type}`,
+                        description: `${newInvoice.type === 'global' ? 'Service Complet' : 'Paiement Partiel'} - ${booking.event_type}`,
                         quantity: 1,
                         unit_price: parseFloat(finalAmount),
                         total: parseFloat(finalAmount)
@@ -106,12 +106,12 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
             };
 
             await base44.entities.Invoice.create(invoiceData);
-            toast({ title: "Invoice Generated", description: "The invoice has been created successfully." });
+            toast({ title: "Facture Générée", description: "La facture a été créée avec succès." });
             setView("list");
             fetchData();
         } catch (error) {
             console.error(error);
-            toast({ title: "Error", description: "Failed to create invoice.", variant: "destructive" });
+            toast({ title: "Erreur", description: "Échec de la création de la facture.", variant: "destructive" });
         } finally {
             setLoading(false);
         }
@@ -120,13 +120,13 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
     const getStatusConfig = (status) => {
         switch (status) {
             case 'paid': 
-                return { color: 'bg-green-100 text-green-800 border-green-200', label: 'Paid', icon: <CheckCircle2 className="w-3 h-3 mr-1" /> };
+                return { color: 'bg-green-100 text-green-800 border-green-200', label: 'Payée', icon: <CheckCircle2 className="w-3 h-3 mr-1" /> };
             case 'issued': 
-                return { color: 'bg-blue-50 text-blue-700 border-blue-200', label: 'Awaiting Payment', icon: <Clock className="w-3 h-3 mr-1" /> };
+                return { color: 'bg-blue-50 text-blue-700 border-blue-200', label: 'En Attente de Paiement', icon: <Clock className="w-3 h-3 mr-1" /> };
             case 'overdue': 
-                return { color: 'bg-red-50 text-red-700 border-red-200', label: 'Overdue', icon: <AlertCircle className="w-3 h-3 mr-1" /> };
+                return { color: 'bg-red-50 text-red-700 border-red-200', label: 'En Retard', icon: <AlertCircle className="w-3 h-3 mr-1" /> };
             case 'draft':
-                return { color: 'bg-stone-100 text-stone-600 border-stone-200', label: 'Draft', icon: <FileText className="w-3 h-3 mr-1" /> };
+                return { color: 'bg-stone-100 text-stone-600 border-stone-200', label: 'Brouillon', icon: <FileText className="w-3 h-3 mr-1" /> };
             default: 
                 return { color: 'bg-gray-100 text-gray-800', label: status, icon: null };
         }
@@ -137,21 +137,21 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
             <DialogTrigger asChild>
                 <Button size="sm" variant="outline" className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
                     <FileText className="w-4 h-4 mr-2" />
-                    Invoices
+                    Factures
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl">
                 <DialogHeader>
                     <DialogTitle className="flex justify-between items-center">
-                        <span>Invoice Management</span>
+                        <span>Gestion des Factures</span>
                         {isProvider && view === 'list' && (
                             <Button size="sm" onClick={() => setView('create')}>
-                                <Plus className="w-4 h-4 mr-2" /> Generate Invoice
+                                <Plus className="w-4 h-4 mr-2" /> Générer une Facture
                             </Button>
                         )}
                          {view === 'create' && (
                             <Button size="sm" variant="ghost" onClick={() => setView('list')}>
-                                Cancel
+                                Annuler
                             </Button>
                         )}
                     </DialogTitle>
@@ -162,8 +162,8 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
                         {invoices.length === 0 ? (
                             <div className="text-center py-12 text-stone-500">
                                 <FileText className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                                <p>No invoices generated yet.</p>
-                                {isProvider && <p className="text-sm">Create an invoice to request payment.</p>}
+                                <p>Aucune facture générée pour le moment.</p>
+                                {isProvider && <p className="text-sm">Créez une facture pour demander un paiement.</p>}
                             </div>
                         ) : (
                             <div className="space-y-4">
@@ -183,21 +183,21 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
                                                         );
                                                     })()}
                                                     <Badge variant="secondary" className="text-stone-600 bg-stone-100">
-                                                        {inv.type === 'global' ? 'Global' : inv.type === 'partial_deposit' ? 'Deposit' : 'Balance'}
+                                                        {inv.type === 'global' ? 'Globale' : inv.type === 'partial_deposit' ? 'Acompte' : 'Solde'}
                                                     </Badge>
                                                 </div>
                                                 <p className="text-sm text-stone-500 mt-1">
-                                                    Issued: {format(new Date(inv.issued_date), 'MMM d, yyyy')} • Due: {format(new Date(inv.due_date), 'MMM d, yyyy')}
+                                                    Émise le : {format(new Date(inv.issued_date), 'd MMM yyyy')} • Échéance : {format(new Date(inv.due_date), 'd MMM yyyy')}
                                                 </p>
                                                 {(inv.focal_point_name || inv.billing_address) && (
                                                     <p className="text-xs text-stone-400 mt-1">
-                                                        Billed to: {inv.billing_address} {inv.focal_point_name ? `(Attn: ${inv.focal_point_name})` : ''}
+                                                        Facturé à : {inv.billing_address} {inv.focal_point_name ? `(À l'attention de : ${inv.focal_point_name})` : ''}
                                                     </p>
                                                 )}
                                                 <p className="font-bold text-lg mt-1">{inv.amount?.toLocaleString()} FCFA</p>
                                             </div>
                                             <div className="flex gap-2">
-                                                <Button size="sm" variant="outline" title="Download PDF">
+                                                <Button size="sm" variant="outline" title="Télécharger PDF">
                                                     <Download className="w-4 h-4" />
                                                 </Button>
                                                 {!isProvider && inv.status !== 'paid' && (
@@ -205,19 +205,19 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
                                                         if(onPaymentClick) onPaymentClick(inv);
                                                         setOpen(false); // Close invoice manager to show payment modal
                                                     }}>
-                                                        <CreditCard className="w-4 h-4 mr-2" /> Pay Now
+                                                        <CreditCard className="w-4 h-4 mr-2" /> Payer Maintenant
                                                     </Button>
                                                 )}
                                                 {inv.status === 'paid' && (
                                                     <Button size="sm" variant="outline" className="text-stone-600" onClick={() => {
-                                                        toast({ description: "Receipt downloading... (Simulated)" });
+                                                        toast({ description: "Téléchargement du reçu... (Simulé)" });
                                                     }}>
-                                                        <FileText className="w-4 h-4 mr-2" /> Receipt
+                                                        <FileText className="w-4 h-4 mr-2" /> Reçu
                                                     </Button>
                                                 )}
                                                 {isProvider && inv.status === 'issued' && (
                                                     <Button size="sm" variant="ghost" className="text-blue-600">
-                                                        <Send className="w-4 h-4 mr-2" /> Resend
+                                                        <Send className="w-4 h-4 mr-2" /> Renvoyer
                                                     </Button>
                                                 )}
                                             </div>
@@ -231,7 +231,7 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
                     <div className="space-y-4 py-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Invoice Type</Label>
+                                <Label>Type de Facture</Label>
                                 <Select 
                                     value={newInvoice.type} 
                                     onValueChange={(val) => setNewInvoice({...newInvoice, type: val})}
@@ -240,14 +240,14 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="global">Global (Full Amount)</SelectItem>
-                                        <SelectItem value="partial_deposit">Partial (Deposit)</SelectItem>
-                                        <SelectItem value="partial_balance">Remaining Balance</SelectItem>
+                                        <SelectItem value="global">Globale (Montant Total)</SelectItem>
+                                        <SelectItem value="partial_deposit">Partielle (Acompte)</SelectItem>
+                                        <SelectItem value="partial_balance">Solde Restant</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label>Due Date</Label>
+                                <Label>Date d'Échéance</Label>
                                 <Input 
                                     type="date" 
                                     value={newInvoice.due_date}
@@ -257,9 +257,9 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Billing Address</Label>
+                            <Label>Adresse de Facturation</Label>
                             <Input 
-                                placeholder="Billing Address"
+                                placeholder="Adresse de facturation"
                                 value={newInvoice.billing_address}
                                 onChange={(e) => setNewInvoice({...newInvoice, billing_address: e.target.value})}
                             />
@@ -267,17 +267,17 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Focal Point Name</Label>
+                                <Label>Nom du Point Focal</Label>
                                 <Input 
-                                    placeholder="Contact Person Name"
+                                    placeholder="Nom de la personne de contact"
                                     value={newInvoice.focal_point_name}
                                     onChange={(e) => setNewInvoice({...newInvoice, focal_point_name: e.target.value})}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Focal Point Contact</Label>
+                                <Label>Contact du Point Focal</Label>
                                 <Input 
-                                    placeholder="Phone / Email"
+                                    placeholder="Téléphone / Email"
                                     value={newInvoice.focal_point_contact}
                                     onChange={(e) => setNewInvoice({...newInvoice, focal_point_contact: e.target.value})}
                                 />
@@ -286,7 +286,7 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
 
                         {newInvoice.type === 'partial_deposit' && (
                             <div className="space-y-2">
-                                <Label>Percentage (%)</Label>
+                                <Label>Pourcentage (%)</Label>
                                 <div className="flex items-center gap-4">
                                     <Input 
                                         type="number" 
@@ -304,14 +304,14 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
 
                         {newInvoice.type === 'global' && (
                              <div className="p-4 bg-stone-50 rounded text-center">
-                                 <p className="text-sm text-stone-500">Total Amount to Invoice</p>
+                                 <p className="text-sm text-stone-500">Montant Total à Facturer</p>
                                  <p className="text-2xl font-bold text-stone-900">{(contract?.contract_amount || booking.total_amount).toLocaleString()} FCFA</p>
                              </div>
                         )}
 
                         <DialogFooter className="mt-6">
                             <Button onClick={handleCreateInvoice} disabled={loading} className="w-full">
-                                {loading ? "Generating..." : "Generate Invoice"}
+                                {loading ? "Génération..." : "Générer la Facture"}
                             </Button>
                         </DialogFooter>
                     </div>

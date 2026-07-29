@@ -83,7 +83,7 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
             });
             
             const savedPercent = Math.round((1 - fileToUpload.size / file.size) * 100);
-            toast.success(`Image optimisee (${savedPercent}% reduit)`);
+            toast.success(`Image optimisée (${savedPercent}% réduit)`);
         }
         
         const { file_url } = await UploadFile({ file: fileToUpload });
@@ -91,10 +91,10 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
             ...prev,
             profile_image: file_url
         }));
-        toast.success("Logo updated successfully");
+        toast.success("Logo mis à jour avec succès");
     } catch (error) {
         console.error("Upload failed", error);
-        toast.error("Failed to upload logo");
+        toast.error("Échec du téléchargement du logo");
     } finally {
         if (!originalLoading) setLoading(false);
     }
@@ -112,10 +112,10 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
             ...prev,
             verification_documents: [...(prev.verification_documents || []), file_url]
         }));
-        toast.success("Document uploaded successfully");
+        toast.success("Document téléchargé avec succès");
     } catch (error) {
         console.error("Upload failed", error);
-        toast.error("Failed to upload document");
+        toast.error("Échec du téléchargement du document");
     } finally {
         if (!originalLoading) setLoading(false);
     }
@@ -137,7 +137,7 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
     };
     return (
         <Badge className={styles[status] || styles.unverified}>
-            {status?.toUpperCase() || "UNVERIFIED"}
+            {status?.toUpperCase() || "NON VÉRIFIÉ"}
         </Badge>
     );
   };
@@ -177,11 +177,11 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
             account_balance: 0
         });
       }
-      toast.success("Profile updated successfully");
+      toast.success("Profil mis à jour avec succès");
       if (onSave) onSave();
     } catch (error) {
       console.error(error);
-      toast.error("Failed to update profile");
+      toast.error("Échec de la mise à jour du profil");
     } finally {
       setLoading(false);
     }
@@ -206,8 +206,8 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
                     </label>
                 </div>
                 <div>
-                    <CardTitle>Business Profile</CardTitle>
-                    <CardDescription>Manage your business identity and verification.</CardDescription>
+                    <CardTitle>Profil Professionnel</CardTitle>
+                    <CardDescription>Gérez votre identité commerciale et vérification.</CardDescription>
                 </div>
             </div>
             {initialProfile && (
@@ -217,9 +217,9 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
                 profile.verification_status === 'rejected' ? 'bg-red-100 text-red-800' :
                 'bg-gray-100 text-gray-800'
               }>
-                {profile.verification_status === 'verified' ? 'VERIFIE' :
+                {profile.verification_status === 'verified' ? 'VÉRIFIÉ' :
                  profile.verification_status === 'pending' ? 'EN ATTENTE' :
-                 profile.verification_status === 'rejected' ? 'REJETE' : 'NON VERIFIE'}
+                 profile.verification_status === 'rejected' ? 'REJETÉ' : 'NON VÉRIFIÉ'}
               </Badge>
             )}
         </div>
@@ -232,7 +232,7 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
                     <Wallet className="w-5 h-5 text-stone-500" />
                 </div>
                 <div>
-                    <p className="text-xs text-stone-500 uppercase font-semibold">Wallet Balance</p>
+                    <p className="text-xs text-stone-500 uppercase font-semibold">Solde du Portefeuille</p>
                     <p className="text-xl font-bold text-stone-900">
                         {profile.account_balance?.toLocaleString() || 0} FCFA
                     </p>
@@ -243,11 +243,11 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
                     <Shield className="w-5 h-5 text-stone-500" />
                 </div>
                 <div>
-                    <p className="text-xs text-stone-500 uppercase font-semibold">Verification</p>
+                    <p className="text-xs text-stone-500 uppercase font-semibold">Vérification</p>
                     <p className="text-sm font-medium text-stone-900">
                         {profile.verification_status === 'verified' 
-                            ? 'Business Verified' 
-                            : 'Docs Required for Badge'}
+                            ? 'Entreprise Vérifiée' 
+                            : 'Documents Requis pour le Badge'}
                     </p>
                 </div>
             </div>
@@ -256,15 +256,15 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Business Name</Label>
+              <Label>Nom de l'Entreprise</Label>
               <Input 
                 value={profile.business_name || ""} 
                 onChange={e => setProfile({...profile, business_name: e.target.value})}
-                placeholder="e.g. Elite Events"
+                placeholder="ex. Elite Events"
               />
             </div>
             <div className="space-y-2">
-              <Label>Phone Number</Label>
+              <Label>Numéro de Téléphone</Label>
               <Input 
                 value={profile.phone || ""} 
                 onChange={e => setProfile({...profile, phone: e.target.value})}
@@ -275,15 +275,15 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div className="space-y-2">
-              <Label>City / Base Location</Label>
+              <Label>Ville / Zone d'Activité</Label>
               <Input 
                 value={profile.city || ""} 
                 onChange={e => setProfile({...profile, city: e.target.value})}
-                placeholder="e.g. Douala"
+                placeholder="ex. Douala"
               />
             </div>
             <div className="space-y-2">
-              <Label>Website (Optional)</Label>
+              <Label>Site Web (Optionnel)</Label>
               <Input 
                 value={profile.website || ""} 
                 onChange={e => setProfile({...profile, website: e.target.value})}
@@ -293,11 +293,11 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
           </div>
 
           <div className="space-y-2">
-            <Label>About Business</Label>
+            <Label>À Propos de l'Entreprise</Label>
             <Textarea 
               value={profile.description || ""} 
               onChange={e => setProfile({...profile, description: e.target.value})}
-              placeholder="Tell clients about your experience and services..."
+              placeholder="Parlez de votre expérience et de vos services aux clients..."
               className="h-32"
             />
           </div>
@@ -305,16 +305,16 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
           {/* Verification Documents */}
           <div className="border-t border-stone-100 pt-4">
             <h3 className="text-sm font-semibold mb-4 text-stone-900 flex items-center gap-2">
-                <Shield className="w-4 h-4" /> Verification Documents
+                <Shield className="w-4 h-4" /> Documents de Vérification
             </h3>
             <div className="bg-stone-50 p-4 rounded-lg border border-stone-200 mb-6">
                 <p className="text-sm text-stone-500 mb-4">
-                    Upload business registration, ID, or portfolio documents (PDF, Word, Audio, Video supported).
+                    Téléchargez l'enregistrement commercial, pièce d'identité ou portfolio (PDF, Word, Audio, Vidéo acceptés).
                 </p>
                 
                 <div className="flex items-center gap-4 mb-4">
                     <Button type="button" variant="outline" onClick={() => document.getElementById('vendor-doc-upload').click()} disabled={loading}>
-                        <Upload className="w-4 h-4 mr-2" /> Upload Document
+                        <Upload className="w-4 h-4 mr-2" /> Télécharger un Document
                     </Button>
                     <input 
                         id="vendor-doc-upload" 
@@ -348,7 +348,7 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
           {/* Location Map */}
           <div className="border-t border-stone-100 pt-4">
             <h3 className="text-sm font-semibold mb-4 text-stone-900 flex items-center gap-2">
-                <MapPin className="w-4 h-4" /> Location Details
+                <MapPin className="w-4 h-4" /> Détails de Localisation
             </h3>
             
             <div className="mb-4 h-[300px] w-full rounded-lg overflow-hidden border border-stone-200 z-0 relative">
@@ -371,9 +371,9 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
                 <div className="space-y-2">
-                    <Label>Neighborhood Code</Label>
+                    <Label>Code de Quartier</Label>
                     <Input 
-                        placeholder="e.g. AKWA-001" 
+                        placeholder="ex. AKWA-001" 
                         value={profile.neighborhood_code || ""} 
                         onChange={e => setProfile({...profile, neighborhood_code: e.target.value})}
                     />
@@ -399,7 +399,7 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
 
           <Button type="submit" className="bg-rose-600 hover:bg-rose-700 w-full md:w-auto" disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-            Save Business Profile
+            Enregistrer le Profil Professionnel
           </Button>
         </form>
       </CardContent>
