@@ -20,7 +20,6 @@ import {
 
 export default function Home() {
   useEffect(() => {
-    // Redirect to SEO page for search engines
     const isSearchBot = /bot|crawler|spider|crawling/i.test(navigator.userAgent);
     if (isSearchBot && window.location.pathname === '/') {
       window.location.href = '/SEOCameroun';
@@ -35,7 +34,6 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedSubCategory, setSelectedSubCategory] = useState("all");
   
-  // Advanced Search State
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [filterCultural, setFilterCultural] = useState("all");
   const [filterLanguage, setFilterLanguage] = useState("all");
@@ -48,7 +46,6 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Parallelize all independent fetches
         const [servicesData, types, funcs, feedbacks] = await Promise.all([
           Service.list('-created_date', 20),
           ServiceType.list(),
@@ -59,10 +56,8 @@ export default function Home() {
         setServiceTypes(types.filter(t => !t.status || t.status === 'active'));
         setFunctions(funcs.filter(f => f.status === 'active'));
 
-        // Enrich testimonials only if we have feedback
         if (feedbacks.length > 0) {
           const publicFeedbacks = feedbacks.slice(0, 3);
-          // Get only the profiles we actually need
           const providerIds = publicFeedbacks.filter(f => f.user_role === 'provider').map(f => f.user_id);
           const clientIds = publicFeedbacks.filter(f => f.user_role !== 'provider').map(f => f.user_id);
 
@@ -97,7 +92,6 @@ export default function Home() {
       
       {/* Hero Section */}
       <section className="relative h-[480px] sm:h-[600px] flex items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=75" 
@@ -123,36 +117,34 @@ export default function Home() {
           {/* Smart Search Box */}
           <div className="bg-white/95 backdrop-blur-sm p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-2xl max-w-5xl mx-auto flex flex-col gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-stretch sm:items-center justify-between w-full">
-             {/* Category Priority */}
              <div className="w-full sm:w-40 lg:w-48 flex-shrink-0">
                  <Select value={selectedCategory} onValueChange={(val) => {
                      setSelectedCategory(val);
-                     setSelectedSubCategory("all"); // Reset subcategory on category change
+                     setSelectedSubCategory("all");
                  }}>
                      <SelectTrigger className="h-12 border-stone-200 bg-stone-50 focus:bg-white">
-                         <SelectValue placeholder="Catégorie" />
+                         <SelectValue placeholder={t('marketplace.subCategory')} />
                      </SelectTrigger>
                      <SelectContent>
-                         <SelectItem value="all">Toutes les catégories</SelectItem>
-                         {serviceTypes.map(t => (
-                             <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>
+                         <SelectItem value="all">{t('categories.All')}</SelectItem>
+                         {serviceTypes.map(t2 => (
+                             <SelectItem key={t2.id} value={t2.name}>{t2.name}</SelectItem>
                          ))}
                      </SelectContent>
                  </Select>
              </div>
 
-             {/* Sub-Category (Function) - Only shown if category selected */}
              {selectedCategory !== 'all' && (
                  <div className="w-full sm:w-40 lg:w-48 flex-shrink-0 animate-in fade-in slide-in-from-left-2">
                      <Select value={selectedSubCategory} onValueChange={setSelectedSubCategory}>
                          <SelectTrigger className="h-12 border-stone-200 bg-stone-50 focus:bg-white">
-                             <SelectValue placeholder="Sous-catégorie" />
+                             <SelectValue placeholder={t('marketplace.subCategory')} />
                          </SelectTrigger>
                          <SelectContent>
-                             <SelectItem value="all">Toutes les sous-catégories</SelectItem>
+                             <SelectItem value="all">{t('marketplace.allSubCategories')}</SelectItem>
                              {functions
                                  .filter(f => {
-                                     const cat = serviceTypes.find(t => t.name === selectedCategory);
+                                     const cat = serviceTypes.find(t2 => t2.name === selectedCategory);
                                      return cat && f.service_type_code === cat.code_service;
                                  })
                                  .map(f => (
@@ -193,7 +185,7 @@ export default function Home() {
                             size="icon"
                             className={`h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 ${showAdvanced ? 'bg-rose-50 text-rose-600' : 'text-stone-400'}`}
                             onClick={() => setShowAdvanced(!showAdvanced)}
-                            title="Filtres avancés"
+                            title={t('marketplace.filters')}
                         >
                             <SlidersHorizontal className="w-5 h-5" />
                         </Button>
@@ -216,54 +208,49 @@ export default function Home() {
                         </Button>
              </div>
 
-             {/* Advanced Filters Row */}
              {showAdvanced && (
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 w-full pt-3 border-t border-stone-100 animate-in slide-in-from-top-2">
-                     {/* Cultural */}
                      <Select value={filterCultural} onValueChange={setFilterCultural}>
                         <SelectTrigger className="bg-stone-50 border-stone-200">
-                            <SelectValue placeholder="Affinité culturelle" />
+                            <SelectValue placeholder={t('marketplace.culturalAffinity')} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Toute culture</SelectItem>
+                            <SelectItem value="all">{t('marketplace.anyCulture')}</SelectItem>
                             {["Aire Sawa", "Aire Grassfields", "Aire Fang-Béti", "Grand Nord (Soudano-Sahélien)", "Bamiléké", "Bamoun", "Bakweri"].map(z => (
                                 <SelectItem key={z} value={z}>{z}</SelectItem>
                             ))}
                         </SelectContent>
                      </Select>
 
-                     {/* Language */}
                      <Select value={filterLanguage} onValueChange={setFilterLanguage}>
                         <SelectTrigger className="bg-stone-50 border-stone-200">
-                            <SelectValue placeholder="Langue" />
+                            <SelectValue placeholder={t('marketplace.language')} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Toute langue</SelectItem>
+                            <SelectItem value="all">{t('marketplace.anyLanguage')}</SelectItem>
                             {["Français", "Anglais", "Pidgin", "Dialectes locaux"].map(l => (
                                 <SelectItem key={l} value={l}>{l}</SelectItem>
                             ))}
                         </SelectContent>
                      </Select>
 
-                     {/* Religion */}
                      <Select value={filterReligion} onValueChange={setFilterReligion}>
                         <SelectTrigger className="bg-stone-50 border-stone-200">
-                            <SelectValue placeholder="Religion / Tradition" />
+                            <SelectValue placeholder={t('marketplace.religionTradition')} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Toute tradition</SelectItem>
+                            <SelectItem value="all">{t('marketplace.anyPreference')}</SelectItem>
                             {["Chrétien", "Musulman", "Traditionnel/Ancestral", "Laïc"].map(r => (
                                 <SelectItem key={r} value={r}>{r}</SelectItem>
                             ))}
                         </SelectContent>
                      </Select>
 
-                     {/* Diaspora Toggle */}
                      <div 
                         className={`flex items-center justify-between px-4 rounded-md border cursor-pointer transition-colors h-10 ${filterDiaspora ? 'bg-rose-50 border-rose-200' : 'bg-stone-50 border-stone-200'}`}
                         onClick={() => setFilterDiaspora(!filterDiaspora)}
                      >
-                        <span className={`text-sm ${filterDiaspora ? 'text-rose-700 font-medium' : 'text-stone-600'}`}>Spécial Diaspora</span>
+                        <span className={`text-sm ${filterDiaspora ? 'text-rose-700 font-medium' : 'text-stone-600'}`}>{t('marketplace.diasporaReady')}</span>
                         <div className={`w-3 h-3 rounded-full ${filterDiaspora ? 'bg-rose-600' : 'bg-stone-300'}`} />
                      </div>
                  </div>
@@ -320,7 +307,7 @@ export default function Home() {
           <div className="flex justify-between items-end mb-6 sm:mb-12">
             <div>
               <h2 className="text-xl sm:text-3xl font-bold text-stone-900 mb-1 sm:mb-2">
-                  {selectedCountry ? `Recommandé en ${selectedCountry}` : t('home.featuredPlanners')}
+                  {selectedCountry ? `${t('home.recommendedIn')} ${selectedCountry}` : t('home.featuredPlanners')}
               </h2>
               <p className="text-stone-500">
                   {t('home.featuredSubtitle')}
@@ -339,7 +326,6 @@ export default function Home() {
                 <ServiceCard key={service.id} service={service} />
               ))
             ) : (
-              // Empty state skeleton
               [1, 2, 3].map((i) => (
                 <div key={i} className="h-[400px] bg-stone-100 rounded-xl animate-pulse" />
               ))
@@ -408,14 +394,14 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="font-bold text-xl">Sarah N.</div>
-                  <div className="text-stone-400">Décoratrice à Douala</div>
+                  <div className="text-stone-400">{t('home.vendorSpotlightRole')}</div>
                 </div>
               </div>
               <p className="text-stone-300 italic text-lg leading-relaxed">
-                "Depuis que j'ai rejoint EventCrafter, j'ai réservé 4 mariages en un seul mois ! La plateforme rend la gestion des réservations et les paiements très simples."
+                "{t('home.vendorQuote')}"
               </p>
               <div className="mt-6 flex items-center gap-2 text-rose-400 font-medium">
-                <CheckCircle2 className="w-5 h-5" /> Prestataire Vérifié
+                <CheckCircle2 className="w-5 h-5" /> {t('home.verifiedProvider')}
               </div>
             </div>
           </div>
@@ -427,8 +413,8 @@ export default function Home() {
         <section className="py-10 sm:py-20 bg-white">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-6 sm:mb-12">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-2 sm:mb-4">Avis de la Communauté</h2>
-                    <p className="text-stone-500">Découvrez ce que nos prestataires et clients disent de leur expérience.</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-2 sm:mb-4">{t('home.communityReviews')}</h2>
+                    <p className="text-stone-500">{t('home.communitySubtitle')}</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
                     {testimonials.map((review, idx) => (
@@ -440,7 +426,7 @@ export default function Home() {
                                 </p>
                                 {review.benefits_experienced && (
                                     <div className="mb-6 p-3 bg-rose-50/50 rounded-lg text-sm text-rose-800">
-                                        <span className="font-bold block text-rose-600 mb-1">Avantage clé :</span>
+                                        <span className="font-bold block text-rose-600 mb-1">{t('home.keyBenefit')}</span>
                                         {review.benefits_experienced}
                                     </div>
                                 )}
