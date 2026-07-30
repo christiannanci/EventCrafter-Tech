@@ -1,6 +1,8 @@
+import { Service, VendorProfile, ClientProfile, Booking, Event, Conversation, Message, Review, Notification, Membership, Invoice, Region, Departement, Ville, Quartier, Fonction, PlatformFeedback, Contract, Dispute, Lead, Transaction, Payout, Refund, AppUser, Country, ServiceType } from '@/api/entities';
+import { base44 } from '@/api/apiClient';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { base44 } from "@/api/apiClient";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { CheckCircle2, FileSignature, CreditCard, Loader2, Download, AlertCircle } from "lucide-react";
@@ -9,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PaymentModal from '@/components/PaymentModal';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function SubscriptionCheckout() {
     // We'll use a query param ?membership_id=...
@@ -16,6 +19,7 @@ export default function SubscriptionCheckout() {
     const membershipId = queryParams.get('membership_id');
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { t } = useLanguage();
     
     const [membership, setMembership] = useState(null);
     const [contract, setContract] = useState(null);
@@ -41,7 +45,7 @@ export default function SubscriptionCheckout() {
                 await fetchData(membershipId);
             } catch (error) {
                 console.error(error);
-                toast({ title: "Erreur", description: "Impossible de charger les détails de l'abonnement", variant: "destructive" });
+                toast({ title: t('subscriptionCheckout.errorLoad'), description: t('subscriptionCheckout.errorLoadDesc'), variant: "destructive" });
             } finally {
                 setLoading(false);
             }
@@ -50,17 +54,17 @@ export default function SubscriptionCheckout() {
     }, [membershipId]);
 
     const fetchData = async (id) => {
-        const mems = await base44.entities.Membership.filter({ id });
+        const mems = await Membership.filter({ id });
         if (mems.length === 0) return;
         setMembership(mems[0]);
 
         if (mems[0].contract_id) {
-            const contracts = await base44.entities.Contract.filter({ id: mems[0].contract_id });
+            const contracts = await Contract.filter({ id: mems[0].contract_id });
             if (contracts.length > 0) setContract(contracts[0]);
         }
 
         if (mems[0].invoice_id) {
-            const invoices = await base44.entities.Invoice.filter({ id: mems[0].invoice_id });
+            const invoices = await Invoice.filter({ id: mems[0].invoice_id });
             if (invoices.length > 0) setInvoice(invoices[0]);
         }
     };
@@ -68,7 +72,7 @@ export default function SubscriptionCheckout() {
     const handleSignContract = async () => {
         setSigning(true);
         try {
-            await base44.entities.Contract.update(contract.id, {
+            await Contract.update(contract.id, {
                 status: 'signed',
                 client_signed_at: new Date().toISOString(),
                 // Auto-sign by platform as provider? In this context, User is the "Client" of the platform.
@@ -77,15 +81,15 @@ export default function SubscriptionCheckout() {
                 signed_date: new Date().toISOString()
             });
             
-            await base44.entities.Membership.update(membership.id, {
+            await Membership.update(membership.id, {
                 status: 'pending_payment'
             });
 
             await fetchData(membership.id);
-            toast({ title: "Contrat signé", description: "Vous pouvez maintenant procéder au paiement." });
+            toast({ title: t('subscriptionCheckout.contractSignedTitle'), description: t('subscriptionCheckout.contractSignedDesc') });
             setShowContract(false);
         } catch (error) {
-            toast({ title: "Erreur de signature", variant: "destructive" });
+            toast({ title: t('subscriptionCheckout.errorSigning'), variant: "destructive" });
         } finally {
             setSigning(false);
         }
@@ -94,21 +98,21 @@ export default function SubscriptionCheckout() {
     const handlePaymentComplete = async () => {
         try {
             // La preuve de paiement a été soumise - attendre validation admin
-            await base44.entities.Membership.update(membership.id, {
+            await Membership.update(membership.id, {
                 status: 'pending_validation'
             });
 
             toast({ 
-                title: "Preuve envoyée", 
-                description: "Votre paiement sera validé sous 24h par notre équipe" 
+                title: t('subscriptionCheckout.proofSentTitle'), 
+                description: t('subscriptionCheckout.proofSentDesc') 
             });
             
             navigate('/VendorDashboard');
         } catch (error) {
             console.error(error);
             toast({ 
-                title: "Erreur", 
-                description: "Impossible de soumettre la preuve", 
+                title: t('subscriptionCheckout.errorSubmit'), 
+                description: t('subscriptionCheckout.errorSubmitDesc'), 
                 variant: "destructive" 
             });
         }
@@ -123,12 +127,12 @@ export default function SubscriptionCheckout() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-rose-600">
                             <AlertCircle className="w-5 h-5" />
-                            Abonnement Introuvable
+                            {t('subscriptionCheckout.notFoundTitle')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-stone-500 mb-4">Impossible de charger les détails de l'abonnement. Veuillez réessayer.</p>
-                        <Button onClick={() => navigate('/Pricing')} className="w-full">Retour aux Tarifs</Button>
+                        <p className="text-stone-500 mb-4">{t('subscriptionCheckout.notFoundDesc')}</p>
+                        <Button onClick={() => navigate('/Pricing')} className="w-full">{t('subscriptionCheckout.backToPricing')}</Button>
                     </CardContent>
                 </Card>
             </div>
@@ -141,8 +145,8 @@ export default function SubscriptionCheckout() {
     return (
         <div className="min-h-screen bg-stone-50 py-12 px-4">
             <div className="max-w-3xl mx-auto">
-                <h1 className="text-3xl font-bold text-stone-900 mb-2">Finalisez Votre Abonnement</h1>
-                <p className="text-stone-500 mb-8">Veuillez examiner et signer le contrat, puis payer la facture pour activer votre plan {membership?.membership_type_code}.</p>
+                <h1 className="text-3xl font-bold text-stone-900 mb-2">{t('subscriptionCheckout.title')}</h1>
+                <p className="text-stone-500 mb-8">{t('subscriptionCheckout.subtitlePrefix')} {membership?.membership_type_code} {t('subscriptionCheckout.subtitleSuffix')}</p>
 
                 <div className="grid gap-6">
                     {/* Step 1: Contract */}
@@ -152,10 +156,10 @@ export default function SubscriptionCheckout() {
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isContractSigned ? "bg-green-600 text-white" : "bg-stone-900 text-white"}`}>
                                     {isContractSigned ? <CheckCircle2 className="w-5 h-5" /> : "1"}
                                 </div>
-                                Signer le Contrat d'Abonnement
+                                {t('subscriptionCheckout.step1Title')}
                             </CardTitle>
                             <CardDescription>
-                                Consultez les conditions de votre abonnement {membership?.membership_type_code}.
+                                {t('subscriptionCheckout.step1DescPrefix')} {membership?.membership_type_code} {t('subscriptionCheckout.step1DescSuffix')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -163,45 +167,45 @@ export default function SubscriptionCheckout() {
                                 <div className="flex items-center gap-3">
                                     <FileSignature className="w-5 h-5 text-stone-400" />
                                     <div>
-                                        <p className="font-medium text-sm">Contrat n°{contract?.contract_number}</p>
-                                        <p className="text-xs text-stone-500">Généré le {contract ? format(new Date(contract.created_date), 'PPP') : ''}</p>
+                                        <p className="font-medium text-sm">{t('subscriptionCheckout.contractNumber')}{contract?.contract_number}</p>
+                                        <p className="text-xs text-stone-500">{t('subscriptionCheckout.generatedOn')} {contract ? format(new Date(contract.created_date), 'PPP') : ''}</p>
                                     </div>
                                 </div>
                                 {isContractSigned ? (
-                                    <Button variant="ghost" disabled className="text-green-600">Signé</Button>
+                                    <Button variant="ghost" disabled className="text-green-600">{t('subscriptionCheckout.signed')}</Button>
                                 ) : (
                                     <Dialog open={showContract} onOpenChange={setShowContract}>
                                         <DialogTrigger asChild>
-                                            <Button>Examiner et Signer</Button>
+                                            <Button>{t('subscriptionCheckout.reviewSign')}</Button>
                                         </DialogTrigger>
                                         <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
                                             <DialogHeader>
-                                                <DialogTitle>Contrat d'Abonnement</DialogTitle>
+                                                <DialogTitle>{t('subscriptionCheckout.contractDialogTitle')}</DialogTitle>
                                             </DialogHeader>
                                             <ScrollArea className="flex-grow p-4 border rounded bg-stone-50 text-sm">
-                                                <h3 className="font-bold mb-2">CONDITIONS D'UTILISATION</h3>
+                                                <h3 className="font-bold mb-2">{t('subscriptionCheckout.termsOfService')}</h3>
                                                 <p className="whitespace-pre-wrap mb-4">
                                                     {contract?.jurisdiction_clause}
                                                 </p>
-                                                <h3 className="font-bold mb-2">POLITIQUE D'ANNULATION</h3>
+                                                <h3 className="font-bold mb-2">{t('subscriptionCheckout.cancellationPolicy')}</h3>
                                                 <p className="whitespace-pre-wrap mb-4">
                                                     {contract?.cancellation_terms}
                                                 </p>
-                                                <h3 className="font-bold mb-2">FRAIS ET PAIEMENT</h3>
+                                                <h3 className="font-bold mb-2">{t('subscriptionCheckout.feesPayment')}</h3>
                                                 <p className="whitespace-pre-wrap">
                                                     {contract?.commission_clause}
                                                 </p>
                                                 <div className="mt-8 pt-4 border-t">
-                                                    <p className="font-bold">Plan : {membership?.membership_type_code?.toUpperCase()}</p>
-                                                    <p>Montant : {membership?.amount?.toLocaleString()} {membership?.currency}</p>
-                                                    <p>Durée : {membership?.duration_days} jours</p>
+                                                    <p className="font-bold">{t('subscriptionCheckout.plan')} {membership?.membership_type_code?.toUpperCase()}</p>
+                                                    <p>{t('subscriptionCheckout.amount')} {membership?.amount?.toLocaleString()} {membership?.currency}</p>
+                                                    <p>{t('subscriptionCheckout.duration')} {membership?.duration_days} {t('subscriptionCheckout.days')}</p>
                                                 </div>
                                             </ScrollArea>
                                             <div className="pt-4 flex justify-end gap-2">
-                                                <Button variant="outline" onClick={() => setShowContract(false)}>Annuler</Button>
+                                                <Button variant="outline" onClick={() => setShowContract(false)}>{t('subscriptionCheckout.cancel')}</Button>
                                                 <Button onClick={handleSignContract} disabled={signing}>
                                                     {signing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                    Accepter et Signer
+                                                    {t('subscriptionCheckout.acceptSign')}
                                                 </Button>
                                             </div>
                                         </DialogContent>
@@ -218,10 +222,10 @@ export default function SubscriptionCheckout() {
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isPaid ? "bg-green-600 text-white" : !isContractSigned ? "bg-stone-300 text-stone-500" : "bg-stone-900 text-white"}`}>
                                     {isPaid ? <CheckCircle2 className="w-5 h-5" /> : "2"}
                                 </div>
-                                Payer la Facture
+                                {t('subscriptionCheckout.step2Title')}
                             </CardTitle>
                              <CardDescription>
-                                Paiement sécurisé pour votre abonnement.
+                                {t('subscriptionCheckout.step2Desc')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -229,19 +233,19 @@ export default function SubscriptionCheckout() {
                                  <div className="flex items-center gap-3">
                                     <CreditCard className="w-5 h-5 text-stone-400" />
                                     <div>
-                                        <p className="font-medium text-sm">Facture n°{invoice?.invoice_number}</p>
-                                        <p className="text-xs text-stone-500">Montant : {invoice?.amount?.toLocaleString()} {invoice?.currency}</p>
+                                        <p className="font-medium text-sm">{t('subscriptionCheckout.invoiceNumber')}{invoice?.invoice_number}</p>
+                                        <p className="text-xs text-stone-500">{t('subscriptionCheckout.amountLabel')} {invoice?.amount?.toLocaleString()} {invoice?.currency}</p>
                                     </div>
                                 </div>
                                 {isPaid ? (
-                                     <Button variant="ghost" disabled className="text-green-600">Payée</Button>
+                                     <Button variant="ghost" disabled className="text-green-600">{t('subscriptionCheckout.paid')}</Button>
                                 ) : (
                                     <>
                                         <Button 
                                             disabled={!isContractSigned} 
                                             onClick={() => setShowPayment(true)}
                                         >
-                                            Payer Maintenant
+                                            {t('subscriptionCheckout.payNow')}
                                         </Button>
                                         <PaymentModal 
                                             booking={null} // Not a booking payment
@@ -252,7 +256,7 @@ export default function SubscriptionCheckout() {
                                                 setShowPayment(false);
                                                 handlePaymentComplete();
                                             }}
-                                            label={`Payer ${invoice?.amount?.toLocaleString()} ${invoice?.currency}`}
+                                            label={`${t('subscriptionCheckout.payLabel')} ${invoice?.amount?.toLocaleString()} ${invoice?.currency}`}
                                         />
                                     </>
                                 )}
