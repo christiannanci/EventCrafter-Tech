@@ -12,6 +12,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import ClientVerificationDialog from './ClientVerificationDialog';
 import PhoneInput from '@/components/PhoneInput';
+import { useLanguage } from '@/components/LanguageContext';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -35,6 +36,7 @@ function LocationMarker({ position, setPosition }) {
 
 export default function ClientProfileForm({ user, initialProfile, onSave }) {
     const { toast } = useToast();
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         last_name: "",
@@ -98,10 +100,10 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                 ...prev,
                 profile_image: file_url
             }));
-            toast({ title: "Succès", description: "Photo de profil mise à jour." });
+            toast({ title: t('clientProfile.success'), description: t('clientProfile.photoUpdated') });
         } catch (error) {
             console.error("Upload failed", error);
-            toast({ title: "Erreur", description: "Échec du téléchargement de la photo.", variant: "destructive" });
+            toast({ title: t('clientProfile.error'), description: t('clientProfile.photoUploadError'), variant: "destructive" });
         } finally {
             if (!originalLoading) setLoading(false);
         }
@@ -119,10 +121,10 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                 ...prev,
                 verification_documents: [...(prev.verification_documents || []), file_url]
             }));
-            toast({ title: "Succès", description: "Document téléchargé avec succès." });
+            toast({ title: t('clientProfile.success'), description: t('clientProfile.documentUploaded') });
         } catch (error) {
             console.error("Upload failed", error);
-            toast({ title: "Erreur", description: "Échec du téléchargement du document.", variant: "destructive" });
+            toast({ title: t('clientProfile.error'), description: t('clientProfile.documentUploadError'), variant: "destructive" });
         } finally {
             if (!originalLoading) setLoading(false);
         }
@@ -160,16 +162,16 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
             }
 
             toast({
-                title: "Profil Mis à Jour",
-                description: "Vos informations client ont été enregistrées avec succès.",
+                title: t('clientProfile.profileUpdatedTitle'),
+                description: t('clientProfile.profileUpdatedDesc'),
             });
             
             if (onSave) onSave();
         } catch (error) {
             console.error("Error saving profile:", error);
             toast({
-                title: "Erreur",
-                description: "Échec de l'enregistrement du profil. Veuillez réessayer.",
+                title: t('clientProfile.error'),
+                description: t('clientProfile.profileUpdateError'),
                 variant: "destructive",
             });
         } finally {
@@ -210,8 +212,8 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                             </label>
                         </div>
                         <div>
-                            <CardTitle>Profil Client</CardTitle>
-                            <CardDescription>Gérez vos informations personnelles.</CardDescription>
+                            <CardTitle>{t('clientProfile.title')}</CardTitle>
+                            <CardDescription>{t('clientProfile.subtitle')}</CardDescription>
                         </div>
                     </div>
                     {initialProfile && <ClientVerificationDialog profile={initialProfile} user={user} onUpdate={onSave} />}
@@ -225,7 +227,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                                 <Wallet className="w-5 h-5 text-stone-500" />
                             </div>
                             <div>
-                                <p className="text-xs text-stone-500 uppercase font-semibold">Solde du Compte</p>
+                                <p className="text-xs text-stone-500 uppercase font-semibold">{t('clientProfile.accountBalance')}</p>
                                 <p className="text-xl font-bold text-stone-900">
                                     {initialProfile.account_balance?.toLocaleString()} FCFA
                                 </p>
@@ -236,11 +238,11 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                                 <Shield className="w-5 h-5 text-stone-500" />
                             </div>
                             <div>
-                                <p className="text-xs text-stone-500 uppercase font-semibold">Statut de Vérification</p>
+                                <p className="text-xs text-stone-500 uppercase font-semibold">{t('clientProfile.verificationStatus')}</p>
                                 <p className="text-sm font-medium text-stone-900">
                                     {initialProfile.verification_status === 'verified' 
-                                        ? 'Identité Vérifiée' 
-                                        : "Vérification d'Identité Requise"}
+                                        ? t('clientProfile.identityVerified') 
+                                        : t('clientProfile.identityRequired')}
                                 </p>
                             </div>
                         </div>
@@ -250,7 +252,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="last_name">Nom *</Label>
+                            <Label htmlFor="last_name">{t('clientProfile.lastName')}</Label>
                             <div className="relative">
                                 <User className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
                                 <Input 
@@ -265,7 +267,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="first_name">Prénom *</Label>
+                            <Label htmlFor="first_name">{t('clientProfile.firstName')}</Label>
                             <div className="relative">
                                 <User className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
                                 <Input 
@@ -282,7 +284,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="contact_email">Email de Contact</Label>
+                        <Label htmlFor="contact_email">{t('clientProfile.contactEmail')}</Label>
                         <div className="relative">
                             <Mail className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
                             <Input 
@@ -299,14 +301,14 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="phone">Numéro de Téléphone</Label>
+                            <Label htmlFor="phone">{t('clientProfile.phoneNumber')}</Label>
                             <PhoneInput
                                 value={formData.phone}
                                 onChange={(val) => setFormData(prev => ({ ...prev, phone: val }))}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="whatsapp">Numéro WhatsApp</Label>
+                            <Label htmlFor="whatsapp">{t('clientProfile.whatsappNumber')}</Label>
                             <PhoneInput
                                 value={formData.whatsapp}
                                 onChange={(val) => setFormData(prev => ({ ...prev, whatsapp: val }))}
@@ -316,17 +318,16 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
 
                     <div className="border-t border-stone-100 pt-4">
                         <h3 className="text-sm font-semibold mb-4 text-stone-900 flex items-center gap-2">
-                            <Shield className="w-4 h-4" /> Documents de Vérification
+                            <Shield className="w-4 h-4" /> {t('clientProfile.verificationDocs')}
                         </h3>
                         <div className="bg-stone-50 p-4 rounded-lg border border-stone-200 mb-6">
                             <p className="text-sm text-stone-500 mb-4">
-                                Téléchargez une pièce d'identité, un justificatif de domicile, ou une vidéo de présentation (PDF, Word, Audio, Vidéo acceptés).
-                                Votre compte sera examiné par un administrateur.
+                                {t('clientProfile.verificationDocsDesc')}
                             </p>
                             
                             <div className="flex items-center gap-4 mb-4">
                                 <Button type="button" variant="outline" onClick={() => document.getElementById('doc-upload').click()} disabled={loading}>
-                                    <Upload className="w-4 h-4 mr-2" /> Télécharger un Document
+                                    <Upload className="w-4 h-4 mr-2" /> {t('clientProfile.uploadDocument')}
                                 </Button>
                                 <input 
                                     id="doc-upload" 
@@ -335,7 +336,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                                     accept=".pdf,.doc,.docx,audio/*,video/*,image/*"
                                     onChange={handleFileUpload}
                                 />
-                                {loading && <span className="text-xs text-stone-500 animate-pulse">Téléchargement...</span>}
+                                {loading && <span className="text-xs text-stone-500 animate-pulse">{t('clientProfile.uploading')}</span>}
                             </div>
 
                             {formData.verification_documents?.length > 0 && (
@@ -360,7 +361,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
 
                     <div className="border-t border-stone-100 pt-4">
                         <h3 className="text-sm font-semibold mb-4 text-stone-900 flex items-center gap-2">
-                            <MapPin className="w-4 h-4" /> Détails de Localisation
+                            <MapPin className="w-4 h-4" /> {t('clientProfile.locationDetails')}
                         </h3>
                         
                         <div className="mb-4 h-[300px] w-full rounded-lg overflow-hidden border border-stone-200 z-0 relative">
@@ -381,12 +382,12 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                             </MapContainer>
                         </div>
                         <p className="text-xs text-stone-500 mb-4 text-center">
-                            Touchez la carte pour définir votre position exacte.
+                            {t('clientProfile.tapMap')}
                         </p>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="space-y-2">
-                                <Label htmlFor="neighborhood_code">Code de Quartier</Label>
+                                <Label htmlFor="neighborhood_code">{t('clientProfile.neighborhoodCode')}</Label>
                                 <Input 
                                     id="neighborhood_code" 
                                     name="neighborhood_code" 
@@ -428,7 +429,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
 
                     <div className="flex justify-end pt-4">
                         <Button type="submit" className="bg-rose-600 hover:bg-rose-700" disabled={loading}>
-                            {loading ? "Enregistrement..." : "Enregistrer les Modifications"}
+                            {loading ? t('clientProfile.saving') : t('clientProfile.saveChanges')}
                         </Button>
                     </div>
                 </form>
