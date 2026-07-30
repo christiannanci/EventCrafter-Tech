@@ -43,6 +43,14 @@ export default function Home() {
   const { t } = useLanguage();
   const { selectedCountry } = useLocationContext();
 
+  // Traduit a la volee une valeur stockee en base (categorie, culture, langue, religion)
+  // en anglais si une correspondance existe dans dynamicLabels, sinon renvoie la valeur telle quelle.
+  const tr = (val) => {
+    if (!val) return val;
+    const translated = t(`dynamicLabels.${val}`);
+    return translated === `dynamicLabels.${val}` ? val : translated;
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -128,7 +136,7 @@ export default function Home() {
                      <SelectContent>
                          <SelectItem value="all">{t('categories.All')}</SelectItem>
                          {serviceTypes.map(t2 => (
-                             <SelectItem key={t2.id} value={t2.name}>{t2.name}</SelectItem>
+                             <SelectItem key={t2.id} value={t2.name}>{tr(t2.name)}</SelectItem>
                          ))}
                      </SelectContent>
                  </Select>
@@ -148,7 +156,7 @@ export default function Home() {
                                      return cat && f.service_type_code === cat.code_service;
                                  })
                                  .map(f => (
-                                     <SelectItem key={f.id} value={f.code}>{f.name}</SelectItem>
+                                     <SelectItem key={f.id} value={f.code}>{tr(f.name)}</SelectItem>
                                  ))
                              }
                          </SelectContent>
@@ -217,7 +225,7 @@ export default function Home() {
                         <SelectContent>
                             <SelectItem value="all">{t('marketplace.anyCulture')}</SelectItem>
                             {["Aire Sawa", "Aire Grassfields", "Aire Fang-Béti", "Grand Nord (Soudano-Sahélien)", "Bamiléké", "Bamoun", "Bakweri"].map(z => (
-                                <SelectItem key={z} value={z}>{z}</SelectItem>
+                                <SelectItem key={z} value={z}>{tr(z)}</SelectItem>
                             ))}
                         </SelectContent>
                      </Select>
@@ -229,7 +237,7 @@ export default function Home() {
                         <SelectContent>
                             <SelectItem value="all">{t('marketplace.anyLanguage')}</SelectItem>
                             {["Français", "Anglais", "Pidgin", "Dialectes locaux"].map(l => (
-                                <SelectItem key={l} value={l}>{l}</SelectItem>
+                                <SelectItem key={l} value={l}>{tr(l)}</SelectItem>
                             ))}
                         </SelectContent>
                      </Select>
@@ -241,7 +249,7 @@ export default function Home() {
                         <SelectContent>
                             <SelectItem value="all">{t('marketplace.anyPreference')}</SelectItem>
                             {["Chrétien", "Musulman", "Traditionnel/Ancestral", "Laïc"].map(r => (
-                                <SelectItem key={r} value={r}>{r}</SelectItem>
+                                <SelectItem key={r} value={r}>{tr(r)}</SelectItem>
                             ))}
                         </SelectContent>
                      </Select>

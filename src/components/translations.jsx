@@ -206,6 +206,33 @@ export const translations = {
       copyright: "EventCrafter Marketplace. All rights reserved.",
       vendorBadge: "VENDOR",
       clientBadge: "CLIENT"
+    },
+    dynamicLabels: {
+      "Alimentation & Traiteur": "Food & Catering",
+      "Cadeaux & Souvenirs": "Gifts & Favors",
+      "Décoration & Design": "Decor & Design",
+      "Divertissement & Culture": "Entertainment & Culture",
+      "Lieux & Espaces": "Venue & Space",
+      "Média & Production": "Media & Production",
+      "Mode & Tenues": "Fashion & Attire",
+      "Organisation & Logistique": "Planning & Logistics",
+      "Services Enfants & Famille": "Kids & Family Services",
+      "Services Rituels & Spirituels": "Ritual & Spiritual Services",
+      "Aire Sawa": "Sawa Area",
+      "Aire Grassfields": "Grassfields Area",
+      "Aire Fang-Béti": "Fang-Beti Area",
+      "Grand Nord (Soudano-Sahélien)": "Far North (Sudano-Sahelian)",
+      "Bamiléké": "Bamileke",
+      "Bamoun": "Bamoun",
+      "Bakweri": "Bakweri",
+      "Français": "French",
+      "Anglais": "English",
+      "Pidgin": "Pidgin",
+      "Dialectes locaux": "Local Dialects",
+      "Chrétien": "Christian",
+      "Musulman": "Muslim",
+      "Traditionnel/Ancestral": "Traditional/Ancestral",
+      "Laïc": "Secular"
     }
   },
   fr: {
