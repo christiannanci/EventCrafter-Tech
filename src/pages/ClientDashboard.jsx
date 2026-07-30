@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { base44 } from "@/api/apiClient";
-import { SendEmail } from "@/api/integrations";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -218,17 +217,21 @@ export default function ClientDashboard() {
   const createEventMutation = useMutation({
     mutationFn: async ({ eventName, eventDate, eventDescription, cart }) => {
       if (!eventName?.trim()) {
-        throw new Error("Veuillez entrer un nom pour l'evenement");
+        throw new Error("Veuillez entrer un nom pour l'Ã©vÃ©nement");
       }
       if (!eventDate) {
-        throw new Error("Veuillez selectionner une date pour l'evenement");
+        throw new Error("Veuillez sÃ©lectionner une date pour l'Ã©vÃ©nement");
       }
       if (cart.length === 0) {
         throw new Error("Veuillez ajouter au moins un service au panier");
       }
+      console.log("CrÃ©ation Ã©vÃ©nement - utilisateur:", user);
+      console.log("Panier:", cart);
 
+      // RÃ©cupÃ©rer services nÃ©cessaires
       const allServices = await base44.entities.Service.list('-created_date', 200);
-
+      
+      // VÃ©rifier que tous les services du panier ont un planner_id valide
       const invalidServices = [];
       for (const cartService of cart) {
         const fullService = allServices.find(s => s.id === cartService.id);
@@ -236,13 +239,13 @@ export default function ClientDashboard() {
           invalidServices.push(cartService.title);
         }
       }
-
+      
       if (invalidServices.length > 0) {
         throw new Error(`Les services suivants n'ont pas de vendeur valide: ${invalidServices.join(', ')}`);
       }
 
       const { generateEntityCode } = await import('../components/SecurityUtils');
-
+      
       const event = await base44.entities.Event.create({
         event_code: generateEntityCode('EVENT'),
         client_id: user.id,
@@ -253,27 +256,32 @@ export default function ClientDashboard() {
         status: 'planning'
       });
 
+      console.log("Ã‰vÃ©nement crÃ©Ã©:", event);
+      
       for (const cartService of cart) {
+        // Trouver le service complet dans la base de donnÃ©es
         const fullService = allServices.find(s => s.id === cartService.id);
-
+        
         if (!fullService) {
-          console.error("Service non trouve:", cartService.id);
+          console.error("Service non trouvÃ©:", cartService.id);
           continue;
         }
 
         const vendorId = fullService.planner_id;
-
+        
         if (!vendorId) {
           console.error("Pas de planner_id pour le service:", fullService);
-          toast({
-            title: "Avertissement",
-            description: `Service "${cartService.title}" ignore - vendeur introuvable`,
+          toast({ 
+            title: "Avertissement", 
+            description: `Service "${cartService.title}" ignorÃ© - vendeur introuvable`, 
             variant: "destructive",
             duration: 3000
           });
           continue;
         }
 
+        console.log("CrÃ©ation booking pour service:", fullService.title, "vendeur:", vendorId);
+        
         await base44.entities.Booking.create({
           booking_code: generateEntityCode('BOOKING'),
           event_id: event.id,
@@ -283,64 +291,51 @@ export default function ClientDashboard() {
           event_type: 'Other',
           event_date: eventDate,
           status: 'pending',
-          notes: eventDescription || `Service ajoute a l'evenement: ${eventName}`,
+          notes: eventDescription || `Service ajoutÃ© Ã  l'Ã©vÃ©nement: ${eventName}`,
           requested_unit_price: fullService.price_min || 0,
           payment_status: 'unpaid',
           total_amount: 0
         });
 
-        try {
-          const allConvs = await base44.entities.Conversation.list('-created_date', 100);
-          const existingConv = allConvs.find(c =>
-            c.participants.includes(user.id) &&
-            c.participants.includes(vendorId)
-          );
+        // CrÃ©er automatiquement une conversation avec le vendeur
+        const allConvs = await base44.entities.Conversation.list('-created_date', 100);
+        const existingConv = allConvs.find(c => 
+          c.participants.includes(user.id) && 
+          c.participants.includes(vendorId)
+        );
 
-          if (!existingConv) {
-            await base44.entities.Conversation.create({
-              participants: [String(user.id), String(vendorId)],
-              last_message: `Nouvelle demande pour ${fullService.title}`,
-              last_message_at: new Date().toISOString(),
-              service_id: fullService.id
-            });
-          }
-        } catch (convError) {
-          console.error("Erreur creation conversation (non bloquant):", convError);
-        }
-
-        try {
-          await base44.entities.Notification.create({
-            user_id: vendorId,
-            title: "Nouvelle demande de reservation",
-            message: `${user.full_name || user.email} souhaite reserver votre service "${fullService.title}" pour ${eventName}`,
-            type: "booking",
-            link: "/VendorDashboard",
-            is_read: false
+        if (!existingConv) {
+          await base44.entities.Conversation.create({
+            participants: [String(user.id), String(vendorId)],
+            last_message: `Nouvelle demande pour ${fullService.title}`,
+            last_message_at: new Date().toISOString(),
+            service_id: fullService.id
           });
-
-          // Email au vendeur : nouvelle demande de reservation, action requise
-          try {
-            const allUsersForEmail = await base44.entities.User.list();
-            const vendorUserForEmail = allUsersForEmail.find(u => u.id === vendorId);
-            if (vendorUserForEmail) {
-              await SendEmail({
-                to: vendorUserForEmail.email,
-                subject: "Nouvelle demande de reservation",
-                body: `Bonjour ${vendorUserForEmail.full_name || ''},\n\n${user.full_name || user.email} souhaite reserver votre service "${fullService.title}" pour l'evenement "${eventName}".\n\nConnectez-vous a votre tableau de bord pour repondre.\n\nCordialement,\nL'equipe EventCrafter`
-              });
-            }
-          } catch (emailError) {
-            console.error("Erreur envoi email (non bloquant):", emailError);
-          }
-        } catch (notifError) {
-          console.error("Erreur creation notification (non bloquant):", notifError);
         }
+
+        // Notify vendor
+        await base44.entities.Notification.create({
+          user_id: vendorId,
+          title: "ðŸ“‹ Nouvelle demande de rÃ©servation",
+          message: `${user.full_name || user.email} souhaite rÃ©server votre service "${fullService.title}" pour ${eventName}`,
+          type: "booking",
+          link: "/VendorDashboard",
+          is_read: false
+        });
       }
 
-      toast({
-        title: "Evenement cree !",
-        description: `${cart.length} service${cart.length > 1 ? 's' : ''} ajoute${cart.length > 1 ? 's' : ''} a votre evenement.`
+      toast({ 
+        title: "Ã‰vÃ©nement crÃ©Ã©!", 
+        description: `${cart.length} service${cart.length > 1 ? 's' : ''} ajoutÃ©${cart.length > 1 ? 's' : ''} Ã  votre Ã©vÃ©nement. Conversations crÃ©Ã©es avec les prestataires.` 
       });
+
+      setCart([]);
+      localStorage.removeItem('contact_cart');
+      localStorage.removeItem('pending_event_form');
+      window.dispatchEvent(new Event('storage'));
+      setEventName("");
+      setEventDate("");
+      setEventDescription("");
 
       setCart([]);
       localStorage.removeItem('contact_cart');
@@ -353,7 +348,7 @@ export default function ClientDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['events', 'bookings']);
-      toast({ title: "Evenement cree !", description: `Services ajoutes avec succes` });
+      toast({ title: "Ã‰vÃ©nement crÃ©Ã©!", description: `Services ajoutÃ©s avec succÃ¨s` });
     },
     onError: (error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -478,7 +473,7 @@ export default function ClientDashboard() {
         <TabsList className="w-max min-w-full justify-start bg-stone-100 p-1">
           <TabsTrigger value="contact_cart" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ›’ Panier</TabsTrigger>
           <TabsTrigger value="my_bookings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ“… Ã‰vÃ©nements</TabsTrigger>
-          <TabsTrigger value="my_requests" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ“‹ Demandes</TabsTrigger>
+          <TabsTrigger value="my_requests" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ“¬ Demandes</TabsTrigger>
           <TabsTrigger value="client_profile" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ‘¤ Profil</TabsTrigger>
           <TabsTrigger value="reviews" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">â­ Avis</TabsTrigger>
         </TabsList>
@@ -899,18 +894,20 @@ export default function ClientDashboard() {
                                        <RateVendorDialog booking={booking} />
                                       )}
 
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="border-amber-600 text-amber-700 hover:bg-amber-50"
-                                        onClick={() => {
-                                          setSelectedDisputeBooking(booking);
-                                          setShowDisputeDialog(true);
-                                        }}
-                                      >
-                                        <AlertTriangle className="w-4 h-4 mr-2" />
-                                        Litige
-                                      </Button>
+                                      {(['in_progress', 'delivered', 'completed'].includes(booking.status)) && booking.status !== 'disputed' && (
+                                       <Button 
+                                         size="sm" 
+                                         variant="outline"
+                                         className="border-amber-600 text-amber-700 hover:bg-amber-50"
+                                         onClick={() => {
+                                           setSelectedDisputeBooking(booking);
+                                           setShowDisputeDialog(true);
+                                         }}
+                                       >
+                                         <AlertTriangle className="w-4 h-4 mr-2" />
+                                         Signaler un Incident
+                                       </Button>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
