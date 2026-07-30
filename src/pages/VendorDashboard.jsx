@@ -104,7 +104,7 @@ export default function VendorDashboard() {
   const [newService, setNewService] = useState({
     title: "",
     description: "",
-    category: "Event Planner",
+    category: "",
     service_type_code: "",
     function_codes: [],
     supported_event_types: [],
@@ -132,10 +132,10 @@ export default function VendorDashboard() {
 
   const getVerifStatusInfo = (status) => {
     const info = {
-      unverified: { icon: XCircle, color: "text-gray-500", bg: "bg-gray-100", text: "NON VERIFIE" },
+      unverified: { icon: XCircle, color: "text-gray-500", bg: "bg-gray-100", text: "NON VÃƒâ€°RIFIÃƒâ€°" },
       pending: { icon: Clock, color: "text-yellow-600", bg: "bg-yellow-100", text: "EN ATTENTE" },
-      verified: { icon: CheckCircle2, color: "text-green-600", bg: "bg-green-100", text: "VERIFIE" },
-      rejected: { icon: XCircle, color: "text-red-600", bg: "bg-red-100", text: "REJETE" }
+      verified: { icon: CheckCircle2, color: "text-green-600", bg: "bg-green-100", text: "VÃƒâ€°RIFIÃƒâ€°" },
+      rejected: { icon: XCircle, color: "text-red-600", bg: "bg-red-100", text: "REJETÃƒâ€°" }
     };
     return info[status] || info.unverified;
   };
@@ -146,7 +146,7 @@ export default function VendorDashboard() {
       return;
     }
     if (!vendorProfile?.verification_docs?.length) {
-      toast({ title: "Documents requis", description: "Veuillez telecharger au moins un document.", variant: "destructive" });
+      toast({ title: "Documents requis", description: "Veuillez tÃƒÂ©lÃƒÂ©charger au moins un document.", variant: "destructive" });
       return;
     }
     setSendingVerif(true);
@@ -162,12 +162,12 @@ export default function VendorDashboard() {
       });
       await base44.entities.VendorProfile.update(vendorProfile.id, { verification_status: 'pending' });
       await NotificationService.sendToAdmins({
-        title: "Nouvelle demande de verification",
-        message: `${vendorProfile.business_name || user.full_name} a demande la verification de son compte prestataire`,
+        title: "Nouvelle demande de vÃƒÂ©rification",
+        message: `${vendorProfile.business_name || user.full_name} a demandÃƒÂ© la vÃƒÂ©rification de son compte prestataire`,
         type: "system",
         link: "/AdminDashboard"
       });
-      toast({ title: "Demande envoyee", description: "Un administrateur vous contactera sous peu." });
+      toast({ title: "Demande envoyÃƒÂ©e", description: "Un administrateur vous contactera sous peu." });
       setVerifMessage("");
       refetch();
     } catch (error) {
@@ -259,13 +259,13 @@ export default function VendorDashboard() {
           setBookings(prev => [newBooking, ...prev]);
           await NotificationService.sendToVendor({
             vendorId: user.id,
-            title: "Nouvelle Réservation",
+            title: "Nouvelle RÃƒÆ’Ã‚Â©servation",
             message: `Vous avez recu une nouvelle reservation de ${newBooking.client_name || 'un client'} pour le ${new Date(newBooking.event_date).toLocaleDateString('fr-FR')}. Montant: ${newBooking.total_amount?.toLocaleString() || 'a negocier'} FCFA`,
             type: "booking",
             link: "/VendorDashboard?tab=bookings_received"
           });
           toast({ 
-            title: "🎉 Nouvelle Réservation !",
+            title: "ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Â° Nouvelle RÃƒÆ’Ã‚Â©servation !",
             description: `${newBooking.client_name || 'Un client'} a reserve pour le ${new Date(newBooking.event_date).toLocaleDateString('fr-FR')}`
           });
         }
@@ -308,19 +308,19 @@ export default function VendorDashboard() {
           const savedPercent = Math.round((1 - compressedSize / originalSize) * 100);
           
           toast({ 
-            title: `Image optimisee (${savedPercent}% réduit)`,
-            description: `${formatFileSize(originalSize)} → ${formatFileSize(compressedSize)}`
+            title: `Image optimisee (${savedPercent}% rÃƒÆ’Ã‚Â©duit)`,
+            description: `${formatFileSize(originalSize)} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ${formatFileSize(compressedSize)}`
           });
         }
       
         const result = await UploadFile({ file: fileToUpload });
         setNewService({...newService, image_url: result.file_url});
-        toast({ title: "Image telechargee avec succès" });
+        toast({ title: "Image telechargee avec succÃƒÆ’Ã‚Â¨s" });
         return true;
       });
     } catch (error) {
       toast({ 
-        title: error.message.includes('Rate limit') ? "⚠️ Limite atteinte" : "Echec du telechargement",
+        title: error.message.includes('Rate limit') ? "ÃƒÂ¢Ã…Â¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â Limite atteinte" : "Echec du telechargement",
         description: error.message.includes('Rate limit') ? error.message : undefined,
         variant: "destructive" 
       });
@@ -337,7 +337,7 @@ export default function VendorDashboard() {
       setUploadingVideo(true);
       const result = await UploadFile({ file });
       setNewService({...newService, video_url: result.file_url});
-      toast({ title: "Video telechargee avec succès" });
+      toast({ title: "Video telechargee avec succÃƒÆ’Ã‚Â¨s" });
     } catch (error) {
       toast({ 
         title: "Echec du telechargement", 
@@ -368,7 +368,7 @@ export default function VendorDashboard() {
       if (!validation.success) {
         const firstError = Object.values(validation.errors)[0];
         toast({ 
-          title: "Validation échouée", 
+          title: "Validation ÃƒÆ’Ã‚Â©chouÃƒÆ’Ã‚Â©e", 
           description: firstError,
           variant: "destructive" 
         });
@@ -396,7 +396,7 @@ export default function VendorDashboard() {
       setEditingService(null);
       setNewService({ 
           title: "", description: "", description_details: "", description_terms: "",
-          category: "Wedding", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "", 
+          category: "", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "", 
           availability_level: "ville", availability_code: "",
           location: "", city: "", region: "", neighborhood_code: "", 
           address_details: "", image_url: "",
@@ -419,7 +419,7 @@ export default function VendorDashboard() {
     setNewService({
       title: service.title || "",
       description: service.description || "",
-      category: service.category || "Wedding",
+      category: service.category || "",
       service_type_code: service.service_type_code || "",
       function_codes: service.function_codes || [],
       supported_event_types: service.supported_event_types || [],
@@ -1009,10 +1009,10 @@ export default function VendorDashboard() {
                      Limite de Notifications Atteinte
                    </h3>
                    <p className="text-white/90 mb-2">
-                     Vous avez recu {notificationCount}/10 notifications ce mois. Vous ne recevrez plus de nouvelles demandes clients.
+                     Vous avez reÃƒÂ§u {notificationCount}/10 notifications ce mois. Vous ne recevrez plus de nouvelles demandes clients.
                    </p>
                    <p className="text-white font-semibold">
-                     Passez a Premium ou Gold pour recevoir des notifications illimites !
+                     Passez ÃƒÂ  Premium ou Gold pour recevoir des notifications illimitÃƒÂ©es !
                    </p>
                  </div>
                  <Button 
@@ -1020,7 +1020,7 @@ export default function VendorDashboard() {
                    onClick={() => setIsMembershipDialogOpen(true)}
                  >
                    <Crown className="w-4 h-4 mr-2" />
-                   Ameliorer l'Abonnement
+                   AmÃƒÂ©liorer l'Abonnement
                  </Button>
                </div>
              </div>
@@ -1032,10 +1032,10 @@ export default function VendorDashboard() {
                  <div>
                    <h3 className="text-lg font-bold flex items-center gap-2">
                      <CheckCircle2 className="w-5 h-5" /> 
-                     Plan Free: {notificationCount}/10 notifications utilises ce mois
+                     Plan Free: {notificationCount}/10 notifications utilisÃƒÂ©es ce mois
                    </h3>
                    <p className="text-blue-100 mt-1">
-                     Passez a Premium ou Gold pour des notifications illimitees et plus d'avantages.
+                     Passez ÃƒÂ  Premium ou Gold pour des notifications illimitÃƒÂ©es et plus d'avantages.
                    </p>
                  </div>
                  <Button 
@@ -1104,9 +1104,9 @@ export default function VendorDashboard() {
             )) : (
               <div className="col-span-full text-center py-20 bg-stone-50 rounded-xl border border-dashed border-stone-200">
                 <Package className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-stone-900">Aucun service repertorie</h3>
-                <p className="text-stone-500 mb-6">Commencez a gagner en listant vos services d'organisation d'evenements.</p>
-                <Button onClick={() => setIsNewServiceOpen(true)} variant="outline">Creer Premiere Offre</Button>
+                <h3 className="text-lg font-medium text-stone-900">Aucun service rÃƒÂ©pertoriÃƒÂ©</h3>
+                <p className="text-stone-500 mb-6">Commencez ÃƒÂ  gagner en listant vos services d'organisation d'ÃƒÂ©vÃƒÂ©nements.</p>
+                <Button onClick={() => setIsNewServiceOpen(true)} variant="outline">CrÃƒÂ©er PremiÃƒÂ¨re Offre</Button>
               </div>
             )}
           </div>
