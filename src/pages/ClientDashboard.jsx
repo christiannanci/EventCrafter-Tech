@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -471,11 +471,11 @@ export default function ClientDashboard() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="mb-6 overflow-x-auto -mx-4 px-4">
         <TabsList className="w-max min-w-full justify-start bg-stone-100 p-1">
-          <TabsTrigger value="contact_cart" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ›’ Panier</TabsTrigger>
-          <TabsTrigger value="my_bookings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ“… Ã‰vÃ©nements</TabsTrigger>
-          <TabsTrigger value="my_requests" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ“¬ Demandes</TabsTrigger>
-          <TabsTrigger value="client_profile" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">ðŸ‘¤ Profil</TabsTrigger>
-          <TabsTrigger value="reviews" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">â­ Avis</TabsTrigger>
+          <TabsTrigger value="contact_cart" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Panier</TabsTrigger>
+          <TabsTrigger value="my_bookings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Evenements</TabsTrigger>
+          <TabsTrigger value="my_requests" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Demandes</TabsTrigger>
+          <TabsTrigger value="client_profile" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Profil</TabsTrigger>
+          <TabsTrigger value="reviews" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Avis</TabsTrigger>
         </TabsList>
         </div>
 
