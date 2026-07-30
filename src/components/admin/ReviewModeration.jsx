@@ -17,13 +17,18 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-// Blacklist de mots-clés suspects pour pré-modération
 const BLACKLIST_KEYWORDS = [
   'merde', 'connard', 'salaud', 'putain', 'enfoiré', 'idiot', 'con',
   'raciste', 'voleur', 'arnaque', 'scam', 'fraud', 'fake',
   '@', 'gmail.com', 'yahoo.com', '+237', '+33', 'whatsapp',
   'http://', 'https://', 'www.'
 ];
+
+const STATUS_LABELS = {
+  pending: 'En attente',
+  approved: 'Approuvé',
+  rejected: 'Rejeté'
+};
 
 const detectSuspiciousContent = (text) => {
   if (!text) return { isSuspicious: false, reasons: [] };
@@ -80,21 +85,17 @@ export default function ReviewModeration() {
     const entityName = selectedReview.entityType;
 
     try {
-      // 1. Mettre à jour le statut de l'avis
       await base44.entities[entityName].update(selectedReview.id, {
         status: newStatus,
         moderation_note: moderationNote || undefined
       });
 
-      // 2. Recalculer les moyennes si approuvé (pour Service/Vendor)
       if (newStatus === 'approved') {
         await recalculateRatings(selectedReview, entityName);
       }
 
-      // 3. Envoyer notification email à l'auteur de l'avis
       await sendModerationNotification(selectedReview, newStatus);
 
-      // 4. Si approuvé, notifier la personne évaluée
       if (newStatus === 'approved') {
         await notifyReviewedEntity(selectedReview, entityName);
       }
@@ -117,7 +118,6 @@ export default function ReviewModeration() {
     }
   };
 
-  // Recalcule la moyenne uniquement sur les avis approuvés
   const recalculateRatings = async (review, entityName) => {
     try {
       if (entityName === 'Review' && review.service_id) {
@@ -155,7 +155,6 @@ export default function ReviewModeration() {
     }
   };
 
-  // Notification à l'auteur de l'avis
   const sendModerationNotification = async (review, status) => {
     try {
       const authorId = review.created_by || review.client_id;
@@ -177,7 +176,6 @@ export default function ReviewModeration() {
     }
   };
 
-  // Notification à la personne/service évalué
   const notifyReviewedEntity = async (review, entityName) => {
     try {
       let recipientId = null;
@@ -226,7 +224,7 @@ export default function ReviewModeration() {
       approved: "bg-green-100 text-green-800",
       rejected: "bg-red-100 text-red-800"
     };
-    return <Badge className={styles[status] || "bg-stone-100"}>{status}</Badge>;
+    return <Badge className={styles[status] || "bg-stone-100"}>{STATUS_LABELS[status] || status}</Badge>;
   };
 
   const ReviewCard = ({ review, entityType, icon: Icon }) => {
@@ -369,7 +367,7 @@ export default function ReviewModeration() {
             Avis Services ({filterByStatus(serviceReviews, 'pending').length})
           </TabsTrigger>
           <TabsTrigger value="vendors">
-            Avis Vendors ({filterByStatus(vendorReviews, 'pending').length})
+            Avis Prestataires ({filterByStatus(vendorReviews, 'pending').length})
           </TabsTrigger>
           <TabsTrigger value="clients">
             Avis Clients ({filterByStatus(clientReviews, 'pending').length})
@@ -392,7 +390,7 @@ export default function ReviewModeration() {
                       <ReviewCard key={review.id} review={review} entityType="Review" icon={Package} />
                     ))
                   ) : (
-                    <p className="col-span-2 text-center py-8 text-stone-500">Aucun avis {status}</p>
+                    <p className="col-span-2 text-center py-8 text-stone-500">Aucun avis {STATUS_LABELS[status]?.toLowerCase() || status}</p>
                   )}
                 </div>
               </TabsContent>
@@ -416,7 +414,7 @@ export default function ReviewModeration() {
                       <ReviewCard key={review.id} review={review} entityType="VendorReview" icon={Building2} />
                     ))
                   ) : (
-                    <p className="col-span-2 text-center py-8 text-stone-500">Aucun avis {status}</p>
+                    <p className="col-span-2 text-center py-8 text-stone-500">Aucun avis {STATUS_LABELS[status]?.toLowerCase() || status}</p>
                   )}
                 </div>
               </TabsContent>
@@ -440,7 +438,7 @@ export default function ReviewModeration() {
                       <ReviewCard key={review.id} review={review} entityType="ClientReview" icon={User} />
                     ))
                   ) : (
-                    <p className="col-span-2 text-center py-8 text-stone-500">Aucun avis {status}</p>
+                    <p className="col-span-2 text-center py-8 text-stone-500">Aucun avis {STATUS_LABELS[status]?.toLowerCase() || status}</p>
                   )}
                 </div>
               </TabsContent>

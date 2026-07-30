@@ -32,7 +32,6 @@ export default function Support() {
     try {
       const user = await base44.auth.me().catch(() => null);
 
-      // Créer un ticket support
       await base44.entities.PlatformFeedback.create({
         user_id: user?.id || 'anonymous',
         feedback_type: 'support_request',
@@ -41,15 +40,14 @@ export default function Support() {
         comments: `[${formData.subject}]\n\n${formData.message}\n\nContact: ${formData.email} | ${formData.phone}`
       });
 
-      // Envoyer email à l'équipe support
       await SendEmail({
-        to: 'support@eventcrafter.com',
-        subject: `?? Support Request: ${formData.category} - ${formData.subject}`,
-        body: `Nouvelle demande de support:\n\nNom: ${formData.name}\nEmail: ${formData.email}\nTéléphone: ${formData.phone}\nCatégorie: ${formData.category}\nSujet: ${formData.subject}\n\nMessage:\n${formData.message}\n\nUtilisateur ID: ${user?.id || 'Non connecté'}`
+        to: 'support@eventcraftercm.com',
+        subject: `ðŸ“© Demande de Support: ${formData.category} - ${formData.subject}`,
+        body: `Nouvelle demande de support:\n\nNom: ${formData.name}\nEmail: ${formData.email}\nTÃ©lÃ©phone: ${formData.phone}\nCatÃ©gorie: ${formData.category}\nSujet: ${formData.subject}\n\nMessage:\n${formData.message}\n\nUtilisateur ID: ${user?.id || 'Non connectÃ©'}`
       });
 
       setSuccess(true);
-      toast({ title: "Demande envoyée", description: "Notre équipe vous répondra sous 24h" });
+      toast({ title: "Demande envoyÃ©e", description: "Notre Ã©quipe vous rÃ©pondra sous 24h" });
       
       setTimeout(() => {
         setFormData({ name: '', email: '', phone: '', category: '', subject: '', message: '' });
@@ -59,7 +57,7 @@ export default function Support() {
     } catch (error) {
       toast({ 
         title: "Erreur", 
-        description: "Impossible d'envoyer votre demande. Réessayez.",
+        description: "Impossible d'envoyer votre demande. RÃ©essayez.",
         variant: "destructive"
       });
     } finally {
@@ -74,13 +72,13 @@ export default function Support() {
           <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-green-900 mb-2">Demande Reçue!</h2>
+          <h2 className="text-2xl font-bold text-green-900 mb-2">Demande ReÃ§ue!</h2>
           <p className="text-green-700 mb-6">
-            Notre équipe support vous contactera par email ou téléphone sous 24 heures.
+            Notre Ã©quipe support vous contactera par email ou tÃ©lÃ©phone sous 24 heures.
           </p>
           <Link to={createPageUrl('Home')}>
             <Button className="bg-green-600 hover:bg-green-700 text-white">
-              Retour à l'accueil
+              Retour Ã  l'accueil
             </Button>
           </Link>
         </Card>
@@ -96,19 +94,18 @@ export default function Support() {
             Centre de Support
           </h1>
           <p className="text-lg text-stone-600 max-w-2xl mx-auto">
-            Besoin d'aide ? Nous sommes là pour vous. Remplissez le formulaire ou contactez-nous directement.
+            Besoin d'aide ? Nous sommes lÃ  pour vous. Remplissez le formulaire ou contactez-nous directement.
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {/* Contact Cards */}
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageCircle className="w-6 h-6 text-white" />
               </div>
               <h3 className="font-bold text-blue-900 mb-2">WhatsApp</h3>
-              <p className="text-sm text-blue-700 mb-3">Support instantané 24/7</p>
+              <p className="text-sm text-blue-700 mb-3">Support instantanÃ© 24/7</p>
               <a href="https://wa.me/237670934378" target="_blank" rel="noopener noreferrer">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full">
                   Ouvrir WhatsApp
@@ -122,7 +119,7 @@ export default function Support() {
               <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Phone className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-bold text-orange-900 mb-2">Téléphone</h3>
+              <h3 className="font-bold text-orange-900 mb-2">TÃ©lÃ©phone</h3>
               <p className="text-sm text-orange-700 mb-1">+237 670 93 43 78</p>
               <p className="text-sm text-orange-700 mb-3">+237 690 17 31 93</p>
               <p className="text-xs text-orange-600">Lun-Sam, 8h-20h</p>
@@ -135,13 +132,12 @@ export default function Support() {
                 <Mail className="w-6 h-6 text-white" />
               </div>
               <h3 className="font-bold text-purple-900 mb-2">Email</h3>
-              <p className="text-sm text-purple-700 mb-3">support@eventcrafter.com</p>
-              <p className="text-xs text-purple-600">Réponse sous 24h</p>
+              <p className="text-sm text-purple-700 mb-3">support@eventcraftercm.com</p>
+              <p className="text-xs text-purple-600">RÃ©ponse sous 24h</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Support Form */}
         <Card className="mt-8 shadow-lg">
           <CardHeader>
             <CardTitle className="text-2xl">Formulaire de Support</CardTitle>
@@ -172,7 +168,7 @@ export default function Support() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Téléphone</Label>
+                  <Label>TÃ©lÃ©phone</Label>
                   <Input
                     placeholder="670 12 34 56"
                     value={formData.phone}
@@ -180,16 +176,16 @@ export default function Support() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Catégorie *</Label>
+                  <Label>CatÃ©gorie *</Label>
                   <Select value={formData.category} onValueChange={(val) => setFormData({ ...formData, category: val })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Choisissez une catégorie" />
+                      <SelectValue placeholder="Choisissez une catÃ©gorie" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="payment">Problème de Paiement</SelectItem>
-                      <SelectItem value="booking">Réservation</SelectItem>
+                      <SelectItem value="payment">ProblÃ¨me de Paiement</SelectItem>
+                      <SelectItem value="booking">RÃ©servation</SelectItem>
                       <SelectItem value="refund">Remboursement</SelectItem>
-                      <SelectItem value="technical">Problème Technique</SelectItem>
+                      <SelectItem value="technical">ProblÃ¨me Technique</SelectItem>
                       <SelectItem value="account">Mon Compte</SelectItem>
                       <SelectItem value="other">Autre</SelectItem>
                     </SelectContent>
@@ -200,7 +196,7 @@ export default function Support() {
               <div className="space-y-2">
                 <Label>Sujet *</Label>
                 <Input
-                  placeholder="Décrivez brièvement votre problème"
+                  placeholder="DÃ©crivez briÃ¨vement votre problÃ¨me"
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                   required
@@ -208,9 +204,9 @@ export default function Support() {
               </div>
 
               <div className="space-y-2">
-                <Label>Message Détaillé *</Label>
+                <Label>Message DÃ©taillÃ© *</Label>
                 <Textarea
-                  placeholder="Expliquez votre problème en détail pour que nous puissions mieux vous aider..."
+                  placeholder="Expliquez votre problÃ¨me en dÃ©tail pour que nous puissions mieux vous aider..."
                   rows={6}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -232,9 +228,8 @@ export default function Support() {
           </CardContent>
         </Card>
 
-        {/* FAQ Link */}
         <div className="text-center mt-8">
-          <p className="text-stone-600 mb-3">Consultez d'abord notre FAQ, vous y trouverez peut-être la réponse !</p>
+          <p className="text-stone-600 mb-3">Consultez d'abord notre FAQ, vous y trouverez peut-Ãªtre la rÃ©ponse !</p>
           <Link to={createPageUrl('FAQ')}>
             <Button variant="outline" className="border-[#FF6B35] text-[#FF6B35] hover:bg-[#FFF0E8]">
               Voir la FAQ

@@ -9,6 +9,26 @@ import { Trash2, Plus, Users, Utensils, Mail, MapPin } from "lucide-react";
 import { useLocationContext } from '@/components/LocationContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
+const EVENT_TYPE_LABELS = {
+  Wedding: 'Mariage',
+  Birthday: 'Anniversaire',
+  Corporate: 'Événement d\'Entreprise',
+  Conference: 'Conférence',
+  'Baby Shower': 'Baby Shower',
+  Graduation: 'Remise de Diplôme',
+  Religious: 'Cérémonie Religieuse',
+  Other: 'Autre'
+};
+
+const GROUP_LABELS = {
+  'Bride Family': 'Famille de la Mariée',
+  'Groom Family': 'Famille du Marié',
+  'Bride Friends': 'Amis de la Mariée',
+  'Groom Friends': 'Amis du Marié',
+  'Colleagues': 'Collègues',
+  'Other': 'Autre'
+};
+
 export default function GuestManager() {
   const { currency, currencySymbol } = useLocationContext();
   const [guests, setGuests] = useState([]);
@@ -40,12 +60,10 @@ export default function GuestManager() {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
         
-        // Fetch user's events
         const allEvents = await base44.entities.Event.list();
         const myEvents = allEvents.filter(e => e.client_id === currentUser.id);
         setEvents(myEvents);
         
-        // Select first event by default
         if (myEvents.length > 0) {
           setSelectedEvent(myEvents[0]);
         }
@@ -59,7 +77,6 @@ export default function GuestManager() {
   }, []);
 
   useEffect(() => {
-    // Load guests for selected event
     const loadGuests = async () => {
       if (!selectedEvent) {
         setGuests([]);
@@ -129,24 +146,23 @@ export default function GuestManager() {
     pending: guests.filter(g => g.rsvp_status === 'Pending').length,
   };
 
-  if (loading) return <div className="p-20 text-center">Loading Guests...</div>;
-  if (!user) return <div className="p-20 text-center">Please log in to manage your guests.</div>;
+  if (loading) return <div className="p-20 text-center">Chargement des Invités...</div>;
+  if (!user) return <div className="p-20 text-center">Veuillez vous connecter pour gérer vos invités.</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-stone-900">Guest List</h1>
+          <h1 className="text-3xl font-bold text-stone-900">Liste des Invités</h1>
           {selectedEvent && (
             <p className="text-stone-500 text-sm mt-1">{selectedEvent.title}</p>
           )}
         </div>
         <div className="flex gap-2">
-          {/* Event Selector */}
           {events.length > 0 && (
             <Select value={selectedEvent?.id} onValueChange={(id) => setSelectedEvent(events.find(e => e.id === id))}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select Event" />
+                <SelectValue placeholder="Sélectionner un Événement" />
               </SelectTrigger>
               <SelectContent>
                 {events.map(evt => (
@@ -156,7 +172,6 @@ export default function GuestManager() {
             </Select>
           )}
           
-          {/* Create Event Button */}
           <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="border-rose-200 text-rose-600">
@@ -182,7 +197,7 @@ export default function GuestManager() {
                   </SelectTrigger>
                   <SelectContent>
                     {["Wedding", "Birthday", "Corporate", "Conference", "Baby Shower", "Graduation", "Religious", "Other"].map(t => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                      <SelectItem key={t} value={t}>{EVENT_TYPE_LABELS[t] || t}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -230,25 +245,24 @@ export default function GuestManager() {
             </DialogContent>
           </Dialog>
 
-          {/* Add Guest Button */}
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
               <Button className="bg-rose-600 hover:bg-rose-700" disabled={!selectedEvent}>
-                <Plus className="w-4 h-4 mr-2" /> Add Guest
+                <Plus className="w-4 h-4 mr-2" /> Ajouter un Invité
               </Button>
             </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Guest</DialogTitle>
+              <DialogTitle>Ajouter un Nouvel Invité</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <Input 
-                placeholder="Full Name" 
+                placeholder="Nom Complet" 
                 value={newGuest.full_name}
                 onChange={e => setNewGuest({...newGuest, full_name: e.target.value})}
               />
               <Input 
-                placeholder="Email (Optional)" 
+                placeholder="Email (Optionnel)" 
                 value={newGuest.email}
                 onChange={e => setNewGuest({...newGuest, email: e.target.value})}
               />
@@ -257,38 +271,37 @@ export default function GuestManager() {
                 onValueChange={val => setNewGuest({...newGuest, group: val})}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Group" />
+                  <SelectValue placeholder="Groupe" />
                 </SelectTrigger>
                 <SelectContent>
                   {["Bride Family", "Groom Family", "Bride Friends", "Groom Friends", "Colleagues", "Other"].map(g => (
-                    <SelectItem key={g} value={g}>{g}</SelectItem>
+                    <SelectItem key={g} value={g}>{GROUP_LABELS[g] || g}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <Button className="w-full bg-rose-600" onClick={handleAddGuest}>Save Guest</Button>
+              <Button className="w-full bg-rose-600" onClick={handleAddGuest}>Enregistrer l'Invité</Button>
             </div>
           </DialogContent>
           </Dialog>
           </div>
           </div>
 
-          {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white p-4 rounded-xl border border-stone-200 text-center">
           <div className="text-2xl font-bold text-stone-900">{stats.total}</div>
-          <div className="text-xs text-stone-500 uppercase font-medium">Total Guests</div>
+          <div className="text-xs text-stone-500 uppercase font-medium">Total Invités</div>
         </div>
         <div className="bg-green-50 p-4 rounded-xl border border-green-100 text-center">
           <div className="text-2xl font-bold text-green-700">{stats.accepted}</div>
-          <div className="text-xs text-green-600 uppercase font-medium">Attending</div>
+          <div className="text-xs text-green-600 uppercase font-medium">Présents</div>
         </div>
         <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-100 text-center">
           <div className="text-2xl font-bold text-yellow-700">{stats.pending}</div>
-          <div className="text-xs text-yellow-600 uppercase font-medium">Pending</div>
+          <div className="text-xs text-yellow-600 uppercase font-medium">En Attente</div>
         </div>
         <div className="bg-red-50 p-4 rounded-xl border border-red-100 text-center">
           <div className="text-2xl font-bold text-red-700">{stats.declined}</div>
-          <div className="text-xs text-red-600 uppercase font-medium">Declined</div>
+          <div className="text-xs text-red-600 uppercase font-medium">Déclinés</div>
         </div>
       </div>
 
@@ -304,14 +317,13 @@ export default function GuestManager() {
         </Card>
       ) : (
         <>
-          {/* Guest Table */}
           <Card>
         <CardContent className="p-0">
           <table className="w-full text-sm">
             <thead className="bg-stone-50 border-b border-stone-200">
               <tr>
-                <th className="text-left p-4 font-medium text-stone-500">Name</th>
-                <th className="text-left p-4 font-medium text-stone-500">Group</th>
+                <th className="text-left p-4 font-medium text-stone-500">Nom</th>
+                <th className="text-left p-4 font-medium text-stone-500">Groupe</th>
                 <th className="text-left p-4 font-medium text-stone-500">RSVP</th>
                 <th className="text-left p-4 font-medium text-stone-500">Table</th>
                 <th className="text-right p-4 font-medium text-stone-500">Actions</th>
@@ -326,7 +338,7 @@ export default function GuestManager() {
                   </td>
                   <td className="p-4">
                     <Badge variant="secondary" className="font-normal text-stone-600 bg-stone-100">
-                      {guest.group}
+                      {GROUP_LABELS[guest.group] || guest.group}
                     </Badge>
                   </td>
                   <td className="p-4">
@@ -338,9 +350,9 @@ export default function GuestManager() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Pending">Pending</SelectItem>
-                        <SelectItem value="Accepted">Accepted</SelectItem>
-                        <SelectItem value="Declined">Declined</SelectItem>
+                        <SelectItem value="Pending">En Attente</SelectItem>
+                        <SelectItem value="Accepted">Accepté</SelectItem>
+                        <SelectItem value="Declined">Décliné</SelectItem>
                       </SelectContent>
                     </Select>
                   </td>
@@ -363,7 +375,7 @@ export default function GuestManager() {
                 <tr>
                   <td colSpan={5} className="p-12 text-center">
                     <Users className="w-12 h-12 text-stone-200 mx-auto mb-4" />
-                    <p className="text-stone-500">No guests added yet.</p>
+                    <p className="text-stone-500">Aucun invité ajouté pour le moment.</p>
                   </td>
                 </tr>
               )}

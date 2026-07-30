@@ -8,28 +8,28 @@ import { Calculator, Users, Calendar, HeartHandshake } from "lucide-react";
 export default function Tools() {
   const tools = [
     {
-      title: "Budget Calculator",
-      description: "Track your expenses, manage payments, and stay within your budget.",
+      title: "Calculateur de Budget",
+      description: "Suivez vos dépenses, gérez vos paiements et restez dans votre budget.",
       icon: Calculator,
       color: "bg-green-100 text-green-600",
       link: "BudgetTool",
-      cta: "Manage Budget"
+      cta: "Gérer le Budget"
     },
     {
-      title: "Guest List Manager",
-      description: "Organize your guest list, track RSVPs, and manage dietary preferences.",
+      title: "Gestionnaire d'Invités",
+      description: "Organisez votre liste d'invités, suivez les RSVP et gérez les préférences alimentaires.",
       icon: Users,
       color: "bg-blue-100 text-blue-600",
       link: "GuestManager",
-      cta: "Manage Guests"
+      cta: "Gérer les Invités"
     },
     {
-      title: "Cultural Inspiration",
-      description: "Explore Cameroonian traditions, attire ideas, and ceremonial guides.",
+      title: "Inspiration Culturelle",
+      description: "Explorez les traditions camerounaises, idées de tenues et guides cérémoniels.",
       icon: HeartHandshake,
       color: "bg-rose-100 text-rose-600",
       link: "Inspiration",
-      cta: "Get Inspired"
+      cta: "S'inspirer"
     }
   ];
 
@@ -37,11 +37,10 @@ export default function Tools() {
     <div className="min-h-screen bg-stone-50 py-12">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <h1 className="text-3xl font-bold text-stone-900 mb-4">Wedding Planning Tools</h1>
-          <p className="text-stone-500">Everything you need to plan your perfect Cameroonian wedding, all in one place.</p>
+          <h1 className="text-3xl font-bold text-stone-900 mb-4">Outils de Planification d'Événements</h1>
+          <p className="text-stone-500">Tout ce dont vous avez besoin pour planifier votre événement parfait, au même endroit.</p>
         </div>
 
-        {/* Message Indisponible */}
         <div className="max-w-3xl mx-auto mb-12 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-8 text-center">
           <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Calculator className="w-8 h-8 text-amber-600" />
@@ -76,11 +75,10 @@ export default function Tools() {
           ))}
         </div>
 
-        {/* Placeholder for future tools */}
         <div className="mt-16 text-center">
-          <h3 className="text-lg font-semibold text-stone-900 mb-4">More tools coming soon</h3>
+          <h3 className="text-lg font-semibold text-stone-900 mb-4">Plus d'outils à venir</h3>
           <div className="flex justify-center gap-4 flex-wrap">
-            {["Seating Chart", "Vendor Checklist", "Timeline Builder"].map(item => (
+            {["Plan de Table", "Checklist Prestataires", "Créateur de Planning"].map(item => (
               <span key={item} className="px-4 py-2 bg-stone-100 text-stone-400 rounded-full text-sm font-medium">
                 {item}
               </span>
