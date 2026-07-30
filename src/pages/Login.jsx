@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, MailCheck, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import PhoneInput from '@/components/PhoneInput';
+import { useLanguage } from '@/components/LanguageContext';
 
-// Mot de passe : au moins 8 caracteres, une majuscule, une minuscule, un chiffre
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 export default function Login() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +30,7 @@ export default function Login() {
 
   const validateRegistration = () => {
     if (!PASSWORD_REGEX.test(password)) {
-      setError('Le mot de passe doit contenir au moins 8 caracteres, une majuscule, une minuscule et un chiffre.');
+      setError(t('auth.passwordRequirement'));
       return false;
     }
     return true;
@@ -47,9 +48,9 @@ export default function Login() {
         },
       });
       if (resendError) throw resendError;
-      setMessage("Email de confirmation renvoye ! Verifiez votre boite de reception (et vos spams).");
+      setMessage(t('auth.confirmationResent'));
     } catch (err) {
-      setError(err.message || "Impossible de renvoyer l'email");
+      setError(err.message || t('auth.genericError'));
     } finally {
       setResending(false);
     }
@@ -66,7 +67,7 @@ export default function Login() {
       if (resetError) throw resetError;
       setResetSent(true);
     } catch (err) {
-      setError(err.message || "Impossible d'envoyer le lien de reinitialisation");
+      setError(err.message || t('auth.genericError'));
     } finally {
       setSendingReset(false);
     }
@@ -100,7 +101,7 @@ export default function Login() {
         if (signUpError) throw signUpError;
 
         if (data.user && !data.session) {
-          setMessage('Compte cree ! Verifiez votre email pour confirmer votre inscription et acceder a votre tableau de bord.');
+          setMessage(t('auth.accountCreated'));
           setNeedsConfirmation(true);
         } else {
           navigate('/ProfileSelection');
@@ -114,7 +115,7 @@ export default function Login() {
         if (signInError) {
           if (signInError.message?.toLowerCase().includes('email not confirmed')) {
             setNeedsConfirmation(true);
-            setError("Votre email n'est pas encore confirme. Verifiez votre boite de reception.");
+            setError(t('auth.emailNotConfirmed'));
           } else {
             throw signInError;
           }
@@ -138,7 +139,7 @@ export default function Login() {
         }
       }
     } catch (err) {
-      setError(err.message || 'Une erreur est survenue');
+      setError(err.message || t('auth.genericError'));
     } finally {
       setLoading(false);
     }
@@ -153,28 +154,28 @@ export default function Login() {
             onClick={() => { setShowForgotPassword(false); setResetSent(false); setError(''); }}
             className="flex items-center gap-1 text-sm text-stone-500 hover:text-stone-700 mb-4"
           >
-            <ArrowLeft className="w-4 h-4" /> Retour a la connexion
+            <ArrowLeft className="w-4 h-4" /> {t('auth.backToLogin')}
           </button>
 
           <h1 className="text-2xl font-bold text-stone-900 mb-2 text-center">
-            Mot de passe oublie
+            {t('auth.forgotPasswordTitle')}
           </h1>
 
           {resetSent ? (
             <div className="bg-green-50 text-green-700 text-sm p-4 rounded-lg flex items-start gap-2 mt-6">
               <MailCheck className="w-5 h-5 mt-0.5 flex-shrink-0" />
               <span>
-                Si un compte existe avec l'adresse <strong>{forgotEmail}</strong>, un email contenant un lien de reinitialisation vient de vous etre envoye. Verifiez aussi vos spams.
+                {t('auth.resetSentPrefix')} <strong>{forgotEmail}</strong>, {t('auth.resetSentSuffix')}
               </span>
             </div>
           ) : (
             <>
               <p className="text-stone-500 text-center mb-6 text-sm">
-                Entrez votre adresse email, nous vous enverrons un lien pour choisir un nouveau mot de passe.
+                {t('auth.forgotPasswordSubtitle')}
               </p>
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-stone-700">Email</label>
+                  <label className="text-sm font-medium text-stone-700">{t('auth.email')}</label>
                   <Input
                     type="email"
                     value={forgotEmail}
@@ -197,9 +198,9 @@ export default function Login() {
                   className="w-full bg-rose-600 hover:bg-rose-700 text-white h-12"
                 >
                   {sendingReset ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Envoi...</>
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('auth.sending')}</>
                   ) : (
-                    'Envoyer le lien de reinitialisation'
+                    t('auth.sendResetLink')
                   )}
                 </Button>
               </form>
@@ -214,15 +215,15 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-stone-50">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-stone-900 mb-2 text-center">
-          {isRegister ? 'Creer un compte' : 'Connexion'}
+          {isRegister ? t('auth.registerTitle') : t('auth.loginTitle')}
         </h1>
         <p className="text-stone-500 text-center mb-6">
-          {isRegister ? 'Rejoignez EventCrafter' : 'Bienvenue sur EventCrafter'}
+          {isRegister ? t('auth.registerSubtitle') : t('auth.loginSubtitle')}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-stone-700">Email</label>
+            <label className="text-sm font-medium text-stone-700">{t('auth.email')}</label>
             <Input
               type="email"
               value={email}
@@ -235,7 +236,7 @@ export default function Login() {
 
           {isRegister && (
             <div>
-              <label className="text-sm font-medium text-stone-700">Numero de telephone (optionnel)</label>
+              <label className="text-sm font-medium text-stone-700">{t('auth.phoneOptional')}</label>
               <div className="mt-1">
                 <PhoneInput value={phone} onChange={setPhone} />
               </div>
@@ -244,14 +245,14 @@ export default function Login() {
 
           <div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-stone-700">Mot de passe</label>
+              <label className="text-sm font-medium text-stone-700">{t('auth.password')}</label>
               {!isRegister && (
                 <button
                   type="button"
                   onClick={() => { setShowForgotPassword(true); setForgotEmail(email); }}
                   className="text-xs text-rose-600 hover:underline"
                 >
-                  Mot de passe oublie ?
+                  {t('auth.forgotPassword')}
                 </button>
               )}
             </div>
@@ -277,7 +278,7 @@ export default function Login() {
             </div>
             {isRegister && (
               <p className="text-xs text-stone-400 mt-1">
-                Au moins 8 caracteres, une majuscule, une minuscule et un chiffre.
+                {t('auth.passwordHint')}
               </p>
             )}
           </div>
@@ -303,9 +304,9 @@ export default function Login() {
               className="w-full"
             >
               {resending ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Envoi...</>
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('auth.sending')}</>
               ) : (
-                "Renvoyer l'email de confirmation"
+                t('auth.resendConfirmation')
               )}
             </Button>
           )}
@@ -316,13 +317,13 @@ export default function Login() {
             className="w-full bg-rose-600 hover:bg-rose-700 text-white h-12"
           >
             {loading ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Chargement...</>
-            ) : isRegister ? 'Creer mon compte' : 'Se connecter'}
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('auth.loading')}</>
+            ) : isRegister ? t('auth.createAccountButton') : t('auth.signInButton')}
           </Button>
         </form>
 
         <p className="text-center text-sm text-stone-500 mt-4">
-          {isRegister ? 'Deja un compte ?' : 'Pas encore de compte ?'}{' '}
+          {isRegister ? t('auth.alreadyHaveAccount') : t('auth.noAccount')}{' '}
           <button
             type="button"
             onClick={() => {
@@ -333,7 +334,7 @@ export default function Login() {
             }}
             className="text-rose-600 font-medium hover:underline"
           >
-            {isRegister ? 'Se connecter' : "S'inscrire"}
+            {isRegister ? t('auth.signInLink') : t('auth.signUpLink')}
           </button>
         </p>
       </div>

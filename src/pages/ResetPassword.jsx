@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useLanguage } from '@/components/LanguageContext';
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 export default function ResetPassword() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [checkingSession, setCheckingSession] = useState(true);
   const [validSession, setValidSession] = useState(false);
   const [password, setPassword] = useState('');
@@ -19,8 +21,6 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Quand l'utilisateur arrive depuis le lien de l'email, Supabase cree
-    // automatiquement une session temporaire de type "recovery".
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY' || session) {
         setValidSession(true);
@@ -28,7 +28,6 @@ export default function ResetPassword() {
       setCheckingSession(false);
     });
 
-    // Filet de securite si l'evenement a deja ete emis avant le montage du composant
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setValidSession(true);
       setCheckingSession(false);
@@ -44,11 +43,11 @@ export default function ResetPassword() {
     setError('');
 
     if (!PASSWORD_REGEX.test(password)) {
-      setError('Le mot de passe doit contenir au moins 8 caracteres, une majuscule, une minuscule et un chiffre.');
+      setError(t('auth.passwordRequirement'));
       return;
     }
     if (password !== confirmPassword) {
-      setError('Les deux mots de passe ne correspondent pas.');
+      setError(t('auth.passwordMismatch'));
       return;
     }
 
@@ -59,7 +58,7 @@ export default function ResetPassword() {
       setSuccess(true);
       setTimeout(() => navigate('/Login'), 2500);
     } catch (err) {
-      setError(err.message || 'Impossible de mettre a jour le mot de passe.');
+      setError(err.message || t('auth.genericError'));
     } finally {
       setLoading(false);
     }
@@ -80,12 +79,12 @@ export default function ResetPassword() {
           <div className="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-7 h-7" />
           </div>
-          <h1 className="text-xl font-bold text-stone-900 mb-2">Lien invalide ou expire</h1>
+          <h1 className="text-xl font-bold text-stone-900 mb-2">{t('auth.invalidLink')}</h1>
           <p className="text-stone-500 mb-6 text-sm">
-            Ce lien de reinitialisation n'est plus valide. Demandez-en un nouveau depuis la page de connexion.
+            {t('auth.invalidLinkDesc')}
           </p>
           <Button onClick={() => navigate('/Login')} className="bg-rose-600 hover:bg-rose-700 w-full">
-            Retour a la connexion
+            {t('auth.backToLogin')}
           </Button>
         </div>
       </div>
@@ -99,9 +98,9 @@ export default function ResetPassword() {
           <div className="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-7 h-7" />
           </div>
-          <h1 className="text-xl font-bold text-stone-900 mb-2">Mot de passe mis a jour</h1>
+          <h1 className="text-xl font-bold text-stone-900 mb-2">{t('auth.passwordUpdated')}</h1>
           <p className="text-stone-500 text-sm">
-            Redirection vers la page de connexion...
+            {t('auth.redirecting')}
           </p>
         </div>
       </div>
@@ -112,15 +111,15 @@ export default function ResetPassword() {
     <div className="min-h-screen flex items-center justify-center bg-stone-50 p-4">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-stone-900 mb-2 text-center">
-          Choisir un nouveau mot de passe
+          {t('auth.newPasswordTitle')}
         </h1>
         <p className="text-stone-500 text-center mb-6 text-sm">
-          Entrez votre nouveau mot de passe ci-dessous.
+          {t('auth.newPasswordSubtitle')}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-stone-700">Nouveau mot de passe</label>
+            <label className="text-sm font-medium text-stone-700">{t('auth.newPassword')}</label>
             <div className="relative mt-1">
               <Input
                 type={showPassword ? 'text' : 'password'}
@@ -142,12 +141,12 @@ export default function ResetPassword() {
               </button>
             </div>
             <p className="text-xs text-stone-400 mt-1">
-              Au moins 8 caracteres, une majuscule, une minuscule et un chiffre.
+              {t('auth.passwordHint')}
             </p>
           </div>
 
           <div>
-            <label className="text-sm font-medium text-stone-700">Confirmer le mot de passe</label>
+            <label className="text-sm font-medium text-stone-700">{t('auth.confirmPassword')}</label>
             <Input
               type={showPassword ? 'text' : 'password'}
               value={confirmPassword}
@@ -171,9 +170,9 @@ export default function ResetPassword() {
             className="w-full bg-rose-600 hover:bg-rose-700 text-white h-12"
           >
             {loading ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Mise a jour...</>
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('auth.updating')}</>
             ) : (
-              'Mettre a jour le mot de passe'
+              t('auth.updatePassword')
             )}
           </Button>
         </form>
