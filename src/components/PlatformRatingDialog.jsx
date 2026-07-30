@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { base44 } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -52,8 +52,8 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
       });
 
       toast({
-        title: "Merci ! ðŸŽ‰",
-        description: "Votre avis nous aide Ã  amÃ©liorer la plateforme",
+        title: "Merci !",
+        description: "Votre avis nous aide a ameliorer la plateforme",
       });
 
       // Reset form
@@ -84,7 +84,7 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
             Notez EventCrafter
           </DialogTitle>
           <DialogDescription>
-            Votre avis nous aide Ã  amÃ©liorer la plateforme
+            Votre avis nous aide a ameliorer la plateforme
           </DialogDescription>
         </DialogHeader>
 
@@ -146,7 +146,7 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="feature_request" id="feature_request" />
-                <Label htmlFor="feature_request" className="text-sm font-normal cursor-pointer">Suggestion de fonctionnalitÃ©</Label>
+                <Label htmlFor="feature_request" className="text-sm font-normal cursor-pointer">Suggestion de fonctionnalite</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="bug_report" id="bug_report" />
