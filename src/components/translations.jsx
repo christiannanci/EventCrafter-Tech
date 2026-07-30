@@ -325,6 +325,19 @@ export const translations = {
       profileUpdatedTitle: "Profile Updated",
       profileUpdatedDesc: "Your client information has been saved successfully.",
       profileUpdateError: "Failed to save profile. Please try again."
+    },
+    chat: {
+      messages: "Messages",
+      noConversations: "No conversations yet.",
+      startChatting: "Start chatting...",
+      online: "Online",
+      typeMessage: "Type a message...",
+      selectConversation: "Select a conversation to start chatting",
+      loadErrorTitle: "Loading error",
+      loadErrorDesc: "Unable to load conversations. Please refresh the page.",
+      sendErrorTitle: "Send failed",
+      sendErrorDesc: "Message could not be sent. Check your connection.",
+      newMessageNotif: "New message"
     }
   },
   fr: {
@@ -748,6 +761,19 @@ export const translations = {
       profileUpdatedTitle: "Profil Mis a Jour",
       profileUpdatedDesc: "Vos informations client ont ete enregistrees avec succes.",
       profileUpdateError: "Echec de l'enregistrement du profil. Veuillez reessayer."
+    },
+    chat: {
+      messages: "Messages",
+      noConversations: "Aucune conversation pour le moment.",
+      startChatting: "Commencez a discuter...",
+      online: "En ligne",
+      typeMessage: "Ecrivez un message...",
+      selectConversation: "Selectionnez une conversation pour commencer a discuter",
+      loadErrorTitle: "Erreur de chargement",
+      loadErrorDesc: "Impossible de charger les conversations. Veuillez rafraichir la page.",
+      sendErrorTitle: "Echec de l'envoi",
+      sendErrorDesc: "Le message n'a pas pu etre envoye. Verifiez votre connexion.",
+      newMessageNotif: "Nouveau message"
     }
   },
   pcm: {

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44, supabase } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import ContractManager from '@/components/dashboard/ContractManager';
 import { useTypingIndicator, TypingIndicator } from '@/components/TypingIndicator';
 import { NotificationService } from '@/components/NotificationService';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function Chat() {
   const [conversations, setConversations] = useState([]);
@@ -22,6 +23,7 @@ export default function Chat() {
   const [relatedBooking, setRelatedBooking] = useState(null);
   const [participantNames, setParticipantNames] = useState({});
   const scrollRef = useRef(null);
+  const { t } = useLanguage();
 
   React.useEffect(() => {
     const style = document.createElement('style');
@@ -135,8 +137,8 @@ export default function Chat() {
       } catch (e) {
         console.error("Chat init error", e);
         toast({
-          title: "Erreur de chargement",
-          description: "Impossible de charger les conversations. Veuillez rafraÃ®chir la page.",
+          title: t('chat.loadErrorTitle'),
+          description: t('chat.loadErrorDesc'),
           variant: "destructive"
         });
         setLoading(false);
@@ -236,7 +238,7 @@ export default function Chat() {
             const messagePreview = messageContent.length > 50 ? messageContent.substring(0, 50) + "..." : messageContent;
             await NotificationService.send({
               userId: recipientId,
-              title: "ðŸ’¬ Nouveau message",
+              title: t('chat.newMessageNotif'),
               message: messagePreview,
               type: "message",
               link: `/Chat?conversationId=${activeConversation.id}`
@@ -248,7 +250,7 @@ export default function Chat() {
             const messagePreview = messageContent.length > 50 ? messageContent.substring(0, 50) + "..." : messageContent;
             await NotificationService.send({
               userId: admin.id,
-              title: "ðŸ’¬ Nouveau message",
+              title: t('chat.newMessageNotif'),
               message: `${currentUser.full_name}: ${messagePreview}`,
               type: "message",
               link: `/Chat?conversationId=${activeConversation.id}`
@@ -262,8 +264,8 @@ export default function Chat() {
     } catch (error) {
       console.error("Send failed", error);
       toast({
-        title: "Ã‰chec de l'envoi",
-        description: "Le message n'a pas pu Ãªtre envoyÃ©. VÃ©rifiez votre connexion.",
+        title: t('chat.sendErrorTitle'),
+        description: t('chat.sendErrorDesc'),
         variant: "destructive",
         duration: 4000
       });
@@ -285,13 +287,13 @@ export default function Chat() {
         <Card className="md:col-span-1 h-full border-stone-200 flex flex-col">
           <div className="p-4 border-b border-stone-100 bg-stone-50 rounded-t-lg">
             <h2 className="font-bold text-lg text-stone-800 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5" /> Messages
+              <MessageSquare className="w-5 h-5" /> {t('chat.messages')}
             </h2>
           </div>
           <ScrollArea className="flex-grow">
             {conversations.length === 0 ? (
               <div className="p-8 text-center text-stone-500 text-sm">
-                No conversations yet.
+                {t('chat.noConversations')}
               </div>
             ) : (
               <div className="divide-y divide-stone-100">
@@ -313,7 +315,7 @@ export default function Chat() {
                       )}
                     </div>
                     <p className="text-xs text-stone-500 line-clamp-1">
-                      {conv.last_message || "Start chatting..."}
+                      {conv.last_message || t('chat.startChatting')}
                     </p>
                   </button>
                 ))}
@@ -333,7 +335,7 @@ export default function Chat() {
                   <div>
                     <h3 className="font-bold text-stone-900">{getOtherParticipantName(activeConversation)}</h3>
                     <p className="text-xs text-green-500 flex items-center gap-1">
-                      <span className="w-2 h-2 bg-green-500 rounded-full"></span> Online
+                      <span className="w-2 h-2 bg-green-500 rounded-full"></span> {t('chat.online')}
                     </p>
                   </div>
                 </div>
@@ -393,7 +395,7 @@ export default function Chat() {
                         handleSendMessage(e);
                       }
                     }}
-                    placeholder="Type a message..."
+                    placeholder={t('chat.typeMessage')}
                     className="flex-grow bg-stone-50 border-stone-200 focus-visible:ring-rose-500"
                   />
                   <Button type="submit" size="icon" className="bg-rose-600 hover:bg-rose-700">
@@ -405,7 +407,7 @@ export default function Chat() {
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-stone-400">
               <MessageSquare className="w-16 h-16 mb-4 opacity-20" />
-              <p>Select a conversation to start chatting</p>
+              <p>{t('chat.selectConversation')}</p>
             </div>
           )}
         </Card>
@@ -413,4 +415,3 @@ export default function Chat() {
     </div>
   );
 }
-
