@@ -1,6 +1,8 @@
+import { Service, VendorProfile, ClientProfile, Booking, Event, Conversation, Message, Review, Notification, Membership, Invoice, Region, Departement, Ville, Quartier, Fonction, PlatformFeedback, Contract, Dispute, Lead, Transaction, Payout, Refund, AppUser, Country, ServiceType } from '@/api/entities';
+import { base44 } from '@/api/apiClient';
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { base44 } from "@/api/apiClient";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,7 +17,6 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from '@/components/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { NotificationService } from '@/components/NotificationService';
 
 export default function PostRequest() {
   const { t } = useLanguage();
@@ -35,7 +36,7 @@ export default function PostRequest() {
         setUser(currentUser);
         
         // Charger tous les ServiceTypes
-        const types = await base44.entities.ServiceType.list();
+        const types = await ServiceType.list();
         setServiceTypes(types);
       } catch (e) {
         setUser(null);
@@ -54,7 +55,7 @@ export default function PostRequest() {
 
     setLoading(true);
     try {
-      await base44.entities.Lead.create({
+      await Lead.create({
         client_id: user.id,
         client_name: user.first_name || user.email,
         event_type: data.event_type,
@@ -68,9 +69,9 @@ export default function PostRequest() {
 
       // Notifier les fournisseurs correspondants
       const [allServices, allVendorProfiles, allMemberships] = await Promise.all([
-        base44.entities.Service.list(),
-        base44.entities.VendorProfile.list(),
-        base44.entities.Membership.list()
+        Service.list(),
+        VendorProfile.list(),
+        Membership.list()
       ]);
 
       // Filtrer les services qui correspondent à la catégorie
@@ -109,7 +110,7 @@ export default function PostRequest() {
         startOfMonth.setDate(1);
         startOfMonth.setHours(0, 0, 0, 0);
 
-        const existingNotifications = await base44.entities.Notification.filter({
+        const existingNotifications = await Notification.filter({
           user_id: vendorId,
           type: 'post_request'
         });
@@ -127,16 +128,13 @@ export default function PostRequest() {
         }
 
         if (canNotify) {
-          const notifTitle = `Nouvelle demande: ${data.event_type}`;
-          const notifMessage = `Un client recherche ${data.service_category} pour un événement le ${date ? format(date, 'dd/MM/yyyy') : 'date TBD'}. Localisation: ${data.location}`;
-
-          // Notification in-app + email (NotificationService gère les deux)
-          await NotificationService.sendToVendor({
-            vendorId,
-            title: notifTitle,
-            message: notifMessage,
+          await Notification.create({
+            user_id: vendorId,
+            title: `Nouvelle demande: ${data.event_type}`,
+            message: `Un client recherche ${data.service_category} pour un événement le ${date ? format(date, 'dd/MM/yyyy') : 'date TBD'}. Localisation: ${data.location}`,
             type: 'post_request',
-            link: '/VendorDashboard'
+            link: '/VendorDashboard',
+            is_read: false
           });
         }
       }
@@ -164,18 +162,18 @@ export default function PostRequest() {
           <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <LogIn className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-['Poppins'] font-bold text-[#2C2C2C] mb-2">Connexion requise</h2>
+          <h2 className="text-2xl font-['Poppins'] font-bold text-[#2C2C2C] mb-2">{t('postRequest.loginRequired')}</h2>
           <p className="text-gray-500 mb-8 font-['Inter']">
-            Vous devez être connecté pour publier une demande. Créez un compte ou connectez-vous pour continuer.
+            {t('postRequest.loginDesc')}
           </p>
           <div className="flex gap-4 justify-center">
-            <Button variant="outline" onClick={() => navigate('/')}>Retour</Button>
+            <Button variant="outline" onClick={() => navigate('/')}>{t('postRequest.back')}</Button>
             <Button 
               className="bg-[#FF6B35] hover:bg-[#e05a2b]" 
               onClick={() => base44.auth.redirectToLogin(createPageUrl('PostRequest'))}
             >
               <LogIn className="w-4 h-4 mr-2" />
-              Se connecter
+              {t('postRequest.signIn')}
             </Button>
           </div>
         </Card>
@@ -190,64 +188,72 @@ export default function PostRequest() {
           <div className="w-16 h-16 bg-[#2ECC71]/10 text-[#2ECC71] rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-['Poppins'] font-bold text-[#2C2C2C] mb-2">Demande Publiée !</h2>
+          <h2 className="text-2xl font-['Poppins'] font-bold text-[#2C2C2C] mb-2">{t('postRequest.requestPosted')}</h2>
           <p className="text-gray-500 mb-8 font-['Inter']">
-            Votre demande a été envoyée à notre réseau de vendeurs vérifiés. Ils vous contacteront sous peu.
+            {t('postRequest.requestPostedDesc')}
           </p>
           <div className="flex gap-4 justify-center">
-            <Button variant="outline" onClick={() => navigate('/')}>Retour Accueil</Button>
-            <Button className="bg-[#FF6B35] hover:bg-[#e05a2b]" onClick={() => navigate('/ClientDashboard?tab=my_requests')}>Voir Mes Demandes</Button>
+            <Button variant="outline" onClick={() => navigate('/')}>{t('postRequest.returnHome')}</Button>
+            <Button className="bg-[#FF6B35] hover:bg-[#e05a2b]" onClick={() => navigate('/ClientDashboard?tab=my_requests')}>{t('postRequest.viewRequests')}</Button>
           </div>
         </Card>
       </div>
     );
   }
 
+  const eventTypeOptions = [
+    { value: 'Wedding', key: 'wedding' },
+    { value: 'Birthday', key: 'birthday' },
+    { value: 'Corporate', key: 'corporate' },
+    { value: 'Conference', key: 'conference' },
+    { value: 'Baby Shower', key: 'babyShower' },
+    { value: 'Graduation', key: 'graduation' },
+    { value: 'Religious', key: 'religious' },
+    { value: 'Funeral', key: 'funeral' },
+    { value: 'Other', key: 'other' },
+  ];
+
   return (
     <div className="min-h-screen bg-[#F9F7F3] py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-['Poppins'] font-bold text-[#2C2C2C]">Publier une Demande</h1>
-          <p className="text-[#2C2C2C]/70 mt-2 font-['Inter']">Dites-nous ce dont vous avez besoin, nous vous mettrons en relation avec les meilleurs vendeurs.</p>
+          <h1 className="text-3xl font-['Poppins'] font-bold text-[#2C2C2C]">{t('postRequest.title')}</h1>
+          <p className="text-[#2C2C2C]/70 mt-2 font-['Inter']">{t('postRequest.subtitle')}</p>
         </div>
 
         <Card className="border-[#F4C542]/20 shadow-lg shadow-[#F4C542]/5">
           <CardHeader>
-            <CardTitle className="text-[#2C2C2C]">Détails de l'Événement</CardTitle>
-            <CardDescription>Remplissez les détails ci-dessous pour obtenir des devis précis.</CardDescription>
+            <CardTitle className="text-[#2C2C2C]">{t('postRequest.eventDetails')}</CardTitle>
+            <CardDescription>{t('postRequest.eventDetailsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Type d'Événement</Label>
+                  <Label>{t('postRequest.eventType')}</Label>
                   <Select onValueChange={(val) => setValue('event_type', val)} required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner le type" />
+                      <SelectValue placeholder={t('postRequest.selectType')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Wedding">Mariage</SelectItem>
-                      <SelectItem value="Birthday">Anniversaire</SelectItem>
-                      <SelectItem value="Corporate">Événement d'Entreprise</SelectItem>
-                      <SelectItem value="Conference">Conférence</SelectItem>
-                      <SelectItem value="Baby Shower">Baby Shower</SelectItem>
-                      <SelectItem value="Graduation">Remise de Diplôme</SelectItem>
-                      <SelectItem value="Religious">Cérémonie Religieuse</SelectItem>
-                      <SelectItem value="Funeral">Funérailles</SelectItem>
-                      <SelectItem value="Other">Autre</SelectItem>
+                      {eventTypeOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {t(`postRequest.eventTypes.${opt.key}`)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Service Nécessaire</Label>
+                  <Label>{t('postRequest.serviceNeeded')}</Label>
                   <Select onValueChange={(val) => setValue('service_category', val)} required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner le service" />
+                      <SelectValue placeholder={t('postRequest.selectService')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="All">Tous les Services (Planification Complète)</SelectItem>
+                      <SelectItem value="All">{t('postRequest.allServices')}</SelectItem>
                       {serviceTypes.map((type) => (
                         <SelectItem key={type.code_service} value={type.name}>
                           {type.name}
@@ -260,7 +266,7 @@ export default function PostRequest() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div className="space-y-2">
-                  <Label>Date de l'Événement</Label>
+                  <Label>{t('postRequest.eventDate')}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -271,7 +277,7 @@ export default function PostRequest() {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date ? format(date, "dd/MM/yyyy") : <span>Choisir une date</span>}
+                        {date ? format(date, "dd/MM/yyyy") : <span>{t('postRequest.pickDate')}</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -287,23 +293,23 @@ export default function PostRequest() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Lieu (Ville/Quartier)</Label>
+                  <Label>{t('postRequest.location')}</Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3 w-4 h-4 text-stone-400" />
-                    <Input className="pl-9" placeholder="ex. Douala, Bonapriso" {...register('location', { required: true })} />
+                    <Input className="pl-9" placeholder={t('postRequest.locationPlaceholder')} {...register('location', { required: true })} />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Budget Estimé</Label>
-                <Input placeholder="ex. 100 000 - 200 000 FCFA" {...register('budget')} />
+                <Label>{t('postRequest.budget')}</Label>
+                <Input placeholder={t('postRequest.budgetPlaceholder')} {...register('budget')} />
               </div>
 
               <div className="space-y-2">
-                <Label>Description & Exigences</Label>
+                <Label>{t('postRequest.description')}</Label>
                 <Textarea 
-                  placeholder="Décrivez votre vision, nombre d'invités, et exigences spécifiques..." 
+                  placeholder={t('postRequest.descriptionPlaceholder')} 
                   className="h-32"
                   {...register('description', { required: true })}
                 />
@@ -311,7 +317,7 @@ export default function PostRequest() {
 
               <Button type="submit" className="w-full bg-[#FF6B35] hover:bg-[#e05a2b] h-12 text-lg font-['Poppins']" disabled={loading}>
                 {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Publier la Demande
+                {t('postRequest.postRequest')}
               </Button>
 
             </form>

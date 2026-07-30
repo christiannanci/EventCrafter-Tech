@@ -338,6 +338,45 @@ export const translations = {
       sendErrorTitle: "Send failed",
       sendErrorDesc: "Message could not be sent. Check your connection.",
       newMessageNotif: "New message"
+    },
+    postRequest: {
+      title: "Post a Request",
+      subtitle: "Tell us what you need, we'll connect you with the best vendors.",
+      eventDetails: "Event Details",
+      eventDetailsDesc: "Fill in the details below to get accurate quotes.",
+      eventType: "Event Type",
+      selectType: "Select the type",
+      serviceNeeded: "Service Needed",
+      selectService: "Select the service",
+      allServices: "All Services (Full Planning)",
+      eventDate: "Event Date",
+      pickDate: "Pick a date",
+      location: "Location (City/Neighborhood)",
+      locationPlaceholder: "ex. Douala, Bonapriso",
+      budget: "Estimated Budget",
+      budgetPlaceholder: "ex. 100,000 - 200,000 FCFA",
+      description: "Description & Requirements",
+      descriptionPlaceholder: "Describe your vision, number of guests, and specific requirements...",
+      postRequest: "Post the Request",
+      loginRequired: "Login Required",
+      loginDesc: "You need to be logged in to post a request. Create an account or log in to continue.",
+      back: "Back",
+      signIn: "Sign in",
+      requestPosted: "Request Posted!",
+      requestPostedDesc: "Your request has been sent to our network of verified vendors. They will contact you shortly.",
+      returnHome: "Return Home",
+      viewRequests: "View My Requests",
+      eventTypes: {
+        wedding: "Wedding",
+        birthday: "Birthday",
+        corporate: "Corporate Event",
+        conference: "Conference",
+        babyShower: "Baby Shower",
+        graduation: "Graduation",
+        religious: "Religious Event",
+        funeral: "Funeral",
+        other: "Other"
+      }
     }
   },
   fr: {
@@ -602,7 +641,18 @@ export const translations = {
       requestPosted: "Demande Publiée !",
       requestPostedDesc: "Votre demande a été envoyée à notre réseau de vendeurs vérifiés. Ils vous contacteront sous peu.",
       returnHome: "Retour Accueil",
-      viewRequests: "Voir Mes Demandes"
+      viewRequests: "Voir Mes Demandes",
+      eventTypes: {
+        wedding: "Mariage",
+        birthday: "Anniversaire",
+        corporate: "Événement d'Entreprise",
+        conference: "Conférence",
+        babyShower: "Baby Shower",
+        graduation: "Remise de Diplôme",
+        religious: "Événement Religieux",
+        funeral: "Funérailles",
+        other: "Autre"
+      }
     },
     auth: {
       loginTitle: "Connexion",
