@@ -39,6 +39,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import PlatformRatingButton from '@/components/PlatformRatingButton';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import FloatingAIAssistant from '@/components/FloatingAIAssistant';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 
@@ -112,7 +113,7 @@ function LayoutContent({ children }) {
 
   const languages = [
     { code: 'en', label: 'Anglais' },
-    { code: 'fr', label: 'Français' },
+    { code: 'fr', label: 'FranÃ§ais' },
     { code: 'pcm', label: 'Pidgin' },
   ];
 
@@ -132,7 +133,7 @@ function LayoutContent({ children }) {
               <span className="text-2xl font-['Poppins'] font-bold tracking-tight text-[#2C2C2C]">
                 Event<span className="text-[#FF6B35] relative">
                   Crafter
-                  <span className="absolute -top-1 -right-2 text-[#F4C542] text-xs">★</span>
+                  <span className="absolute -top-1 -right-2 text-[#F4C542] text-xs">â˜…</span>
                 </span>
               </span>
             </Link>
@@ -225,7 +226,7 @@ function LayoutContent({ children }) {
                           <p className="text-xs text-stone-500 mb-2">Pays</p>
                           <Select value={selectedCountry || ''} onValueChange={setSelectedCountry}>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Sélectionner un pays" />
+                              <SelectValue placeholder="SÃ©lectionner un pays" />
                             </SelectTrigger>
                             <SelectContent>
                               {countries.map((c) => (
@@ -413,6 +414,9 @@ function LayoutContent({ children }) {
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav user={user} hasVendorProfile={hasVendorProfile} hasClientProfile={hasClientProfile} />
 
+      {/* Assistant IA flottant */}
+      <FloatingAIAssistant />
+
       {/* Footer */}
       <footer className="bg-white border-t border-stone-200 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -424,11 +428,11 @@ function LayoutContent({ children }) {
                 </span>
               </div>
               <p className="text-stone-500 max-w-sm">
-                La marketplace ultime pour tous vos besoins événementiels. Des organisateurs aux photographes, nous avons tout ce qu'il vous faut.
+                La marketplace ultime pour tous vos besoins Ã©vÃ©nementiels. Des organisateurs aux photographes, nous avons tout ce qu'il vous faut.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Plateforme</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Plateformes</h3>
               <ul className="space-y-2 text-stone-500">
                 <li><Link to={createPageUrl("Marketplace")} className="hover:text-[#FF6B35]">{t("nav.marketplace")}</Link></li>
                 <li><Link to={createPageUrl("About")} className="hover:text-[#FF6B35]">{t("nav.howItWorks")}</Link></li>
@@ -436,18 +440,18 @@ function LayoutContent({ children }) {
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Support</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Supports</h3>
               <ul className="space-y-2 text-stone-500">
                 <li><Link to={createPageUrl("Support")} className="hover:text-[#FF6B35]">Centre d'aide</Link></li>
                 <li><a href="https://wa.me/237670934378" target="_blank" rel="noopener noreferrer" className="hover:text-[#FF6B35]">WhatsApp</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Juridique</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Juridiques</h3>
               <ul className="space-y-2 text-stone-500">
                 <li><Link to={createPageUrl("TermsOfService")} className="hover:text-[#FF6B35]">CGU</Link></li>
-                <li><Link to={createPageUrl("PrivacyPolicy")} className="hover:text-[#FF6B35]">Confidentialité</Link></li>
-                <li><Link to={createPageUrl("LegalNotice")} className="hover:text-[#FF6B35]">Mentions légales</Link></li>
+                <li><Link to={createPageUrl("PrivacyPolicy")} className="hover:text-[#FF6B35]">ConfidentialitÃ©</Link></li>
+                <li><Link to={createPageUrl("LegalNotice")} className="hover:text-[#FF6B35]">Mentions lÃ©gales</Link></li>
               </ul>
             </div>
             <div>
@@ -464,7 +468,7 @@ function LayoutContent({ children }) {
           </div>
           <div className="mt-12 pt-8 border-t border-stone-100 text-center text-stone-400 text-sm">
           <p className="mb-2">{t('about.legalInfo')}</p>
-          © 2026 EventCrafter Marketplace. Tous droits réservés.
+          Â© 2026 EventCrafter Marketplace. Tous droits rÃ©servÃ©s.
           </div>
         </div>
       </footer>

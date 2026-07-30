@@ -11,6 +11,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AfrikpayChecklist from './pages/AfrikpayChecklist';
+import AIAssistant from './pages/AIAssistant';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -70,6 +71,14 @@ const AuthenticatedApp = () => {
           element={
             <LayoutWrapper currentPageName="AfrikpayChecklist">
               <AfrikpayChecklist />
+            </LayoutWrapper>
+          }
+        />
+        <Route
+          path="/AIAssistant"
+          element={
+            <LayoutWrapper currentPageName="AIAssistant">
+              <AIAssistant />
             </LayoutWrapper>
           }
         />
