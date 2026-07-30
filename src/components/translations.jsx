@@ -154,6 +154,30 @@ export const translations = {
       emailNotConfirmed: "Your email is not confirmed yet. Check your inbox.",
       confirmationResent: "Confirmation email resent! Check your inbox (and spam folder).",
       genericError: "An error occurred"
+    },
+    layout: {
+      vendorDashboard: "Vendor Dashboard",
+      myProfile: "My Profile",
+      clientDashboard: "Dashboard",
+      country: "Country",
+      selectCountry: "Select a country",
+      language: "Language",
+      backOffice: "Back Office",
+      openMenu: "Open menu",
+      closeMenu: "Close menu",
+      back: "Back",
+      platformHeading: "Platform",
+      supportHeading: "Support",
+      legalHeading: "Legal",
+      contactsHeading: "Contacts",
+      helpCenter: "Help Center",
+      cgu: "Terms of Service",
+      confidentiality: "Privacy Policy",
+      legalNotice: "Legal Notice",
+      tagline: "The ultimate marketplace for all your event needs. From planners to photographers, we have everything you need.",
+      copyright: "EventCrafter Marketplace. All rights reserved.",
+      vendorBadge: "VENDOR",
+      clientBadge: "CLIENT"
     }
   },
   fr: {
@@ -433,6 +457,30 @@ export const translations = {
       emailNotConfirmed: "Votre email n'est pas encore confirme. Verifiez votre boite de reception.",
       confirmationResent: "Email de confirmation renvoye ! Verifiez votre boite de reception (et vos spams).",
       genericError: "Une erreur est survenue"
+    },
+    layout: {
+      vendorDashboard: "Tableau de Bord Professionnel",
+      myProfile: "Mon Profil",
+      clientDashboard: "Tableau de Bord",
+      country: "Pays",
+      selectCountry: "Sélectionner un pays",
+      language: "Langue",
+      backOffice: "Back-Office",
+      openMenu: "Ouvrir le menu",
+      closeMenu: "Fermer le menu",
+      back: "Retour",
+      platformHeading: "Plateforme",
+      supportHeading: "Support",
+      legalHeading: "Juridique",
+      contactsHeading: "Contacts",
+      helpCenter: "Centre d'aide",
+      cgu: "CGU",
+      confidentiality: "Confidentialité",
+      legalNotice: "Mentions légales",
+      tagline: "La marketplace ultime pour tous vos besoins événementiels. Des organisateurs aux photographes, nous avons tout ce qu'il vous faut.",
+      copyright: "EventCrafter Marketplace. Tous droits réservés.",
+      vendorBadge: "VENDEUR",
+      clientBadge: "CLIENT"
     }
   },
   pcm: {

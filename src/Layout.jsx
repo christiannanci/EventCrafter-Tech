@@ -106,11 +106,11 @@ function LayoutContent({ children }) {
     { name: t("nav.marketplace"), path: "/Marketplace", icon: Search },
     { name: t("nav.inspiration"), path: "/Inspiration", icon: null },
     { name: t("nav.tools"), path: "/Tools", icon: null },
-    { name: "Publier une Demande", path: "/PostRequest", icon: null },
+    { name: t("nav.postRequest"), path: "/PostRequest", icon: null },
   ], [t]);
 
   const languages = [
-    { code: 'en', label: 'Anglais' },
+    { code: 'en', label: 'English' },
     { code: 'fr', label: 'Francais' },
     { code: 'pcm', label: 'Pidgin' },
   ];
@@ -160,7 +160,7 @@ function LayoutContent({ children }) {
                       <Link to={createPageUrl('AdminDashboard')}>
                           <Button variant="ghost" className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-100">
                               <Shield className="w-4 h-4 mr-2" />
-                              Back-Office
+                              {t('layout.backOffice')}
                           </Button>
                       </Link>
                   )}
@@ -171,15 +171,15 @@ function LayoutContent({ children }) {
                         <span className="mr-2">{user.full_name || user.email}</span>
                         {hasVendorProfile && hasClientProfile && (
                           <>
-                            <Badge className="bg-purple-500 text-white text-[10px] px-1.5 py-0 mr-1">VENDEUR</Badge>
-                            <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">CLIENT</Badge>
+                            <Badge className="bg-purple-500 text-white text-[10px] px-1.5 py-0 mr-1">{t('layout.vendorBadge')}</Badge>
+                            <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">{t('layout.clientBadge')}</Badge>
                           </>
                         )}
                         {hasVendorProfile && !hasClientProfile && (
-                          <Badge className="bg-purple-500 text-white text-[10px] px-1.5 py-0">VENDEUR</Badge>
+                          <Badge className="bg-purple-500 text-white text-[10px] px-1.5 py-0">{t('layout.vendorBadge')}</Badge>
                         )}
                         {!hasVendorProfile && hasClientProfile && (
-                          <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">CLIENT</Badge>
+                          <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">{t('layout.clientBadge')}</Badge>
                         )}
                       </Button>
                     </DropdownMenuTrigger>
@@ -188,7 +188,7 @@ function LayoutContent({ children }) {
                         <DropdownMenuItem asChild>
                           <Link to={createPageUrl('VendorDashboard')} className="cursor-pointer">
                             <LayoutDashboard className="w-4 h-4 mr-2" />
-                            Tableau de Bord Professionnel
+                            {t('layout.vendorDashboard')}
                           </Link>
                         </DropdownMenuItem>
                       )}
@@ -196,7 +196,7 @@ function LayoutContent({ children }) {
                         <DropdownMenuItem asChild>
                           <Link to={createPageUrl('VendorProfile')} className="cursor-pointer">
                             <LayoutDashboard className="w-4 h-4 mr-2" />
-                            Mon Profil
+                            {t('layout.myProfile')}
                           </Link>
                         </DropdownMenuItem>
                       )}
@@ -204,7 +204,7 @@ function LayoutContent({ children }) {
                         <DropdownMenuItem asChild>
                           <Link to={createPageUrl('ClientDashboard')} className="cursor-pointer">
                             <LayoutDashboard className="w-4 h-4 mr-2" />
-                            Tableau de Bord
+                            {t('layout.clientDashboard')}
                           </Link>
                         </DropdownMenuItem>
                       )}
@@ -212,7 +212,7 @@ function LayoutContent({ children }) {
                         <DropdownMenuItem asChild>
                           <Link to={createPageUrl('ClientDashboard') + '?tab=client_profile'} className="cursor-pointer">
                             <LayoutDashboard className="w-4 h-4 mr-2" />
-                            Mon Profil
+                            {t('layout.myProfile')}
                           </Link>
                         </DropdownMenuItem>
                       )}
@@ -220,10 +220,10 @@ function LayoutContent({ children }) {
 
                       {countries.length > 0 && (
                         <div className="px-2 py-2">
-                          <p className="text-xs text-stone-500 mb-2">Pays</p>
+                          <p className="text-xs text-stone-500 mb-2">{t('layout.country')}</p>
                           <Select value={selectedCountry || ''} onValueChange={setSelectedCountry}>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Selectionner un pays" />
+                              <SelectValue placeholder={t('layout.selectCountry')} />
                             </SelectTrigger>
                             <SelectContent>
                               {countries.map((c) => (
@@ -237,7 +237,7 @@ function LayoutContent({ children }) {
                       )}
 
                       <div className="px-2 py-2 border-t">
-                        <p className="text-xs text-stone-500 mb-2">Langue</p>
+                        <p className="text-xs text-stone-500 mb-2">{t('layout.language')}</p>
                         {languages.map((lang) => (
                           <DropdownMenuItem 
                             key={lang.code} 
@@ -293,7 +293,7 @@ function LayoutContent({ children }) {
 
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label={isMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+                aria-label={isMenuOpen ? t('layout.closeMenu') : t('layout.openMenu')}
                 aria-expanded={isMenuOpen}
                 className="text-stone-600 hover:text-rose-600 focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
@@ -326,7 +326,7 @@ function LayoutContent({ children }) {
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <LayoutDashboard className="w-4 h-4" />
-                      Tableau de Bord Professionnel
+                      {t('layout.vendorDashboard')}
                     </Link>
                   )}
                   {hasVendorProfile && (
@@ -336,7 +336,7 @@ function LayoutContent({ children }) {
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <LayoutDashboard className="w-4 h-4" />
-                      Mon Profil
+                      {t('layout.myProfile')}
                     </Link>
                   )}
                   {hasClientProfile && (
@@ -346,7 +346,7 @@ function LayoutContent({ children }) {
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <LayoutDashboard className="w-4 h-4" />
-                      Tableau de Bord
+                      {t('layout.clientDashboard')}
                     </Link>
                   )}
                   {hasClientProfile && (
@@ -356,7 +356,7 @@ function LayoutContent({ children }) {
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <LayoutDashboard className="w-4 h-4" />
-                      Mon Profil
+                      {t('layout.myProfile')}
                     </Link>
                   )}
                   <button
@@ -391,7 +391,7 @@ function LayoutContent({ children }) {
               className="flex items-center gap-1.5 text-sm text-stone-600 hover:text-[#FF6B35] transition-colors select-none"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-              Retour
+              {t('layout.back')}
             </button>
           </div>
         )}
@@ -425,11 +425,11 @@ function LayoutContent({ children }) {
                 </span>
               </div>
               <p className="text-stone-500 max-w-sm">
-                La marketplace ultime pour tous vos besoins evenementiels. Des organisateurs aux photographes, nous avons tout ce qu'il vous faut.
+                {t('layout.tagline')}
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Plateforme</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">{t('layout.platformHeading')}</h3>
               <ul className="space-y-2 text-stone-500">
                 <li><Link to={createPageUrl("Marketplace")} className="hover:text-[#FF6B35]">{t("nav.marketplace")}</Link></li>
                 <li><Link to={createPageUrl("About")} className="hover:text-[#FF6B35]">{t("nav.howItWorks")}</Link></li>
@@ -437,22 +437,22 @@ function LayoutContent({ children }) {
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Support</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">{t('layout.supportHeading')}</h3>
               <ul className="space-y-2 text-stone-500">
-                <li><Link to={createPageUrl("Support")} className="hover:text-[#FF6B35]">Centre d'aide</Link></li>
+                <li><Link to={createPageUrl("Support")} className="hover:text-[#FF6B35]">{t('layout.helpCenter')}</Link></li>
                 <li><a href="https://wa.me/237670934378" target="_blank" rel="noopener noreferrer" className="hover:text-[#FF6B35]">WhatsApp</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Juridique</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">{t('layout.legalHeading')}</h3>
               <ul className="space-y-2 text-stone-500">
-                <li><Link to={createPageUrl("TermsOfService")} className="hover:text-[#FF6B35]">CGU</Link></li>
-                <li><Link to={createPageUrl("PrivacyPolicy")} className="hover:text-[#FF6B35]">Confidentialite</Link></li>
-                <li><Link to={createPageUrl("LegalNotice")} className="hover:text-[#FF6B35]">Mentions legales</Link></li>
+                <li><Link to={createPageUrl("TermsOfService")} className="hover:text-[#FF6B35]">{t('layout.cgu')}</Link></li>
+                <li><Link to={createPageUrl("PrivacyPolicy")} className="hover:text-[#FF6B35]">{t('layout.confidentiality')}</Link></li>
+                <li><Link to={createPageUrl("LegalNotice")} className="hover:text-[#FF6B35]">{t('layout.legalNotice')}</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Contacts</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">{t('layout.contactsHeading')}</h3>
               <ul className="space-y-2 text-stone-500">
                 <li>founder@eventcraftercm.com</li>
                 <li>hello@eventcraftercm.com</li>
@@ -465,7 +465,7 @@ function LayoutContent({ children }) {
           </div>
           <div className="mt-12 pt-8 border-t border-stone-100 text-center text-stone-400 text-sm">
           <p className="mb-2">{t('about.legalInfo')}</p>
-          (c) 2026 EventCrafter Marketplace. Tous droits reserves.
+          (c) 2026 {t('layout.copyright')}
           </div>
         </div>
       </footer>
