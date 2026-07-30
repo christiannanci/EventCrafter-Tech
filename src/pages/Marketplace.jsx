@@ -38,7 +38,6 @@ export default function Marketplace() {
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 12;
   
-  // URL Params
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const initialCategory = searchParams.get('category') || 'all';
@@ -46,12 +45,10 @@ export default function Marketplace() {
   const initialSearch = searchParams.get('search') || '';
   const eventIdParam = searchParams.get('event_id');
   
-  // Location Params
   const locLevel = searchParams.get('location_level');
   const locCode = searchParams.get('location_code');
   const locName = searchParams.get('location_name');
 
-  // Advanced Params
   const initialCultural = searchParams.get('cultural') || 'all';
   const initialLanguage = searchParams.get('language') || 'all';
   const initialReligion = searchParams.get('religion') || 'all';
@@ -66,13 +63,11 @@ export default function Marketplace() {
   const [cityFilter, setCityFilter] = useState("");
   const [sortBy, setSortBy] = useState("featured");
 
-  // New Filters
   const [filterCultural, setFilterCultural] = useState(initialCultural);
   const [filterLanguage, setFilterLanguage] = useState(initialLanguage);
   const [filterReligion, setFilterReligion] = useState(initialReligion);
   const [filterDiaspora, setFilterDiaspora] = useState(initialDiaspora);
 
-  // Filter options
   const [availableCities, setAvailableCities] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
   const [functions, setFunctions] = useState([]);
@@ -83,8 +78,13 @@ export default function Marketplace() {
     await queryClient.invalidateQueries({ queryKey: ['marketplace-services'] });
   }, [queryClient]);
   const { pullDistance, isPulling, isRefreshing, onTouchStart, onTouchMove, onTouchEnd } = usePullToRefresh(handleRefresh);
+
+  const tr = (val) => {
+    if (!val) return val;
+    const translated = t(`dynamicLabels.${val}`);
+    return translated === `dynamicLabels.${val}` ? val : translated;
+  };
   
-  // Ref data for hierarchy matching
   const [geoData, setGeoData] = useState({ regions: [], depts: [], cities: [], neighborhoods: [] });
 
   useEffect(() => {
@@ -97,7 +97,6 @@ export default function Marketplace() {
         setServiceTypes(types);
         setFunctions(fns);
         
-        // Charger l'historique de recherche
         const { getSearchHistory } = await import('../components/SearchHistory');
         setSearchHistory(getSearchHistory());
       } catch (error) {
@@ -112,7 +111,6 @@ export default function Marketplace() {
   }, []);
 
   useEffect(() => {
-      // Load hierarchies to do intelligent matching if needed
       const loadGeo = async () => {
           if (locLevel && locCode) {
               const [r, d, c, n] = await Promise.all([
@@ -127,14 +125,12 @@ export default function Marketplace() {
       loadGeo();
   }, [locLevel, locCode]);
 
-  // Use React Query for cached service fetching
   const { data: allServices = [], isLoading } = useQuery({
     queryKey: ['marketplace-services'],
     queryFn: () => Service.list('-created_date', 1000),
     staleTime: 3 * 60 * 1000,
   });
 
-  // Charger les profils vendeurs et bookings pour les recommandations
   const { data: vendorProfiles = [] } = useQuery({
     queryKey: ['vendor-profiles'],
     queryFn: () => VendorProfile.list(),
@@ -147,7 +143,6 @@ export default function Marketplace() {
     staleTime: 5 * 60 * 1000,
   });
   
-  // Charger les conversations pour déterminer les vendeurs actifs
   const { data: allConversations = [] } = useQuery({
     queryKey: ['all-conversations'],
     queryFn: () => Conversation.list(),
@@ -170,7 +165,6 @@ export default function Marketplace() {
     loadUser();
   }, []);
 
-  // Appliquer le ranking system de manière asynchrone
   React.useEffect(() => {
     const applyRanking = async () => {
       if (allServices && allServices.length > 0) {
@@ -189,7 +183,6 @@ export default function Marketplace() {
     applyRanking();
   }, [allServices, searchTerm]);
 
-  // Extract available cities for dropdown
   useEffect(() => {
     if (allServices && allServices.length > 0) {
       try {
@@ -201,9 +194,7 @@ export default function Marketplace() {
     }
   }, [allServices]);
 
-  // Client-side filtering and pagination
   const { services, totalPages, recommendedServices } = React.useMemo(() => {
-    // Always start with valid data
     let data = [];
     if (rankedServices && rankedServices.length > 0) {
       data = [...rankedServices];
@@ -211,17 +202,14 @@ export default function Marketplace() {
       data = [...allServices];
     }
     
-    // Filter out any invalid/undefined services
     data = data.filter(s => s && typeof s === 'object' && s.id);
     
-    // Enrichir avec badge "Active" pour vendeurs actifs
     data = data.map(service => {
       try {
         const vendorProfile = (vendorProfiles || []).find(v => v?.user_id === service?.planner_id);
         const vendorBookings = (allBookings || []).filter(b => b?.planner_id === service?.planner_id);
         const completedContracts = vendorBookings.filter(b => b?.status === 'completed' || b?.status === 'delivered').length;
         
-        // Conversations uniques avec différents clients
         const vendorConversations = (allConversations || []).filter(conv => 
           conv?.participants && Array.isArray(conv.participants) && conv.participants.includes(service?.planner_id)
         );
@@ -231,7 +219,6 @@ export default function Marketplace() {
           )
         ).size;
         
-        // Badge "Active" si: contrat conclu OU 3+ clients réguliers
         const isActiveVendor = completedContracts > 0 || uniqueClients >= 3;
         
         return {
@@ -248,7 +235,6 @@ export default function Marketplace() {
       }
     });
 
-    // Appliquer le système de recommandations intelligent
     if (currentUser && currentUser.id && vendorProfiles && vendorProfiles.length > 0 && allBookings && allBookings.length > 0) {
       try {
         const userBookings = allBookings.filter(b => b && b.created_by === currentUser.id);
@@ -269,7 +255,6 @@ export default function Marketplace() {
       }
     }
 
-        // Apply filters locally for MVP with safety checks
         if (selectedCategory && selectedCategory !== 'all') {
             data = data.filter(s => s && s.category === selectedCategory);
         }
@@ -286,7 +271,6 @@ export default function Marketplace() {
              data = data.filter(s => s && ((s.city === cityFilter) || (s.location === cityFilter)));
         }
 
-        // Advanced Filters with safety checks
         if (filterCultural && filterCultural !== "all") {
             data = data.filter(s => {
                 if (!s) return false;
@@ -315,7 +299,6 @@ export default function Marketplace() {
             data = data.filter(s => s && s.diaspora_ready === true);
         }
 
-        // Location Hierarchy Filtering
         if (locLevel && locCode && geoData.regions.length > 0) {
             data = data.filter(s => {
                 if (!s) return false;
@@ -399,24 +382,19 @@ export default function Marketplace() {
           }
         }
 
-        // Plan hierarchy for sorting: gold > premium > free
         const planPriority = { 'gold': 3, 'premium': 2, 'free': 1 };
         
-        // Sorting with vendor plan priority
         data.sort((a, b) => {
-          // Look up vendor plans from profiles
           const aProfile = vendorProfiles.find(vp => vp && vp.user_id === a.planner_id);
           const bProfile = vendorProfiles.find(vp => vp && vp.user_id === b.planner_id);
           
           const aPlan = planPriority[(aProfile && aProfile.plan) || 'free'] || 0;
           const bPlan = planPriority[(bProfile && bProfile.plan) || 'free'] || 0;
           
-          // Always prioritize by plan first
           if (aPlan !== bPlan) {
             return bPlan - aPlan;
           }
           
-          // Then sort by selected criteria within same plan
           if (sortBy === "price_low") return (a.price_min || 0) - (b.price_min || 0);
           if (sortBy === "price_high") return (b.price_min || 0) - (a.price_min || 0);
           if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
@@ -425,7 +403,6 @@ export default function Marketplace() {
           return 0;
         });
 
-    // Pagination with safety
     const validData = data && Array.isArray(data) ? data : [];
     const pages = Math.max(1, Math.ceil(validData.length / ITEMS_PER_PAGE));
     const safePage = Math.min(Math.max(1, page), pages);
@@ -459,7 +436,7 @@ export default function Marketplace() {
           style={{ opacity: Math.min(pullDistance / 72, 1) }}
         >
           <svg className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-          {isRefreshing ? 'Actualisation...' : isPulling ? 'Relâcher pour actualiser' : 'Tirer pour actualiser'}
+          {isRefreshing ? t('marketplace.refreshing') : isPulling ? t('marketplace.releaseToRefresh') : t('marketplace.pullToRefresh')}
         </div>
       )}
       <SEOHead 
@@ -544,8 +521,8 @@ export default function Marketplace() {
                 <SelectValue placeholder={t('marketplace.sortBy')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="relevance">🏆 Meilleur Classement</SelectItem>
-                {currentUser && <SelectItem value="recommended">✨ Recommandé pour vous</SelectItem>}
+                <SelectItem value="relevance">{t('marketplace.bestRanking')}</SelectItem>
+                {currentUser && <SelectItem value="recommended">{t('marketplace.recommendedForYou')}</SelectItem>}
                 <SelectItem value="featured">{t('marketplace.sort.featured')}</SelectItem>
                 <SelectItem value="price_low">{t('marketplace.sort.priceLow')}</SelectItem>
                 <SelectItem value="price_high">{t('marketplace.sort.priceHigh')}</SelectItem>
@@ -564,26 +541,26 @@ export default function Marketplace() {
               <SheetContent>
                 <SheetHeader>
                   <SheetTitle>{t('marketplace.filterTitle')}</SheetTitle>
-                  <SheetDescription>Affinez votre recherche avec des critères spécifiques</SheetDescription>
+                  <SheetDescription>{t('marketplace.refineSearch')}</SheetDescription>
                 </SheetHeader>
                 <div className="py-6 space-y-6 overflow-y-auto max-h-[80vh]">
 
                   {selectedCategory !== 'all' && (
                       <div>
-                          <h3 className="text-sm font-medium mb-3">Sous-Catégorie</h3>
+                          <h3 className="text-sm font-medium mb-3">{t('marketplace.subCategory')}</h3>
                           <Select value={selectedSubCategory} onValueChange={setSelectedSubCategory}>
                               <SelectTrigger>
-                                  <SelectValue placeholder="Sélectionner une Sous-Catégorie" />
+                                  <SelectValue placeholder={t('marketplace.selectSubCategory')} />
                               </SelectTrigger>
                               <SelectContent>
-                                  <SelectItem value="all">Toutes les Sous-Catégories</SelectItem>
+                                  <SelectItem value="all">{t('marketplace.allSubCategories')}</SelectItem>
                                   {functions
                                       .filter(f => {
-                                          const cat = serviceTypes.find(t => t.name === selectedCategory);
+                                          const cat = serviceTypes.find(t2 => t2.name === selectedCategory);
                                           return cat && f.service_type_code === cat.code_service;
                                       })
                                       .map(f => (
-                                          <SelectItem key={f.id} value={f.code}>{f.name}</SelectItem>
+                                          <SelectItem key={f.id} value={f.code}>{tr(f.name)}</SelectItem>
                                       ))
                                   }
                               </SelectContent>
@@ -592,45 +569,45 @@ export default function Marketplace() {
                   )}
 
                   <div>
-                      <h3 className="text-sm font-medium mb-3">Affinité Culturelle</h3>
+                      <h3 className="text-sm font-medium mb-3">{t('marketplace.culturalAffinity')}</h3>
                       <Select value={filterCultural} onValueChange={setFilterCultural}>
                           <SelectTrigger>
-                              <SelectValue placeholder="Toute Culture" />
+                              <SelectValue placeholder={t('marketplace.anyCulture')} />
                           </SelectTrigger>
                           <SelectContent>
-                              <SelectItem value="all">Toute Culture</SelectItem>
+                              <SelectItem value="all">{t('marketplace.anyCulture')}</SelectItem>
                               {["Aire Sawa", "Aire Grassfields", "Aire Fang-Béti", "Grand Nord (Soudano-Sahélien)", "Bamiléké", "Bamoun", "Bakweri"].map(z => (
-                                  <SelectItem key={z} value={z}>{z}</SelectItem>
+                                  <SelectItem key={z} value={z}>{tr(z)}</SelectItem>
                               ))}
                           </SelectContent>
                       </Select>
                   </div>
 
                   <div>
-                      <h3 className="text-sm font-medium mb-3">Langue</h3>
+                      <h3 className="text-sm font-medium mb-3">{t('marketplace.language')}</h3>
                       <Select value={filterLanguage} onValueChange={setFilterLanguage}>
                           <SelectTrigger>
-                              <SelectValue placeholder="Toute Langue" />
+                              <SelectValue placeholder={t('marketplace.anyLanguage')} />
                           </SelectTrigger>
                           <SelectContent>
-                              <SelectItem value="all">Toute Langue</SelectItem>
+                              <SelectItem value="all">{t('marketplace.anyLanguage')}</SelectItem>
                               {["Français", "Anglais", "Pidgin", "Dialectes Locaux"].map(l => (
-                                  <SelectItem key={l} value={l}>{l}</SelectItem>
+                                  <SelectItem key={l} value={l}>{tr(l)}</SelectItem>
                               ))}
                           </SelectContent>
                       </Select>
                   </div>
 
                   <div>
-                      <h3 className="text-sm font-medium mb-3">Religion & Tradition</h3>
+                      <h3 className="text-sm font-medium mb-3">{t('marketplace.religionTradition')}</h3>
                       <Select value={filterReligion} onValueChange={setFilterReligion}>
                           <SelectTrigger>
-                              <SelectValue placeholder="Toute Préférence" />
+                              <SelectValue placeholder={t('marketplace.anyPreference')} />
                           </SelectTrigger>
                           <SelectContent>
-                              <SelectItem value="all">Toute Préférence</SelectItem>
+                              <SelectItem value="all">{t('marketplace.anyPreference')}</SelectItem>
                               {["Chrétien", "Musulman", "Traditionnel/Ancestral", "Laïc"].map(r => (
-                                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                                  <SelectItem key={r} value={r}>{tr(r)}</SelectItem>
                               ))}
                           </SelectContent>
                       </Select>
@@ -638,8 +615,8 @@ export default function Marketplace() {
 
                   <div className="flex items-center justify-between pt-2 border-t border-stone-100">
                       <label htmlFor="diaspora-filter" className="text-sm font-medium cursor-pointer">
-                          Adapté à la Diaspora
-                          <span className="block text-xs text-stone-500 font-normal">Disponible pour les clients à l'étranger</span>
+                          {t('marketplace.diasporaReady')}
+                          <span className="block text-xs text-stone-500 font-normal">{t('marketplace.diasporaReadyDesc')}</span>
                       </label>
                       <div 
                           className={`w-10 h-6 rounded-full p-1 cursor-pointer transition-colors ${filterDiaspora ? 'bg-rose-600' : 'bg-stone-200'}`}
@@ -660,7 +637,7 @@ export default function Marketplace() {
                           setSelectedSubCategory("all");
                       }}
                   >
-                      Réinitialiser les Filtres
+                      {t('marketplace.resetFilters')}
                   </Button>
                 </div>
                 </SheetContent>
@@ -680,13 +657,13 @@ export default function Marketplace() {
           <div className="mb-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-2xl">✨</span>
-              <h2 className="text-xl font-bold text-stone-900">Sélection personnalisée pour vous</h2>
+              <h2 className="text-xl font-bold text-stone-900">{t('marketplace.personalizedSelection')}</h2>
               <span className="ml-auto text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">
-                Premium & Gold en priorité
+                {t('marketplace.priorityBadge')}
               </span>
             </div>
             <p className="text-sm text-stone-600 mb-4">
-              Basé sur vos préférences et les choix d'utilisateurs similaires
+              {t('marketplace.basedOnPreferences')}
             </p>
           </div>
         )}
