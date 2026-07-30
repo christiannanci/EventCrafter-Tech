@@ -1,4 +1,4 @@
-import { Service, VendorProfile, ClientProfile, Booking, Event, Conversation, Message, Review, Notification, Membership, MembershipType, Invoice, Region, Departement, Ville, Quartier, Fonction, PlatformFeedback, Contract, Dispute, Lead, Transaction, Payout, Refund, AppUser, Country, ServiceType } from '@/api/entities';
+import { Service, VendorProfile, ClientProfile, Booking, Event, Conversation, Message, Review, Notification, Membership, Invoice, Region, Departement, Ville, Quartier, Fonction, PlatformFeedback, Contract, Dispute, Lead, Transaction, Payout, Refund, AppUser, Country, ServiceType } from '@/api/entities';
 import { base44 } from '@/api/apiClient';
 import React, { useState, useEffect } from 'react';
 
@@ -24,28 +24,13 @@ export default function Pricing() {
       try {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-        
-        // Fetch Membership Types dynamically
-        const types = await MembershipType.list();
-        // Fallback to static if empty or error (optional, but good for stability during dev)
-        if (types.length > 0) {
-            setPlans(types.map(t => ({
-                id: t.code,
-                name: t.name,
-                price: t.price,
-                description: t.description || t.legal_terms, // Using legal terms/desc as subtitle
-                features: t.features || [],
-                icon: t.code === 'gold' ? Zap : t.code === 'premium' ? Star : Shield,
-                popular: t.code === 'premium'
-            })));
-        } else {
-             // Default static plans if entity is empty
-             setPlans([
-                { id: "free", name: t('pricing.fallbackBasicName'), price: 0, description: t('pricing.fallbackBasicDesc'), features: [t('pricing.fallbackBasicFeature')], icon: Shield },
-                { id: "premium", name: t('pricing.fallbackPremiumName'), price: 10000, description: t('pricing.fallbackPremiumDesc'), features: [t('pricing.fallbackPremiumFeature')], icon: Star, popular: true },
-                { id: "gold", name: t('pricing.fallbackGoldName'), price: 25000, description: t('pricing.fallbackGoldDesc'), features: [t('pricing.fallbackGoldFeature')], icon: Zap }
-             ]);
-        }
+
+        // Plans statiques (pas d'entite MembershipType dans ce projet - Supabase)
+        setPlans([
+            { id: "free", name: t('pricing.fallbackBasicName'), price: 0, description: t('pricing.fallbackBasicDesc'), features: [t('pricing.fallbackBasicFeature')], icon: Shield },
+            { id: "premium", name: t('pricing.fallbackPremiumName'), price: 10000, description: t('pricing.fallbackPremiumDesc'), features: [t('pricing.fallbackPremiumFeature')], icon: Star, popular: true },
+            { id: "gold", name: t('pricing.fallbackGoldName'), price: 25000, description: t('pricing.fallbackGoldDesc'), features: [t('pricing.fallbackGoldFeature')], icon: Zap }
+        ]);
 
         // Fetch vendor profile
         const profiles = await VendorProfile.list();
@@ -163,8 +148,6 @@ export default function Pricing() {
       }
     }, 1500);
   };
-
-  // Plans are now fetched dynamically in useEffect
 
   return (
     <div className="min-h-screen bg-stone-50 py-20 px-4">
