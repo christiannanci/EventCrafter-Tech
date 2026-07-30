@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from "@/api/apiClient";
+import { SendEmail } from "@/api/integrations";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -114,7 +115,6 @@ export default function ClientDashboard() {
   }, []);
 
   useEffect(() => {
-    // Charger les donnÃ©es du formulaire sauvegardÃ©es si l'utilisateur vient de se connecter
     if (user) {
       const pendingForm = localStorage.getItem('pending_event_form');
       if (pendingForm) {
@@ -124,8 +124,8 @@ export default function ClientDashboard() {
           setEventDate(formData.eventDate || '');
           setEventDescription(formData.eventDescription || '');
           toast({ 
-            title: "Informations restaurÃ©es", 
-            description: "Vos donnÃ©es d'Ã©vÃ©nement ont Ã©tÃ© rÃ©cupÃ©rÃ©es" 
+            title: "Informations restaurees", 
+            description: "Vos donnees d'evenement ont ete recuperees" 
           });
         } catch (e) {
           console.error('Failed to load pending form', e);
@@ -134,7 +134,6 @@ export default function ClientDashboard() {
     }
   }, [user]);
 
-  // Use React Query for data fetching with cache
   const { data: clientProfile } = useQuery({
     queryKey: ['clientProfile', user?.id],
     queryFn: async () => {
@@ -184,12 +183,11 @@ export default function ClientDashboard() {
     enabled: !!user,
   });
 
-  // Mutations with cache invalidation
   const deleteBookingMutation = useMutation({
     mutationFn: (bookingId) => base44.entities.Booking.delete(bookingId),
     onSuccess: () => {
       queryClient.invalidateQueries(['bookings']);
-      toast({ title: "Service retirÃ©" });
+      toast({ title: "Service retire" });
     },
   });
 
@@ -203,7 +201,7 @@ export default function ClientDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['events', 'bookings']);
-      toast({ title: "Ã‰vÃ©nement supprimÃ©" });
+      toast({ title: "Evenement supprime" });
     },
   });
 
@@ -217,21 +215,17 @@ export default function ClientDashboard() {
   const createEventMutation = useMutation({
     mutationFn: async ({ eventName, eventDate, eventDescription, cart }) => {
       if (!eventName?.trim()) {
-        throw new Error("Veuillez entrer un nom pour l'Ã©vÃ©nement");
+        throw new Error("Veuillez entrer un nom pour l'evenement");
       }
       if (!eventDate) {
-        throw new Error("Veuillez sÃ©lectionner une date pour l'Ã©vÃ©nement");
+        throw new Error("Veuillez selectionner une date pour l'evenement");
       }
       if (cart.length === 0) {
         throw new Error("Veuillez ajouter au moins un service au panier");
       }
-      console.log("CrÃ©ation Ã©vÃ©nement - utilisateur:", user);
-      console.log("Panier:", cart);
 
-      // RÃ©cupÃ©rer services nÃ©cessaires
       const allServices = await base44.entities.Service.list('-created_date', 200);
-      
-      // VÃ©rifier que tous les services du panier ont un planner_id valide
+
       const invalidServices = [];
       for (const cartService of cart) {
         const fullService = allServices.find(s => s.id === cartService.id);
@@ -239,13 +233,13 @@ export default function ClientDashboard() {
           invalidServices.push(cartService.title);
         }
       }
-      
+
       if (invalidServices.length > 0) {
         throw new Error(`Les services suivants n'ont pas de vendeur valide: ${invalidServices.join(', ')}`);
       }
 
       const { generateEntityCode } = await import('../components/SecurityUtils');
-      
+
       const event = await base44.entities.Event.create({
         event_code: generateEntityCode('EVENT'),
         client_id: user.id,
@@ -256,32 +250,27 @@ export default function ClientDashboard() {
         status: 'planning'
       });
 
-      console.log("Ã‰vÃ©nement crÃ©Ã©:", event);
-      
       for (const cartService of cart) {
-        // Trouver le service complet dans la base de donnÃ©es
         const fullService = allServices.find(s => s.id === cartService.id);
-        
+
         if (!fullService) {
-          console.error("Service non trouvÃ©:", cartService.id);
+          console.error("Service non trouve:", cartService.id);
           continue;
         }
 
         const vendorId = fullService.planner_id;
-        
+
         if (!vendorId) {
           console.error("Pas de planner_id pour le service:", fullService);
-          toast({ 
-            title: "Avertissement", 
-            description: `Service "${cartService.title}" ignorÃ© - vendeur introuvable`, 
+          toast({
+            title: "Avertissement",
+            description: `Service "${cartService.title}" ignore - vendeur introuvable`,
             variant: "destructive",
             duration: 3000
           });
           continue;
         }
 
-        console.log("CrÃ©ation booking pour service:", fullService.title, "vendeur:", vendorId);
-        
         await base44.entities.Booking.create({
           booking_code: generateEntityCode('BOOKING'),
           event_id: event.id,
@@ -291,51 +280,63 @@ export default function ClientDashboard() {
           event_type: 'Other',
           event_date: eventDate,
           status: 'pending',
-          notes: eventDescription || `Service ajoutÃ© Ã  l'Ã©vÃ©nement: ${eventName}`,
+          notes: eventDescription || `Service ajoute a l'evenement: ${eventName}`,
           requested_unit_price: fullService.price_min || 0,
           payment_status: 'unpaid',
           total_amount: 0
         });
 
-        // CrÃ©er automatiquement une conversation avec le vendeur
-        const allConvs = await base44.entities.Conversation.list('-created_date', 100);
-        const existingConv = allConvs.find(c => 
-          c.participants.includes(user.id) && 
-          c.participants.includes(vendorId)
-        );
+        try {
+          const allConvs = await base44.entities.Conversation.list('-created_date', 100);
+          const existingConv = allConvs.find(c =>
+            c.participants.includes(user.id) &&
+            c.participants.includes(vendorId)
+          );
 
-        if (!existingConv) {
-          await base44.entities.Conversation.create({
-            participants: [String(user.id), String(vendorId)],
-            last_message: `Nouvelle demande pour ${fullService.title}`,
-            last_message_at: new Date().toISOString(),
-            service_id: fullService.id
-          });
+          if (!existingConv) {
+            await base44.entities.Conversation.create({
+              participants: [String(user.id), String(vendorId)],
+              last_message: `Nouvelle demande pour ${fullService.title}`,
+              last_message_at: new Date().toISOString(),
+              service_id: fullService.id
+            });
+          }
+        } catch (convError) {
+          console.error("Erreur creation conversation (non bloquant):", convError);
         }
 
-        // Notify vendor
-        await base44.entities.Notification.create({
-          user_id: vendorId,
-          title: "ðŸ“‹ Nouvelle demande de rÃ©servation",
-          message: `${user.full_name || user.email} souhaite rÃ©server votre service "${fullService.title}" pour ${eventName}`,
-          type: "booking",
-          link: "/VendorDashboard",
-          is_read: false
-        });
+        try {
+          await base44.entities.Notification.create({
+            user_id: vendorId,
+            title: "Nouvelle demande de reservation",
+            message: `${user.full_name || user.email} souhaite reserver votre service "${fullService.title}" pour ${eventName}`,
+            type: "booking",
+            link: "/VendorDashboard",
+            is_read: false
+          });
+
+          try {
+            const allUsersForEmail = await base44.entities.User.list();
+            const vendorUserForEmail = allUsersForEmail.find(u => u.id === vendorId);
+            if (vendorUserForEmail) {
+              await SendEmail({
+                to: vendorUserForEmail.email,
+                subject: "Nouvelle demande de reservation",
+                body: `Bonjour ${vendorUserForEmail.full_name || ''},\n\n${user.full_name || user.email} souhaite reserver votre service "${fullService.title}" pour l'evenement "${eventName}".\n\nConnectez-vous a votre tableau de bord pour repondre.\n\nCordialement,\nL'equipe EventCrafter`
+              });
+            }
+          } catch (emailError) {
+            console.error("Erreur envoi email (non bloquant):", emailError);
+          }
+        } catch (notifError) {
+          console.error("Erreur creation notification (non bloquant):", notifError);
+        }
       }
 
-      toast({ 
-        title: "Ã‰vÃ©nement crÃ©Ã©!", 
-        description: `${cart.length} service${cart.length > 1 ? 's' : ''} ajoutÃ©${cart.length > 1 ? 's' : ''} Ã  votre Ã©vÃ©nement. Conversations crÃ©Ã©es avec les prestataires.` 
+      toast({
+        title: "Evenement cree !",
+        description: `${cart.length} service${cart.length > 1 ? 's' : ''} ajoute${cart.length > 1 ? 's' : ''} a votre evenement.`
       });
-
-      setCart([]);
-      localStorage.removeItem('contact_cart');
-      localStorage.removeItem('pending_event_form');
-      window.dispatchEvent(new Event('storage'));
-      setEventName("");
-      setEventDate("");
-      setEventDescription("");
 
       setCart([]);
       localStorage.removeItem('contact_cart');
@@ -348,7 +349,7 @@ export default function ClientDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['events', 'bookings']);
-      toast({ title: "Ã‰vÃ©nement crÃ©Ã©!", description: `Services ajoutÃ©s avec succÃ¨s` });
+      toast({ title: "Evenement cree !", description: `Services ajoutes avec succes` });
     },
     onError: (error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -371,12 +372,12 @@ export default function ClientDashboard() {
     };
 
     const labels = {
-      contract_pending: "Waiting Signature",
-      awaiting_payment: "Waiting Payment",
-      in_progress: "In Progress",
-      delivered: "Delivered (Wait Recept.)",
-      warranty_period: "Warranty",
-      disputed: "In Dispute"
+      contract_pending: "En Attente de Signature",
+      awaiting_payment: "En Attente de Paiement",
+      in_progress: "En Cours",
+      delivered: "Livre (Attente Reception)",
+      warranty_period: "Garantie",
+      disputed: "En Litige"
     };
 
     return (
@@ -398,12 +399,12 @@ export default function ClientDashboard() {
     <div className="container mx-auto px-4 py-12">
       <PlatformFeedbackPrompt user={user} userRole="client" />
 
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-stone-900">Tableau de Bord Client</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-900">Tableau de Bord Client</h1>
           <p className="text-stone-500">Bienvenue, {user.first_name || user.email}</p>
         </div>
-        <Button asChild className="bg-rose-600 hover:bg-rose-700">
+        <Button asChild className="bg-rose-600 hover:bg-rose-700 w-full sm:w-auto">
           <a href="/Marketplace">
             <ShoppingCart className="w-4 h-4 mr-2" /> Parcourir les Services
           </a>
@@ -425,9 +426,9 @@ export default function ClientDashboard() {
       <AlertDialog open={!!deletingEvent} onOpenChange={(open) => !open && setDeletingEvent(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer l'Ã©vÃ©nement ?</AlertDialogTitle>
+            <AlertDialogTitle>Supprimer l'evenement ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action supprimera l'Ã©vÃ©nement et tous les services associÃ©s. Cette action est irrÃ©versible.
+              Cette action supprimera l'evenement et tous les services associes. Cette action est irreversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -450,7 +451,7 @@ export default function ClientDashboard() {
           <AlertDialogHeader>
             <AlertDialogTitle>Retirer ce service ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Le service sera retirÃ© de votre Ã©vÃ©nement. Cette action est irrÃ©versible.
+              Le service sera retire de votre evenement. Cette action est irreversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -482,7 +483,7 @@ export default function ClientDashboard() {
         <TabsContent value="contact_cart">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <CardTitle className="flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5" />
                   Mon Panier de Services
@@ -490,7 +491,7 @@ export default function ClientDashboard() {
                 <Button 
                   variant="outline"
                   onClick={() => window.location.href = '/Marketplace'}
-                  className="text-rose-600 border-rose-200 hover:bg-rose-50"
+                  className="text-rose-600 border-rose-200 hover:bg-rose-50 w-full sm:w-auto"
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Ajouter des services
@@ -502,20 +503,20 @@ export default function ClientDashboard() {
                 <div className="space-y-6">
                   <div className="space-y-3">
                     {cart.map((service) => (
-                      <div key={service.id} className="flex items-start gap-4 p-4 border rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors group">
+                      <div key={service.id} className="flex flex-col sm:flex-row sm:items-start gap-4 p-4 border rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors group">
                         <img 
                           src={service.image_url} 
                           alt={service.title}
-                          className="w-20 h-20 rounded-lg object-cover"
+                          className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                         />
-                        <div className="flex-grow">
+                        <div className="flex-grow min-w-0">
                           <h4 className="font-semibold text-stone-900">{service.title}</h4>
                           <p className="text-sm text-stone-500">{service.city}</p>
                           <p className="text-sm font-bold text-rose-600 mt-1">
-                            Ã€ partir de {service.price_min?.toLocaleString()} FCFA
+                            A partir de {service.price_min?.toLocaleString()} FCFA
                           </p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-shrink-0 self-start sm:self-center">
                           <Button 
                             variant="outline" 
                             size="sm"
@@ -534,7 +535,7 @@ export default function ClientDashboard() {
                               } else {
                                 const newConv = await base44.entities.Conversation.create({
                                   participants: [String(user.id), String(vendorId)],
-                                  last_message: "Conversation dÃ©marrÃ©e",
+                                  last_message: "Conversation demarree",
                                   last_message_at: new Date().toISOString()
                                 });
                                 window.location.href = `/Chat?conversationId=${newConv.id}`;
@@ -560,10 +561,10 @@ export default function ClientDashboard() {
                   </div>
 
                   <div className="border-t pt-6 space-y-4">
-                    <h3 className="font-semibold text-lg">CrÃ©er un Ã‰vÃ©nement</h3>
+                    <h3 className="font-semibold text-lg">Creer un Evenement</h3>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Nom de l'Ã©vÃ©nement *</label>
+                      <label className="text-sm font-medium">Nom de l'evenement *</label>
                       <input 
                         type="text"
                         placeholder="Ex: Mon Mariage 2025"
@@ -574,7 +575,7 @@ export default function ClientDashboard() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Date de l'Ã©vÃ©nement *</label>
+                      <label className="text-sm font-medium">Date de l'evenement *</label>
                       <input 
                         type="date"
                         value={eventDate}
@@ -587,7 +588,7 @@ export default function ClientDashboard() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Description (optionnel)</label>
                       <textarea 
-                        placeholder="DÃ©tails sur votre Ã©vÃ©nement..."
+                        placeholder="Details sur votre evenement..."
                         value={eventDescription}
                         onChange={(e) => setEventDescription(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md min-h-[80px]"
@@ -600,17 +601,17 @@ export default function ClientDashboard() {
                       disabled={createEventMutation.isPending || !eventName?.trim() || !eventDate}
                     >
                       {createEventMutation.isPending ? (
-                        <>CrÃ©ation en cours...</>
+                        <>Creation en cours...</>
                       ) : (
                         <>
                           <CalendarCheck className="w-4 h-4 mr-2" />
-                          CrÃ©er Ã‰vÃ©nement avec {cart.length} Service{cart.length > 1 ? 's' : ''}
+                          Creer Evenement avec {cart.length} Service{cart.length > 1 ? 's' : ''}
                         </>
                       )}
                     </Button>
                     {(!eventName?.trim() || !eventDate) && (
                       <p className="text-xs text-amber-600 mt-2">
-                        Vos informations seront conservÃ©es aprÃ¨s connexion
+                        Vos informations seront conservees apres connexion
                       </p>
                     )}
                   </div>
@@ -640,7 +641,7 @@ export default function ClientDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Megaphone className="w-5 h-5" />
-                Mes Demandes PostÃ©es
+                Mes Demandes Postees
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -649,26 +650,26 @@ export default function ClientDashboard() {
                   {myLeads.map((lead) => (
                     <Card key={lead.id} className="border-l-4 border-rose-600">
                       <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-3">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
                           <div>
                             <h4 className="font-semibold text-lg">{lead.event_type}</h4>
                             <p className="text-sm text-stone-500">{lead.service_category}</p>
                           </div>
                           <Badge className={lead.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-stone-100 text-stone-800'}>
-                            {lead.status === 'open' ? 'Ouverte' : 'FermÃ©e'}
+                            {lead.status === 'open' ? 'Ouverte' : 'Fermee'}
                           </Badge>
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex items-center gap-2 text-stone-600">
                             <CalendarCheck className="w-4 h-4" />
-                            {lead.event_date ? format(new Date(lead.event_date), 'dd MMMM yyyy', { locale: fr }) : 'Date non spÃ©cifiÃ©e'}
+                            {lead.event_date ? format(new Date(lead.event_date), 'dd MMMM yyyy', { locale: fr }) : 'Date non specifiee'}
                           </div>
-                          <p className="text-stone-600">ðŸ“ {lead.location}</p>
-                          {lead.budget && <p className="text-stone-600">ðŸ’° {lead.budget}</p>}
+                          <p className="text-stone-600">{lead.location}</p>
+                          {lead.budget && <p className="text-stone-600">{lead.budget}</p>}
                           <p className="text-stone-700 mt-2">{lead.description}</p>
                         </div>
                         <div className="mt-4 text-xs text-stone-400">
-                          PostÃ©e le {format(new Date(lead.created_date), 'dd/MM/yyyy Ã  HH:mm')}
+                          Postee le {format(new Date(lead.created_date), 'dd/MM/yyyy a HH:mm')}
                         </div>
                       </CardContent>
                     </Card>
@@ -678,7 +679,7 @@ export default function ClientDashboard() {
                 <div className="text-center py-12">
                   <Megaphone className="w-12 h-12 text-stone-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-stone-900">Aucune demande</h3>
-                  <p className="text-stone-500 mb-6">Vous n'avez pas encore postÃ© de demande de service.</p>
+                  <p className="text-stone-500 mb-6">Vous n'avez pas encore poste de demande de service.</p>
                   <Button asChild className="bg-rose-600 hover:bg-rose-700">
                     <a href="/PostRequest">
                       <Plus className="w-4 h-4 mr-2" />
@@ -735,12 +736,10 @@ export default function ClientDashboard() {
               onSuccess={() => {
                 setSelectedPaymentBooking(null);
                 queryClient.invalidateQueries(['bookings']);
-                toast({ title: "Paiement effectuÃ© avec succÃ¨s!" });
+                toast({ title: "Paiement effectue avec succes!" });
               }}
             />
           )}
-
-
 
           {myEvents.length > 0 ? (
             <div className="space-y-6">
@@ -750,7 +749,7 @@ export default function ClientDashboard() {
                 return (
                   <Card key={event.id} className="overflow-hidden">
                     <CardHeader className="bg-gradient-to-r from-rose-50 to-pink-50 border-b">
-                      <div className="flex justify-between items-start">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                         <div>
                          <CardTitle className="text-xl flex items-center gap-2">
                            <CalendarCheck className="w-5 h-5 text-rose-600" />
@@ -782,7 +781,7 @@ export default function ClientDashboard() {
                                 className="text-red-600 focus:text-red-600"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Supprimer l'Ã©vÃ©nement
+                                Supprimer l'evenement
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -797,7 +796,6 @@ export default function ClientDashboard() {
                            const service = services[booking.service_id];
                            const vendor = vendors[booking.planner_id];
 
-                           // CrÃ©er un dossier pour le prompt de clÃ´ture
                            const dossier = {
                              id: booking.id,
                              bookingId: booking.id,
@@ -809,7 +807,6 @@ export default function ClientDashboard() {
 
                            return (
                              <div key={booking.id} className="p-4 hover:bg-stone-50 transition-colors space-y-4">
-                               {/* Prompt de clÃ´ture si Ã©vÃ©nement passÃ© */}
                                <ServiceCompletionPrompt 
                                  dossier={dossier}
                                  userType="client"
@@ -818,16 +815,16 @@ export default function ClientDashboard() {
 
                                <div>
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                  <div className="flex items-start gap-4 flex-grow">
+                                  <div className="flex items-start gap-4 flex-grow min-w-0">
                                     {service?.image_url && (
                                       <img 
                                         src={service.image_url} 
                                         alt={service.title}
-                                        className="w-16 h-16 rounded-lg object-cover"
+                                        className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                                       />
                                     )}
-                                    <div className="flex-grow">
-                                      <div className="flex items-center gap-2 mb-1">
+                                    <div className="flex-grow min-w-0">
+                                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                                         <h4 className="font-semibold text-stone-900">
                                           {service?.title || 'Service'}
                                         </h4>
@@ -837,7 +834,7 @@ export default function ClientDashboard() {
                                       <div className="space-y-1">
                                         <p className="text-sm text-stone-600 flex items-center gap-2">
                                           <span className="font-medium">Vendeur:</span>
-                                          {vendor?.business_name || 'Provider'}
+                                          {vendor?.business_name || 'Prestataire'}
                                         </p>
                                         {booking.total_amount > 0 && (
                                           <p className="text-sm font-semibold text-green-600">
@@ -848,13 +845,13 @@ export default function ClientDashboard() {
                                     </div>
                                   </div>
 
-                                  <div className="flex items-center gap-2">
-                                    <div className="flex flex-col items-end gap-2">
+                                  <div className="flex items-center gap-2 w-full md:w-auto">
+                                    <div className="flex flex-col w-full md:w-auto md:items-end gap-2">
                                       <Button 
                                         size="sm" 
                                         variant="outline"
                                         onClick={() => window.location.href = `/Chat?userId=${booking.planner_id}`}
-                                        className="border-rose-200 text-rose-600 hover:bg-rose-50"
+                                        className="border-rose-200 text-rose-600 hover:bg-rose-50 w-full md:w-auto justify-center"
                                       >
                                         <MessageCircle className="w-4 h-4 mr-2" />
                                         Discussion
@@ -863,14 +860,14 @@ export default function ClientDashboard() {
                                       <Button 
                                         size="sm" 
                                         variant="outline"
-                                        className="border-amber-200 text-amber-700 hover:bg-amber-50"
+                                        className="border-amber-200 text-amber-700 hover:bg-amber-50 w-full md:w-auto justify-center"
                                         onClick={() => {
                                           setSelectedContractBooking(booking);
                                           setIsContractFlowOpen(true);
                                         }}
                                       >
                                         <FileSignature className="w-4 h-4 mr-2" />
-                                        GÃ©rer Contrat
+                                        Gerer Contrat
                                       </Button>
 
                                       {booking.status !== 'draft' && (
@@ -878,7 +875,7 @@ export default function ClientDashboard() {
                                          {(booking.status === 'awaiting_payment' || booking.status === 'contract_pending') && (
                                            <Button 
                                              size="sm" 
-                                             className="bg-green-600 hover:bg-green-700 text-white"
+                                             className="bg-green-600 hover:bg-green-700 text-white w-full md:w-auto justify-center"
                                              onClick={() => setSelectedPaymentBooking(booking)}
                                            >
                                              <DollarSign className="w-4 h-4 mr-2" />
@@ -888,26 +885,22 @@ export default function ClientDashboard() {
                                        </>
                                       )}
 
-
-
                                       {booking.status === 'completed' && (
                                        <RateVendorDialog booking={booking} />
                                       )}
 
-                                      {(['in_progress', 'delivered', 'completed'].includes(booking.status)) && booking.status !== 'disputed' && (
-                                       <Button 
-                                         size="sm" 
-                                         variant="outline"
-                                         className="border-amber-600 text-amber-700 hover:bg-amber-50"
-                                         onClick={() => {
-                                           setSelectedDisputeBooking(booking);
-                                           setShowDisputeDialog(true);
-                                         }}
-                                       >
-                                         <AlertTriangle className="w-4 h-4 mr-2" />
-                                         Signaler un Incident
-                                       </Button>
-                                      )}
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-amber-600 text-amber-700 hover:bg-amber-50 w-full md:w-auto justify-center"
+                                        onClick={() => {
+                                          setSelectedDisputeBooking(booking);
+                                          setShowDisputeDialog(true);
+                                        }}
+                                      >
+                                        <AlertTriangle className="w-4 h-4 mr-2" />
+                                        Litige
+                                      </Button>
                                     </div>
                                   </div>
                                 </div>
@@ -918,7 +911,7 @@ export default function ClientDashboard() {
                         </div>
                       ) : (
                         <div className="p-8 text-center text-stone-500">
-                          Aucun service ajoutÃ© Ã  cet Ã©vÃ©nement
+                          Aucun service ajoute a cet evenement
                         </div>
                       )}
                     </CardContent>
@@ -930,8 +923,8 @@ export default function ClientDashboard() {
             <Card>
               <CardContent className="p-20 text-center">
                 <CalendarCheck className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-stone-900">Aucun Ã©vÃ©nement</h3>
-                <p className="text-stone-500 mb-6">CrÃ©ez votre premier Ã©vÃ©nement en ajoutant des services Ã  votre panier.</p>
+                <h3 className="text-lg font-medium text-stone-900">Aucun evenement</h3>
+                <p className="text-stone-500 mb-6">Creez votre premier evenement en ajoutant des services a votre panier.</p>
                 <Button asChild>
                   <a href="/Marketplace">Explorer les Services</a>
                 </Button>
@@ -952,16 +945,16 @@ export default function ClientDashboard() {
                     return (
                     <div key={booking.id} className="p-6 hover:bg-stone-50 transition-colors">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-start gap-4 flex-grow">
+                        <div className="flex items-start gap-4 flex-grow min-w-0">
                           {service?.image_url && (
                             <img 
                               src={service.image_url} 
                               alt={service.title}
-                              className="w-20 h-20 rounded-lg object-cover"
+                              className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                             />
                           )}
-                          <div className="flex-grow">
-                            <div className="flex items-center gap-2 mb-1">
+                          <div className="flex-grow min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <h4 className="font-semibold text-stone-900">
                                 {service?.title || 'Service'}
                               </h4>
@@ -971,7 +964,7 @@ export default function ClientDashboard() {
                             <div className="space-y-1">
                               <p className="text-sm text-stone-600 flex items-center gap-2">
                                 <span className="font-medium">Vendeur:</span>
-                                {vendor?.business_name || 'Provider'}
+                                {vendor?.business_name || 'Prestataire'}
                               </p>
                               <p className="text-sm text-stone-600 flex items-center gap-2">
                                 <CalendarCheck className="w-4 h-4" />
@@ -990,8 +983,6 @@ export default function ClientDashboard() {
                             </div>
                           </div>
                         </div>
-                        
-
                       </div>
                     </div>
                     );
@@ -1000,8 +991,8 @@ export default function ClientDashboard() {
                ) : (
                  <div className="p-20 text-center">
                    <CalendarCheck className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                   <h3 className="text-lg font-medium text-stone-900">Aucune rÃ©servation</h3>
-                   <p className="text-stone-500 mb-6">Explorez la plateforme pour trouver des prestataires pour votre prochain Ã©vÃ©nement.</p>
+                   <h3 className="text-lg font-medium text-stone-900">Aucune reservation</h3>
+                   <p className="text-stone-500 mb-6">Explorez la plateforme pour trouver des prestataires pour votre prochain evenement.</p>
                    <Button asChild>
                      <a href="/Marketplace">Explorer les Services</a>
                    </Button>
