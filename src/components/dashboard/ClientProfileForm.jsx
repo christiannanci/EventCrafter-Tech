@@ -11,8 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import ClientVerificationDialog from './ClientVerificationDialog';
+import PhoneInput from '@/components/PhoneInput';
 
-// Fix for default marker icon in React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -64,7 +64,6 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                 verification_documents: initialProfile.verification_documents || []
             });
         } else if (user) {
-            // Pre-fill from user object if no profile exists
             setFormData(prev => ({
                 ...prev,
                 first_name: user.first_name || "",
@@ -99,10 +98,10 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                 ...prev,
                 profile_image: file_url
             }));
-            toast({ title: "Success", description: "Profile photo updated." });
+            toast({ title: "Succès", description: "Photo de profil mise à jour." });
         } catch (error) {
             console.error("Upload failed", error);
-            toast({ title: "Error", description: "Failed to upload photo.", variant: "destructive" });
+            toast({ title: "Erreur", description: "Échec du téléchargement de la photo.", variant: "destructive" });
         } finally {
             if (!originalLoading) setLoading(false);
         }
@@ -120,14 +119,11 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                 ...prev,
                 verification_documents: [...(prev.verification_documents || []), file_url]
             }));
-            toast({ title: "Success", description: "Document uploaded successfully." });
+            toast({ title: "Succès", description: "Document téléchargé avec succès." });
         } catch (error) {
             console.error("Upload failed", error);
-            toast({ title: "Error", description: "Failed to upload document.", variant: "destructive" });
+            toast({ title: "Erreur", description: "Échec du téléchargement du document.", variant: "destructive" });
         } finally {
-            setLoading(originalLoading); // Restore previous loading state if any, or just false. 
-            // Actually loading state in this component is used for "Saving..." button. 
-            // I should probably verify if I should use a separate state, but for now this works to block save while uploading.
             if (!originalLoading) setLoading(false);
         }
     };
@@ -144,9 +140,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
         setLoading(true);
 
         try {
-            // Determine status
             let newStatus = initialProfile?.verification_status || 'unverified';
-            // If docs are provided and we are unverified (or rejected), move to pending
             if (formData.verification_documents?.length > 0 && (newStatus === 'unverified' || newStatus === 'rejected')) {
                 newStatus = 'pending';
             }
@@ -154,7 +148,6 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
             const dataToSave = {
                 ...formData,
                 user_id: user.id,
-                // Ensure numbers are numbers
                 gps_longitude: formData.gps_longitude ? parseFloat(formData.gps_longitude) : null,
                 gps_latitude: formData.gps_latitude ? parseFloat(formData.gps_latitude) : null,
                 verification_status: newStatus
@@ -167,16 +160,16 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
             }
 
             toast({
-                title: "Profile Updated",
-                description: "Your client information has been saved successfully.",
+                title: "Profil Mis à Jour",
+                description: "Vos informations client ont été enregistrées avec succès.",
             });
             
             if (onSave) onSave();
         } catch (error) {
             console.error("Error saving profile:", error);
             toast({
-                title: "Error",
-                description: "Failed to save profile. Please try again.",
+                title: "Erreur",
+                description: "Échec de l'enregistrement du profil. Veuillez réessayer.",
                 variant: "destructive",
             });
         } finally {
@@ -193,7 +186,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
         };
         return (
             <Badge className={styles[status] || styles.unverified}>
-                {status?.toUpperCase() || "UNVERIFIED"}
+                {status?.toUpperCase() || "NON VÉRIFIÉ"}
             </Badge>
         );
     };
@@ -206,7 +199,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                         <div className="relative group">
                             <div className="w-20 h-20 rounded-full bg-stone-100 overflow-hidden border-2 border-white shadow-sm flex items-center justify-center">
                                 {formData.profile_image ? (
-                                    <img src={formData.profile_image} alt="Profile" className="w-full h-full object-cover" />
+                                    <img src={formData.profile_image} alt="Profil" className="w-full h-full object-cover" />
                                 ) : (
                                     <User className="w-8 h-8 text-stone-300" />
                                 )}
@@ -217,8 +210,8 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                             </label>
                         </div>
                         <div>
-                            <CardTitle>Client Profile</CardTitle>
-                            <CardDescription>Manage your personal information.</CardDescription>
+                            <CardTitle>Profil Client</CardTitle>
+                            <CardDescription>Gérez vos informations personnelles.</CardDescription>
                         </div>
                     </div>
                     {initialProfile && <ClientVerificationDialog profile={initialProfile} user={user} onUpdate={onSave} />}
@@ -232,7 +225,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                                 <Wallet className="w-5 h-5 text-stone-500" />
                             </div>
                             <div>
-                                <p className="text-xs text-stone-500 uppercase font-semibold">Account Balance</p>
+                                <p className="text-xs text-stone-500 uppercase font-semibold">Solde du Compte</p>
                                 <p className="text-xl font-bold text-stone-900">
                                     {initialProfile.account_balance?.toLocaleString()} FCFA
                                 </p>
@@ -243,11 +236,11 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                                 <Shield className="w-5 h-5 text-stone-500" />
                             </div>
                             <div>
-                                <p className="text-xs text-stone-500 uppercase font-semibold">Verification Status</p>
+                                <p className="text-xs text-stone-500 uppercase font-semibold">Statut de Vérification</p>
                                 <p className="text-sm font-medium text-stone-900">
                                     {initialProfile.verification_status === 'verified' 
-                                        ? 'Identity Verified' 
-                                        : 'Identity Verification Required'}
+                                        ? 'Identité Vérifiée' 
+                                        : "Vérification d'Identité Requise"}
                                 </p>
                             </div>
                         </div>
@@ -257,7 +250,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="last_name">Last Name (Nom) *</Label>
+                            <Label htmlFor="last_name">Nom *</Label>
                             <div className="relative">
                                 <User className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
                                 <Input 
@@ -272,7 +265,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="first_name">First Name (Prénom) *</Label>
+                            <Label htmlFor="first_name">Prénom *</Label>
                             <div className="relative">
                                 <User className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
                                 <Input 
@@ -289,7 +282,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="contact_email">Contact Email</Label>
+                        <Label htmlFor="contact_email">Email de Contact</Label>
                         <div className="relative">
                             <Mail className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
                             <Input 
@@ -306,48 +299,34 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="phone">Phone Number</Label>
-                            <div className="relative">
-                                <Phone className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
-                                <Input 
-                                    id="phone" 
-                                    name="phone" 
-                                    placeholder="+237 6..." 
-                                    className="pl-9"
-                                    value={formData.phone} 
-                                    onChange={handleChange} 
-                                />
-                            </div>
+                            <Label htmlFor="phone">Numéro de Téléphone</Label>
+                            <PhoneInput
+                                value={formData.phone}
+                                onChange={(val) => setFormData(prev => ({ ...prev, phone: val }))}
+                            />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="whatsapp">WhatsApp Number</Label>
-                            <div className="relative">
-                                <Phone className="absolute left-3 top-3 h-4 w-4 text-green-500" />
-                                <Input 
-                                    id="whatsapp" 
-                                    name="whatsapp" 
-                                    placeholder="+237 6..." 
-                                    className="pl-9"
-                                    value={formData.whatsapp} 
-                                    onChange={handleChange} 
-                                />
-                            </div>
+                            <Label htmlFor="whatsapp">Numéro WhatsApp</Label>
+                            <PhoneInput
+                                value={formData.whatsapp}
+                                onChange={(val) => setFormData(prev => ({ ...prev, whatsapp: val }))}
+                            />
                         </div>
                     </div>
 
                     <div className="border-t border-stone-100 pt-4">
                         <h3 className="text-sm font-semibold mb-4 text-stone-900 flex items-center gap-2">
-                            <Shield className="w-4 h-4" /> Verification Documents
+                            <Shield className="w-4 h-4" /> Documents de Vérification
                         </h3>
                         <div className="bg-stone-50 p-4 rounded-lg border border-stone-200 mb-6">
                             <p className="text-sm text-stone-500 mb-4">
-                                Upload ID cards, proof of address, or video introductions (PDF, Word, Audio, Video supported). 
-                                Your account will be reviewed by an administrator.
+                                Téléchargez une pièce d'identité, un justificatif de domicile, ou une vidéo de présentation (PDF, Word, Audio, Vidéo acceptés).
+                                Votre compte sera examiné par un administrateur.
                             </p>
                             
                             <div className="flex items-center gap-4 mb-4">
                                 <Button type="button" variant="outline" onClick={() => document.getElementById('doc-upload').click()} disabled={loading}>
-                                    <Upload className="w-4 h-4 mr-2" /> Upload Document
+                                    <Upload className="w-4 h-4 mr-2" /> Télécharger un Document
                                 </Button>
                                 <input 
                                     id="doc-upload" 
@@ -356,7 +335,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                                     accept=".pdf,.doc,.docx,audio/*,video/*,image/*"
                                     onChange={handleFileUpload}
                                 />
-                                {loading && <span className="text-xs text-stone-500 animate-pulse">Uploading...</span>}
+                                {loading && <span className="text-xs text-stone-500 animate-pulse">Téléchargement...</span>}
                             </div>
 
                             {formData.verification_documents?.length > 0 && (
@@ -381,7 +360,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
 
                     <div className="border-t border-stone-100 pt-4">
                         <h3 className="text-sm font-semibold mb-4 text-stone-900 flex items-center gap-2">
-                            <MapPin className="w-4 h-4" /> Location Details
+                            <MapPin className="w-4 h-4" /> Détails de Localisation
                         </h3>
                         
                         <div className="mb-4 h-[300px] w-full rounded-lg overflow-hidden border border-stone-200 z-0 relative">
@@ -402,16 +381,16 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
                             </MapContainer>
                         </div>
                         <p className="text-xs text-stone-500 mb-4 text-center">
-                            Tap on the map to set your exact location.
+                            Touchez la carte pour définir votre position exacte.
                         </p>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="space-y-2">
-                                <Label htmlFor="neighborhood_code">Neighborhood Code</Label>
+                                <Label htmlFor="neighborhood_code">Code de Quartier</Label>
                                 <Input 
                                     id="neighborhood_code" 
                                     name="neighborhood_code" 
-                                    placeholder="e.g. AKWA-001" 
+                                    placeholder="ex. AKWA-001" 
                                     value={formData.neighborhood_code} 
                                     onChange={handleChange} 
                                 />
@@ -449,7 +428,7 @@ export default function ClientProfileForm({ user, initialProfile, onSave }) {
 
                     <div className="flex justify-end pt-4">
                         <Button type="submit" className="bg-rose-600 hover:bg-rose-700" disabled={loading}>
-                            {loading ? "Saving..." : "Save Profile Changes"}
+                            {loading ? "Enregistrement..." : "Enregistrer les Modifications"}
                         </Button>
                     </div>
                 </form>
