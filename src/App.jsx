@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AfrikpayChecklist from './pages/AfrikpayChecklist';
 import AIAssistant from './pages/AIAssistant';
+import ResetPassword from './pages/ResetPassword';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -79,6 +80,14 @@ const AuthenticatedApp = () => {
           element={
             <LayoutWrapper currentPageName="AIAssistant">
               <AIAssistant />
+            </LayoutWrapper>
+          }
+        />
+        <Route
+          path="/ResetPassword"
+          element={
+            <LayoutWrapper currentPageName="ResetPassword">
+              <ResetPassword />
             </LayoutWrapper>
           }
         />

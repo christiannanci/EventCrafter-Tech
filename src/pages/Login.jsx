@@ -3,12 +3,11 @@ import { supabase } from '@/api/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, MailCheck, Eye, EyeOff } from 'lucide-react';
+import { Loader2, MailCheck, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import PhoneInput from '@/components/PhoneInput';
 
-// Mot de passe : au moins 8 caractères, une majuscule, une minuscule, un chiffre
+// Mot de passe : au moins 8 caracteres, une majuscule, une minuscule, un chiffre
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
-// Le téléphone n'est plus soumis à un format particulier : tout numéro est accepté.
 
 export default function Login() {
   const navigate = useNavigate();
@@ -23,12 +22,16 @@ export default function Login() {
   const [error, setError] = useState('');
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [sendingReset, setSendingReset] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
   const validateRegistration = () => {
     if (!PASSWORD_REGEX.test(password)) {
-      setError('Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.');
+      setError('Le mot de passe doit contenir au moins 8 caracteres, une majuscule, une minuscule et un chiffre.');
       return false;
     }
-    // Aucune exigence de format sur le numéro de téléphone : tout numéro est accepté, y compris vide.
     return true;
   };
 
@@ -44,11 +47,28 @@ export default function Login() {
         },
       });
       if (resendError) throw resendError;
-      setMessage("Email de confirmation renvoyé ! Vérifiez votre boîte de réception (et vos spams).");
+      setMessage("Email de confirmation renvoye ! Verifiez votre boite de reception (et vos spams).");
     } catch (err) {
       setError(err.message || "Impossible de renvoyer l'email");
     } finally {
       setResending(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setSendingReset(true);
+    setError('');
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/ResetPassword`,
+      });
+      if (resetError) throw resetError;
+      setResetSent(true);
+    } catch (err) {
+      setError(err.message || "Impossible d'envoyer le lien de reinitialisation");
+    } finally {
+      setSendingReset(false);
     }
   };
 
@@ -66,7 +86,7 @@ export default function Login() {
 
     try {
       if (isRegister) {
-        const cleanedPhone = phone.replace(/\s/g, '');
+        const cleanedPhone = phone.replace(/\s+/g, ' ').trim();
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -74,14 +94,13 @@ export default function Login() {
             data: {
               phone: cleanedPhone,
             },
-            // Redirige directement vers la sélection de profil après confirmation
             emailRedirectTo: `${window.location.origin}/ProfileSelection`,
           },
         });
         if (signUpError) throw signUpError;
 
         if (data.user && !data.session) {
-          setMessage('Compte créé ! Vérifiez votre email pour confirmer votre inscription et accéder à votre tableau de bord.');
+          setMessage('Compte cree ! Verifiez votre email pour confirmer votre inscription et acceder a votre tableau de bord.');
           setNeedsConfirmation(true);
         } else {
           navigate('/ProfileSelection');
@@ -93,10 +112,9 @@ export default function Login() {
         });
 
         if (signInError) {
-          // Supabase renvoie ce message précis quand l'email n'est pas encore confirmé
           if (signInError.message?.toLowerCase().includes('email not confirmed')) {
             setNeedsConfirmation(true);
-            setError("Votre email n'est pas encore confirmé. Vérifiez votre boîte de réception.");
+            setError("Votre email n'est pas encore confirme. Verifiez votre boite de reception.");
           } else {
             throw signInError;
           }
@@ -126,11 +144,77 @@ export default function Login() {
     }
   };
 
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+        <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+          <button
+            type="button"
+            onClick={() => { setShowForgotPassword(false); setResetSent(false); setError(''); }}
+            className="flex items-center gap-1 text-sm text-stone-500 hover:text-stone-700 mb-4"
+          >
+            <ArrowLeft className="w-4 h-4" /> Retour a la connexion
+          </button>
+
+          <h1 className="text-2xl font-bold text-stone-900 mb-2 text-center">
+            Mot de passe oublie
+          </h1>
+
+          {resetSent ? (
+            <div className="bg-green-50 text-green-700 text-sm p-4 rounded-lg flex items-start gap-2 mt-6">
+              <MailCheck className="w-5 h-5 mt-0.5 flex-shrink-0" />
+              <span>
+                Si un compte existe avec l'adresse <strong>{forgotEmail}</strong>, un email contenant un lien de reinitialisation vient de vous etre envoye. Verifiez aussi vos spams.
+              </span>
+            </div>
+          ) : (
+            <>
+              <p className="text-stone-500 text-center mb-6 text-sm">
+                Entrez votre adresse email, nous vous enverrons un lien pour choisir un nouveau mot de passe.
+              </p>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-stone-700">Email</label>
+                  <Input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder="votre@email.com"
+                    required
+                    className="mt-1"
+                  />
+                </div>
+
+                {error && (
+                  <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">
+                    {error}
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={sendingReset}
+                  className="w-full bg-rose-600 hover:bg-rose-700 text-white h-12"
+                >
+                  {sendingReset ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Envoi...</>
+                  ) : (
+                    'Envoyer le lien de reinitialisation'
+                  )}
+                </Button>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-stone-50">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-stone-900 mb-2 text-center">
-          {isRegister ? 'Créer un compte' : 'Connexion'}
+          {isRegister ? 'Creer un compte' : 'Connexion'}
         </h1>
         <p className="text-stone-500 text-center mb-6">
           {isRegister ? 'Rejoignez EventCrafter' : 'Bienvenue sur EventCrafter'}
@@ -151,25 +235,32 @@ export default function Login() {
 
           {isRegister && (
             <div>
-              <label className="text-sm font-medium text-stone-700">Numéro de téléphone (optionnel)</label>
-              <Input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Votre numéro de téléphone"
-                className="mt-1"
-              />
+              <label className="text-sm font-medium text-stone-700">Numero de telephone (optionnel)</label>
+              <div className="mt-1">
+                <PhoneInput value={phone} onChange={setPhone} />
+              </div>
             </div>
           )}
 
           <div>
-            <label className="text-sm font-medium text-stone-700">Mot de passe</label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-stone-700">Mot de passe</label>
+              {!isRegister && (
+                <button
+                  type="button"
+                  onClick={() => { setShowForgotPassword(true); setForgotEmail(email); }}
+                  className="text-xs text-rose-600 hover:underline"
+                >
+                  Mot de passe oublie ?
+                </button>
+              )}
+            </div>
             <div className="relative mt-1">
               <Input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="********"
                 required
                 minLength={8}
                 className="pr-10"
@@ -186,7 +277,7 @@ export default function Login() {
             </div>
             {isRegister && (
               <p className="text-xs text-stone-400 mt-1">
-                Au moins 8 caractères, une majuscule, une minuscule et un chiffre.
+                Au moins 8 caracteres, une majuscule, une minuscule et un chiffre.
               </p>
             )}
           </div>
@@ -226,12 +317,12 @@ export default function Login() {
           >
             {loading ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Chargement...</>
-            ) : isRegister ? 'Créer mon compte' : 'Se connecter'}
+            ) : isRegister ? 'Creer mon compte' : 'Se connecter'}
           </Button>
         </form>
 
         <p className="text-center text-sm text-stone-500 mt-4">
-          {isRegister ? 'Déjà un compte ?' : 'Pas encore de compte ?'}{' '}
+          {isRegister ? 'Deja un compte ?' : 'Pas encore de compte ?'}{' '}
           <button
             type="button"
             onClick={() => {
