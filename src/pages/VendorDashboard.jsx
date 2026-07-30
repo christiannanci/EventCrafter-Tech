@@ -132,10 +132,10 @@ export default function VendorDashboard() {
 
   const getVerifStatusInfo = (status) => {
     const info = {
-      unverified: { icon: XCircle, color: "text-gray-500", bg: "bg-gray-100", text: "NON VÃƒâ€°RIFIÃƒâ€°" },
+      unverified: { icon: XCircle, color: "text-gray-500", bg: "bg-gray-100", text: "NON VÃƒÆ’Ã¢â‚¬Â°RIFIÃƒÆ’Ã¢â‚¬Â°" },
       pending: { icon: Clock, color: "text-yellow-600", bg: "bg-yellow-100", text: "EN ATTENTE" },
-      verified: { icon: CheckCircle2, color: "text-green-600", bg: "bg-green-100", text: "VÃƒâ€°RIFIÃƒâ€°" },
-      rejected: { icon: XCircle, color: "text-red-600", bg: "bg-red-100", text: "REJETÃƒâ€°" }
+      verified: { icon: CheckCircle2, color: "text-green-600", bg: "bg-green-100", text: "VÃƒÆ’Ã¢â‚¬Â°RIFIÃƒÆ’Ã¢â‚¬Â°" },
+      rejected: { icon: XCircle, color: "text-red-600", bg: "bg-red-100", text: "REJETÃƒÆ’Ã¢â‚¬Â°" }
     };
     return info[status] || info.unverified;
   };
@@ -146,7 +146,7 @@ export default function VendorDashboard() {
       return;
     }
     if (!vendorProfile?.verification_docs?.length) {
-      toast({ title: "Documents requis", description: "Veuillez tÃƒÂ©lÃƒÂ©charger au moins un document.", variant: "destructive" });
+      toast({ title: "Documents requis", description: "Veuillez tÃƒÆ’Ã‚Â©lÃƒÆ’Ã‚Â©charger au moins un document.", variant: "destructive" });
       return;
     }
     setSendingVerif(true);
@@ -162,12 +162,12 @@ export default function VendorDashboard() {
       });
       await base44.entities.VendorProfile.update(vendorProfile.id, { verification_status: 'pending' });
       await NotificationService.sendToAdmins({
-        title: "Nouvelle demande de vÃƒÂ©rification",
-        message: `${vendorProfile.business_name || user.full_name} a demandÃƒÂ© la vÃƒÂ©rification de son compte prestataire`,
+        title: "Nouvelle demande de vÃƒÆ’Ã‚Â©rification",
+        message: `${vendorProfile.business_name || user.full_name} a demandÃƒÆ’Ã‚Â© la vÃƒÆ’Ã‚Â©rification de son compte prestataire`,
         type: "system",
         link: "/AdminDashboard"
       });
-      toast({ title: "Demande envoyÃƒÂ©e", description: "Un administrateur vous contactera sous peu." });
+      toast({ title: "Demande envoyÃƒÆ’Ã‚Â©e", description: "Un administrateur vous contactera sous peu." });
       setVerifMessage("");
       refetch();
     } catch (error) {
@@ -259,13 +259,13 @@ export default function VendorDashboard() {
           setBookings(prev => [newBooking, ...prev]);
           await NotificationService.sendToVendor({
             vendorId: user.id,
-            title: "Nouvelle RÃƒÆ’Ã‚Â©servation",
+            title: "Nouvelle RÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©servation",
             message: `Vous avez recu une nouvelle reservation de ${newBooking.client_name || 'un client'} pour le ${new Date(newBooking.event_date).toLocaleDateString('fr-FR')}. Montant: ${newBooking.total_amount?.toLocaleString() || 'a negocier'} FCFA`,
             type: "booking",
             link: "/VendorDashboard?tab=bookings_received"
           });
           toast({ 
-            title: "ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Â° Nouvelle RÃƒÆ’Ã‚Â©servation !",
+            title: "ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° Nouvelle RÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©servation !",
             description: `${newBooking.client_name || 'Un client'} a reserve pour le ${new Date(newBooking.event_date).toLocaleDateString('fr-FR')}`
           });
         }
@@ -308,19 +308,19 @@ export default function VendorDashboard() {
           const savedPercent = Math.round((1 - compressedSize / originalSize) * 100);
           
           toast({ 
-            title: `Image optimisee (${savedPercent}% rÃƒÆ’Ã‚Â©duit)`,
-            description: `${formatFileSize(originalSize)} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ${formatFileSize(compressedSize)}`
+            title: `Image optimisee (${savedPercent}% rÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©duit)`,
+            description: `${formatFileSize(originalSize)} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ ${formatFileSize(compressedSize)}`
           });
         }
       
         const result = await UploadFile({ file: fileToUpload });
         setNewService({...newService, image_url: result.file_url});
-        toast({ title: "Image telechargee avec succÃƒÆ’Ã‚Â¨s" });
+        toast({ title: "Image telechargee avec succÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¨s" });
         return true;
       });
     } catch (error) {
       toast({ 
-        title: error.message.includes('Rate limit') ? "ÃƒÂ¢Ã…Â¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â Limite atteinte" : "Echec du telechargement",
+        title: error.message.includes('Rate limit') ? "ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Limite atteinte" : "Echec du telechargement",
         description: error.message.includes('Rate limit') ? error.message : undefined,
         variant: "destructive" 
       });
@@ -337,7 +337,7 @@ export default function VendorDashboard() {
       setUploadingVideo(true);
       const result = await UploadFile({ file });
       setNewService({...newService, video_url: result.file_url});
-      toast({ title: "Video telechargee avec succÃƒÆ’Ã‚Â¨s" });
+      toast({ title: "Video telechargee avec succÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¨s" });
     } catch (error) {
       toast({ 
         title: "Echec du telechargement", 
@@ -368,7 +368,7 @@ export default function VendorDashboard() {
       if (!validation.success) {
         const firstError = Object.values(validation.errors)[0];
         toast({ 
-          title: "Validation ÃƒÆ’Ã‚Â©chouÃƒÆ’Ã‚Â©e", 
+          title: "Validation ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©chouÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©e", 
           description: firstError,
           variant: "destructive" 
         });
@@ -465,8 +465,8 @@ export default function VendorDashboard() {
               
               await NotificationService.sendToVendor({
                   vendorId: user.id,
-                  title: "Fonds Librs",
-                  message: "L'evenement est termine. Les fonds ont ete liberess vers votre portefeuille.",
+                  title: "Fonds Liberes",
+                  message: "L'evenement est termine. Les fonds ont ete liberees vers votre portefeuille.",
                   type: "payment",
                   link: "/VendorDashboard"
               });
@@ -474,12 +474,12 @@ export default function VendorDashboard() {
       }
       
       refetch();
-      toast({ title: "Statut mis  jour" });
+      toast({ title: "Statut mis a jour" });
     } catch (e) {
       console.error(e);
       toast({ 
-        title: "Erreur de mise  jour", 
-        description: "Impossible de modifier le statut. Ressayez.",
+        title: "Erreur de mise a jour", 
+        description: "Impossible de modifier le statut. Reessayez.",
         variant: "destructive" 
       });
     }
@@ -615,12 +615,12 @@ export default function VendorDashboard() {
               </div>
               {notificationCount >= 7 && notificationCount < 10 && (
                 <p className="text-xs text-orange-600 mt-1">
-                  ?? Plus que {10 - notificationCount} demande{10 - notificationCount > 1 ? 's' : ''} disponible{10 - notificationCount > 1 ? 's' : ''}
+                  Plus que {10 - notificationCount} demande{10 - notificationCount > 1 ? 's' : ''} disponible{10 - notificationCount > 1 ? 's' : ''}
                 </p>
               )}
               {notificationCount >= 10 && (
                 <p className="text-xs text-red-600 mt-1">
-                  ?? Limite atteinte. Passez a Premium pour des demandes illimites.
+                  Limite atteinte. Passez a Premium pour des demandes illimites.
                 </p>
               )}
             </div>
@@ -634,14 +634,14 @@ export default function VendorDashboard() {
             onClick={() => setIsMembershipDialogOpen(true)}
           >
             <Crown className="w-4 h-4 mr-2 text-amber-500" />
-            {membershipStatus === 'premium' ? 'Plan Premium' : membershipStatus === 'gold' ? 'Plan Gold' : 'Amliorer'}
+            {membershipStatus === 'premium' ? 'Plan Premium' : membershipStatus === 'gold' ? 'Plan Gold' : 'Ameliorer'}
           </Button>
           <Dialog open={isNewServiceOpen} onOpenChange={setIsNewServiceOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="bg-rose-600 hover:bg-rose-700">
                 <Plus className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Creer une Offre</span>
-                <span className="sm:hidden">Crer</span>
+                <span className="sm:hidden">Creer</span>
               </Button>
             </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh]">
@@ -655,7 +655,7 @@ export default function VendorDashboard() {
               </div>
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Catgorie</label>
+                  <label className="text-xs font-medium text-stone-600">Categorie</label>
                   <Select value={newService.category} onValueChange={val => {
                     const selectedType = serviceTypes.find(t => t.name === val);
                     setNewService({...newService, category: val, service_type_code: selectedType ? selectedType.code_service : ""});
@@ -700,7 +700,7 @@ export default function VendorDashboard() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Zone de Disponibilit</label>
+                  <label className="text-xs font-medium text-stone-600">Zone de Disponibilite</label>
                   <Select value={newService.availability_level} onValueChange={val => setNewService({...newService, availability_level: val})}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -739,7 +739,7 @@ export default function VendorDashboard() {
                 <label className="text-sm font-medium text-stone-600">Video de Presentation</label>
                 <input type="file" id="video-upload" accept="video/*" onChange={handleVideoUpload} className="hidden" />
                 <Button type="button" variant="outline" className="w-full" onClick={() => document.getElementById('video-upload').click()} disabled={uploadingVideo}>
-                  {uploadingVideo ? "Telechargement..." : newService.video_url ? "Changer la video" : "Telecharger une vido"}
+                  {uploadingVideo ? "Telechargement..." : newService.video_url ? "Changer la video" : "Telecharger une video"}
                 </Button>
                 {newService.video_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Video telecharge</div>}
               </div>
@@ -753,12 +753,12 @@ export default function VendorDashboard() {
                   <Textarea placeholder="Detaillez ce qui est inclus..." className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">Conditions & Prrequis</label>
+                  <label className="text-sm font-medium mb-1 block text-stone-600">Conditions & Prerequis</label>
                   <Textarea placeholder="Conditions importantes..." className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} />
                 </div>
               </div>
               <Button onClick={handleCreateService} className="w-full bg-rose-600">
-                {editingService ? "Enregistrer les modifications" : "Crer l'Offre"}
+                {editingService ? "Enregistrer les modifications" : "Creer l'Offre"}
               </Button>
             </div>
           </DialogContent>
@@ -784,11 +784,11 @@ export default function VendorDashboard() {
       <Tabs defaultValue="dossiers" className="w-full">
         <div className="mb-6 overflow-x-auto -mx-4 px-4">
         <TabsList className="w-max min-w-full justify-start bg-stone-100 p-1 gap-0">
-          <TabsTrigger value="dossiers" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">?? Dossiers</TabsTrigger>
-          <TabsTrigger value="listings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">?? Catalogue</TabsTrigger>
-          <TabsTrigger value="leads" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">?? Prospects</TabsTrigger>
-          <TabsTrigger value="growth" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">?? Croissance</TabsTrigger>
-          <TabsTrigger value="availability" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">?? Calendrier</TabsTrigger>
+          <TabsTrigger value="dossiers" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Dossiers</TabsTrigger>
+          <TabsTrigger value="listings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Catalogue</TabsTrigger>
+          <TabsTrigger value="leads" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Prospects</TabsTrigger>
+          <TabsTrigger value="growth" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Croissance</TabsTrigger>
+          <TabsTrigger value="availability" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Calendrier</TabsTrigger>
           <TabsTrigger value="settings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Parametres</TabsTrigger>
         </TabsList>
         </div>
@@ -857,7 +857,7 @@ export default function VendorDashboard() {
                       <div>
                         <CardTitle className="flex items-center gap-2">
                           <ShieldCheck className="w-5 h-5 text-amber-600" />
-                          Verification Documents
+                          Documents de Verification
                         </CardTitle>
                       </div>
                       <Badge className={`${statusInfo.bg} ${statusInfo.color}`}>
@@ -887,7 +887,7 @@ export default function VendorDashboard() {
                             const files = Array.from(e.target.files || []);
                             if (files.length === 0) return;
                             try {
-                              toast({ title: "Upload en cours..." });
+                              toast({ title: "Televersement en cours..." });
                               const results = await Promise.all(files.map(file => UploadFile({ file })));
                               const urls = results.map(r => r.file_url);
                               const currentDocs = vendorProfile.verification_docs || [];
@@ -965,7 +965,7 @@ export default function VendorDashboard() {
                        <div className="flex items-center justify-between text-sm">
                          <span className="text-stone-600">Ce mois</span>
                          <span className={`font-bold ${notificationCount >= 10 ? 'text-red-600' : 'text-stone-900'}`}>
-                           {notificationCount}/10 notifications reues
+                           {notificationCount}/10 notifications recues
                          </span>
                        </div>
                        <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
@@ -980,7 +980,7 @@ export default function VendorDashboard() {
                        </div>
                        {notificationCount < 10 && (
                          <p className="text-xs text-stone-500">
-                           ?? Encore {10 - notificationCount} demande{10 - notificationCount > 1 ? 's' : ''} disponible{10 - notificationCount > 1 ? 's' : ''} ce mois
+                           Encore {10 - notificationCount} demande{10 - notificationCount > 1 ? 's' : ''} disponible{10 - notificationCount > 1 ? 's' : ''} ce mois
                          </p>
                        )}
                      </div>
@@ -1009,10 +1009,10 @@ export default function VendorDashboard() {
                      Limite de Notifications Atteinte
                    </h3>
                    <p className="text-white/90 mb-2">
-                     Vous avez reÃƒÂ§u {notificationCount}/10 notifications ce mois. Vous ne recevrez plus de nouvelles demandes clients.
+                     Vous avez reÃƒÆ’Ã‚Â§u {notificationCount}/10 notifications ce mois. Vous ne recevrez plus de nouvelles demandes clients.
                    </p>
                    <p className="text-white font-semibold">
-                     Passez ÃƒÂ  Premium ou Gold pour recevoir des notifications illimitÃƒÂ©es !
+                     Passez ÃƒÆ’Ã‚Â  Premium ou Gold pour recevoir des notifications illimitÃƒÆ’Ã‚Â©es !
                    </p>
                  </div>
                  <Button 
@@ -1020,7 +1020,7 @@ export default function VendorDashboard() {
                    onClick={() => setIsMembershipDialogOpen(true)}
                  >
                    <Crown className="w-4 h-4 mr-2" />
-                   AmÃƒÂ©liorer l'Abonnement
+                   AmÃƒÆ’Ã‚Â©liorer l'Abonnement
                  </Button>
                </div>
              </div>
@@ -1032,10 +1032,10 @@ export default function VendorDashboard() {
                  <div>
                    <h3 className="text-lg font-bold flex items-center gap-2">
                      <CheckCircle2 className="w-5 h-5" /> 
-                     Plan Free: {notificationCount}/10 notifications utilisÃƒÂ©es ce mois
+                     Plan Free: {notificationCount}/10 notifications utilisÃƒÆ’Ã‚Â©es ce mois
                    </h3>
                    <p className="text-blue-100 mt-1">
-                     Passez ÃƒÂ  Premium ou Gold pour des notifications illimitÃƒÂ©es et plus d'avantages.
+                     Passez ÃƒÆ’Ã‚Â  Premium ou Gold pour des notifications illimitÃƒÆ’Ã‚Â©es et plus d'avantages.
                    </p>
                  </div>
                  <Button 
@@ -1104,9 +1104,9 @@ export default function VendorDashboard() {
             )) : (
               <div className="col-span-full text-center py-20 bg-stone-50 rounded-xl border border-dashed border-stone-200">
                 <Package className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-stone-900">Aucun service rÃƒÂ©pertoriÃƒÂ©</h3>
-                <p className="text-stone-500 mb-6">Commencez ÃƒÂ  gagner en listant vos services d'organisation d'ÃƒÂ©vÃƒÂ©nements.</p>
-                <Button onClick={() => setIsNewServiceOpen(true)} variant="outline">CrÃƒÂ©er PremiÃƒÂ¨re Offre</Button>
+                <h3 className="text-lg font-medium text-stone-900">Aucun service rÃƒÆ’Ã‚Â©pertoriÃƒÆ’Ã‚Â©</h3>
+                <p className="text-stone-500 mb-6">Commencez ÃƒÆ’Ã‚Â  gagner en listant vos services d'organisation d'ÃƒÆ’Ã‚Â©vÃƒÆ’Ã‚Â©nements.</p>
+                <Button onClick={() => setIsNewServiceOpen(true)} variant="outline">CrÃƒÆ’Ã‚Â©er PremiÃƒÆ’Ã‚Â¨re Offre</Button>
               </div>
             )}
           </div>
