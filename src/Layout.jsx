@@ -66,7 +66,6 @@ function LayoutContent({ children }) {
         
         setUser(currentUser);
 
-        // Paralleliser les deux requetes profil
         const [vendorProfiles, clientProfiles] = await Promise.all([
           base44.entities.VendorProfile.filter({ user_id: currentUser.id }),
           base44.entities.ClientProfile.filter({ user_id: currentUser.id })
@@ -77,7 +76,6 @@ function LayoutContent({ children }) {
         setHasVendorProfile(vendorProfiles.length > 0);
         setHasClientProfile(clientProfiles.length > 0);
 
-        // Initialiser les notifications en arriere-plan (non-bloquant)
         import('@/components/RealtimeNotificationSystem').then(({ realtimeNotifications }) => {
           if (mounted) realtimeNotifications.initialize(currentUser.id, currentUser.role);
         }).catch(() => {});
@@ -113,7 +111,7 @@ function LayoutContent({ children }) {
 
   const languages = [
     { code: 'en', label: 'Anglais' },
-    { code: 'fr', label: 'FranÃ§ais' },
+    { code: 'fr', label: 'Francais' },
     { code: 'pcm', label: 'Pidgin' },
   ];
 
@@ -122,7 +120,6 @@ function LayoutContent({ children }) {
       <Toaster />
       <SonnerToaster />
       <ScrollToTop />
-      {/* Google Analytics removed: external scripts blocked by MTN/Orange */}
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#F4C542]/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -133,7 +130,7 @@ function LayoutContent({ children }) {
               <span className="text-2xl font-['Poppins'] font-bold tracking-tight text-[#2C2C2C]">
                 Event<span className="text-[#FF6B35] relative">
                   Crafter
-                  <span className="absolute -top-1 -right-2 text-[#F4C542] text-xs">â˜…</span>
+                  <span className="absolute -top-1 -right-2 text-[#F4C542] text-xs">*</span>
                 </span>
               </span>
             </Link>
@@ -226,7 +223,7 @@ function LayoutContent({ children }) {
                           <p className="text-xs text-stone-500 mb-2">Pays</p>
                           <Select value={selectedCountry || ''} onValueChange={setSelectedCountry}>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="SÃ©lectionner un pays" />
+                              <SelectValue placeholder="Selectionner un pays" />
                             </SelectTrigger>
                             <SelectContent>
                               {countries.map((c) => (
@@ -428,11 +425,11 @@ function LayoutContent({ children }) {
                 </span>
               </div>
               <p className="text-stone-500 max-w-sm">
-                La marketplace ultime pour tous vos besoins Ã©vÃ©nementiels. Des organisateurs aux photographes, nous avons tout ce qu'il vous faut.
+                La marketplace ultime pour tous vos besoins evenementiels. Des organisateurs aux photographes, nous avons tout ce qu'il vous faut.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Plateformes</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Plateforme</h3>
               <ul className="space-y-2 text-stone-500">
                 <li><Link to={createPageUrl("Marketplace")} className="hover:text-[#FF6B35]">{t("nav.marketplace")}</Link></li>
                 <li><Link to={createPageUrl("About")} className="hover:text-[#FF6B35]">{t("nav.howItWorks")}</Link></li>
@@ -440,18 +437,18 @@ function LayoutContent({ children }) {
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Supports</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Support</h3>
               <ul className="space-y-2 text-stone-500">
                 <li><Link to={createPageUrl("Support")} className="hover:text-[#FF6B35]">Centre d'aide</Link></li>
                 <li><a href="https://wa.me/237670934378" target="_blank" rel="noopener noreferrer" className="hover:text-[#FF6B35]">WhatsApp</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">Juridiques</h3>
+              <h3 className="font-semibold text-[#2C2C2C] mb-4">Juridique</h3>
               <ul className="space-y-2 text-stone-500">
                 <li><Link to={createPageUrl("TermsOfService")} className="hover:text-[#FF6B35]">CGU</Link></li>
-                <li><Link to={createPageUrl("PrivacyPolicy")} className="hover:text-[#FF6B35]">ConfidentialitÃ©</Link></li>
-                <li><Link to={createPageUrl("LegalNotice")} className="hover:text-[#FF6B35]">Mentions lÃ©gales</Link></li>
+                <li><Link to={createPageUrl("PrivacyPolicy")} className="hover:text-[#FF6B35]">Confidentialite</Link></li>
+                <li><Link to={createPageUrl("LegalNotice")} className="hover:text-[#FF6B35]">Mentions legales</Link></li>
               </ul>
             </div>
             <div>
@@ -468,7 +465,7 @@ function LayoutContent({ children }) {
           </div>
           <div className="mt-12 pt-8 border-t border-stone-100 text-center text-stone-400 text-sm">
           <p className="mb-2">{t('about.legalInfo')}</p>
-          Â© 2026 EventCrafter Marketplace. Tous droits rÃ©servÃ©s.
+          (c) 2026 EventCrafter Marketplace. Tous droits reserves.
           </div>
         </div>
       </footer>
