@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
 import { base44, supabase } from "@/api/apiClient";
 import { UploadFile } from "@/api/integrations";
+import React, { useState, useEffect } from 'react';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -59,8 +60,10 @@ import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { withRateLimit } from '@/components/RateLimiter';
 import { compressImage, isImage, formatFileSize } from '@/components/ImageCompressor';
 import { generateEntityCode, generateSlug } from '@/components/SecurityUtils';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function VendorDashboard() {
+  const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [isMembershipDialogOpen, setIsMembershipDialogOpen] = useState(false);
   const [isNewServiceOpen, setIsNewServiceOpen] = useState(false);
@@ -104,7 +107,7 @@ export default function VendorDashboard() {
   const [newService, setNewService] = useState({
     title: "",
     description: "",
-    category: "Event Planner",
+    category: "",
     service_type_code: "",
     function_codes: [],
     supported_event_types: [],
@@ -132,21 +135,21 @@ export default function VendorDashboard() {
 
   const getVerifStatusInfo = (status) => {
     const info = {
-      unverified: { icon: XCircle, color: "text-gray-500", bg: "bg-gray-100", text: "NON VERIFIE" },
-      pending: { icon: Clock, color: "text-yellow-600", bg: "bg-yellow-100", text: "EN ATTENTE" },
-      verified: { icon: CheckCircle2, color: "text-green-600", bg: "bg-green-100", text: "VERIFIE" },
-      rejected: { icon: XCircle, color: "text-red-600", bg: "bg-red-100", text: "REJETE" }
+      unverified: { icon: XCircle, color: "text-gray-500", bg: "bg-gray-100", text: t('vendor.unverified') },
+      pending: { icon: Clock, color: "text-yellow-600", bg: "bg-yellow-100", text: t('vendor.pending') },
+      verified: { icon: CheckCircle2, color: "text-green-600", bg: "bg-green-100", text: t('vendor.verified') },
+      rejected: { icon: XCircle, color: "text-red-600", bg: "bg-red-100", text: t('vendor.rejected') }
     };
     return info[status] || info.unverified;
   };
 
   const handleSendVerifRequest = async () => {
     if (!verifMessage.trim()) {
-      toast({ title: "Message requis", description: "Veuillez expliquer votre demande.", variant: "destructive" });
+      toast({ title: t('vendor.messageRequired'), description: t('vendor.explainRequestNeeded'), variant: "destructive" });
       return;
     }
     if (!vendorProfile?.verification_docs?.length) {
-      toast({ title: "Documents requis", description: "Veuillez telecharger au moins un document.", variant: "destructive" });
+      toast({ title: t('vendor.documentsRequired'), description: t('vendor.uploadAtLeastOne'), variant: "destructive" });
       return;
     }
     setSendingVerif(true);
@@ -167,12 +170,12 @@ export default function VendorDashboard() {
         type: "system",
         link: "/AdminDashboard"
       });
-      toast({ title: "Demande envoyee", description: "Un administrateur vous contactera sous peu." });
+      toast({ title: t('vendor.verifRequestSent'), description: t('vendor.adminWillContact') });
       setVerifMessage("");
       refetch();
     } catch (error) {
       console.error("Error sending verification request:", error);
-      toast({ title: "Erreur", description: "Impossible d'envoyer la demande.", variant: "destructive" });
+      toast({ title: t('vendor.genericError'), description: t('vendor.unableToSendRequest'), variant: "destructive" });
     } finally {
       setSendingVerif(false);
     }
@@ -259,13 +262,13 @@ export default function VendorDashboard() {
           setBookings(prev => [newBooking, ...prev]);
           await NotificationService.sendToVendor({
             vendorId: user.id,
-            title: "Nouvelle Rservation",
+            title: "Nouvelle Reservation",
             message: `Vous avez recu une nouvelle reservation de ${newBooking.client_name || 'un client'} pour le ${new Date(newBooking.event_date).toLocaleDateString('fr-FR')}. Montant: ${newBooking.total_amount?.toLocaleString() || 'a negocier'} FCFA`,
             type: "booking",
             link: "/VendorDashboard?tab=bookings_received"
           });
           toast({ 
-            title: "?? Nouvelle Rservation !",
+            title: "Nouvelle Reservation !",
             description: `${newBooking.client_name || 'Un client'} a reserve pour le ${new Date(newBooking.event_date).toLocaleDateString('fr-FR')}`
           });
         }
@@ -295,7 +298,7 @@ export default function VendorDashboard() {
       
         if (isImage(file)) {
           const originalSize = file.size;
-          toast({ title: "Compression de l'image..." });
+          toast({ title: t('vendor.compressingImage') });
           
           fileToUpload = await compressImage(file, {
             maxWidth: 1920,
@@ -308,19 +311,19 @@ export default function VendorDashboard() {
           const savedPercent = Math.round((1 - compressedSize / originalSize) * 100);
           
           toast({ 
-            title: `Image optimisee (${savedPercent}% rduit)`,
-            description: `${formatFileSize(originalSize)} ? ${formatFileSize(compressedSize)}`
+            title: `${t('vendor.imageOptimized')} (${savedPercent}% ${t('vendor.reduced')})`,
+            description: `${formatFileSize(originalSize)} -> ${formatFileSize(compressedSize)}`
           });
         }
       
         const result = await UploadFile({ file: fileToUpload });
         setNewService({...newService, image_url: result.file_url});
-        toast({ title: "Image telechargee avec succs" });
+        toast({ title: t('vendor.imageUploadedSuccess') });
         return true;
       });
     } catch (error) {
       toast({ 
-        title: error.message.includes('Rate limit') ? "?? Limite atteinte" : "Echec du telechargement",
+        title: error.message.includes('Rate limit') ? t('vendor.rateLimitReached') : t('vendor.uploadFailed'),
         description: error.message.includes('Rate limit') ? error.message : undefined,
         variant: "destructive" 
       });
@@ -337,10 +340,10 @@ export default function VendorDashboard() {
       setUploadingVideo(true);
       const result = await UploadFile({ file });
       setNewService({...newService, video_url: result.file_url});
-      toast({ title: "Video telechargee avec succs" });
+      toast({ title: t('vendor.videoUploadedSuccess') });
     } catch (error) {
       toast({ 
-        title: "Echec du telechargement", 
+        title: t('vendor.uploadFailed'), 
         description: "La video n'a pas pu etre telechargee. Verifiez votre connexion.",
         variant: "destructive" 
       });
@@ -368,7 +371,7 @@ export default function VendorDashboard() {
       if (!validation.success) {
         const firstError = Object.values(validation.errors)[0];
         toast({ 
-          title: "Validation choue", 
+          title: t('vendor.validationFailed'), 
           description: firstError,
           variant: "destructive" 
         });
@@ -380,7 +383,7 @@ export default function VendorDashboard() {
           ...newService,
           price_min: parseFloat(newService.price_min)
         });
-        toast({ title: "Service modifie avec succes" });
+        toast({ title: t('vendor.serviceUpdated') });
       } else {
         await base44.entities.Service.create({
           ...newService,
@@ -389,14 +392,14 @@ export default function VendorDashboard() {
           price_min: parseFloat(newService.price_min),
           planner_id: user.id
         });
-        toast({ title: "Service cree avec succes" });
+        toast({ title: t('vendor.serviceCreated') });
       }
       
       setIsNewServiceOpen(false);
       setEditingService(null);
       setNewService({ 
           title: "", description: "", description_details: "", description_terms: "",
-          category: "Wedding", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "", 
+          category: "", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "", 
           availability_level: "ville", availability_code: "",
           location: "", city: "", region: "", neighborhood_code: "", 
           address_details: "", image_url: "",
@@ -407,8 +410,8 @@ export default function VendorDashboard() {
     } catch (error) {
       console.error("Error creating/updating service", error);
       toast({ 
-        title: "Erreur de sauvegarde", 
-        description: error.message || "Le service n'a pas pu etre sauvegarde.",
+        title: t('vendor.saveError'), 
+        description: error.message || t('vendor.saveErrorDesc'),
         variant: "destructive" 
       });
     }
@@ -419,7 +422,7 @@ export default function VendorDashboard() {
     setNewService({
       title: service.title || "",
       description: service.description || "",
-      category: service.category || "Wedding",
+      category: service.category || "",
       service_type_code: service.service_type_code || "",
       function_codes: service.function_codes || [],
       supported_event_types: service.supported_event_types || [],
@@ -441,7 +444,7 @@ export default function VendorDashboard() {
       diaspora_ready: service.diaspora_ready || false
     });
     
-    const selectedType = serviceTypes.find(t => t.code_service === service.service_type_code);
+    const selectedType = serviceTypes.find(t2 => t2.code_service === service.service_type_code);
     if (selectedType) {
       setAvailableFunctions(allFunctions.filter(f => f.service_type_code === selectedType.code_service));
     }
@@ -455,7 +458,7 @@ export default function VendorDashboard() {
       
       if (status === 'completed') {
           const txs = await base44.entities.Transaction.list();
-          const tx = txs.find(t => t.reference_id === id && t.status === 'escrow_held');
+          const tx = txs.find(t2 => t2.reference_id === id && t2.status === 'escrow_held');
           
           if (tx) {
               await base44.entities.Transaction.update(tx.id, { 
@@ -465,8 +468,8 @@ export default function VendorDashboard() {
               
               await NotificationService.sendToVendor({
                   vendorId: user.id,
-                  title: "Fonds Librs",
-                  message: "L'evenement est termine. Les fonds ont ete liberess vers votre portefeuille.",
+                  title: t('vendor.fundsReleasedTitle'),
+                  message: t('vendor.fundsReleasedDesc'),
                   type: "payment",
                   link: "/VendorDashboard"
               });
@@ -474,39 +477,39 @@ export default function VendorDashboard() {
       }
       
       refetch();
-      toast({ title: "Statut mis  jour" });
+      toast({ title: t('vendor.statusUpdated') });
     } catch (e) {
       console.error(e);
       toast({ 
-        title: "Erreur de mise  jour", 
-        description: "Impossible de modifier le statut. Ressayez.",
+        title: t('vendor.statusUpdateError'), 
+        description: t('vendor.statusUpdateErrorDesc'),
         variant: "destructive" 
       });
     }
   };
 
   const deleteService = async (id) => {
-    if(confirm("Etes-vous sur de vouloir supprimer ce service ?")) {
+    if(confirm(t('vendor.confirmDeleteService'))) {
       try {
         const services = await base44.entities.Service.list();
         const service = services.find(s => s.id === id);
         
         if (!service) {
-          throw new Error("Service introuvable");
+          throw new Error(t('vendor.serviceNotFound'));
         }
 
         const canDelete = await PermissionGuard.canDeleteService(service);
         if (!canDelete) {
-          throw new Error("Vous n'avez pas la permission de supprimer ce service");
+          throw new Error(t('vendor.noDeletePermission'));
         }
 
         await base44.entities.Service.delete(id);
-        toast({ title: "Service supprime avec succes" });
+        toast({ title: t('vendor.serviceDeleted') });
         refetch();
       } catch (error) {
         toast({ 
-          title: "Echec de suppression", 
-          description: error.message || "Le service n'a pas pu etre supprime.",
+          title: t('vendor.deleteFailed'), 
+          description: error.message || t('vendor.saveErrorDesc'),
           variant: "destructive" 
         });
       }
@@ -530,12 +533,12 @@ export default function VendorDashboard() {
     };
 
     const labels = {
-      contract_pending: "Waiting Signature",
-      awaiting_payment: "Waiting Payment",
-      in_progress: "In Progress",
-      delivered: "Delivered (Wait Recept.)",
-      warranty_period: "Warranty",
-      disputed: "In Dispute"
+      contract_pending: t('clientDashboard.statusWaitingSignature'),
+      awaiting_payment: t('clientDashboard.statusWaitingPayment'),
+      in_progress: t('clientDashboard.statusInProgress'),
+      delivered: t('clientDashboard.statusDelivered'),
+      warranty_period: t('clientDashboard.statusWarranty'),
+      disputed: t('clientDashboard.statusDispute')
     };
 
     return (
@@ -556,10 +559,10 @@ export default function VendorDashboard() {
       <Card className="max-w-md">
         <CardContent className="p-8 text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-stone-900 mb-2">Erreur de Chargement</h3>
+          <h3 className="text-lg font-bold text-stone-900 mb-2">{t('vendor.loadingError')}</h3>
           <p className="text-stone-600 mb-4">{error}</p>
           <Button onClick={refetch} className="bg-rose-600 hover:bg-rose-700">
-            Ressayer
+            {t('vendor.retry')}
           </Button>
         </CardContent>
       </Card>
@@ -578,7 +581,7 @@ export default function VendorDashboard() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-6">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl sm:text-3xl font-bold text-stone-900">Tableau de Bord Fournisseur</h1>
+            <h1 className="text-xl sm:text-3xl font-bold text-stone-900">{t('vendor.title')}</h1>
             <Badge 
               className={`cursor-pointer hover:opacity-80 transition-opacity shrink-0 ${
                 membershipStatus === 'premium' ? 'bg-rose-600 text-white' :
@@ -591,13 +594,13 @@ export default function VendorDashboard() {
               {membershipStatus.charAt(0).toUpperCase() + membershipStatus.slice(1)}
             </Badge>
           </div>
-          <p className="text-stone-500 text-sm">Bienvenue, {user.first_name || user.email}</p>
+          <p className="text-stone-500 text-sm">{t('vendor.welcome')} {user.first_name || user.email}</p>
           
           {membershipStatus === 'free' && (
             <div className="mt-4 max-w-md">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-stone-600">
-                  Demandes prospects ce mois
+                  {t('vendor.newBookingRequests')}
                 </span>
                 <span className={`text-sm font-bold ${notificationCount >= 10 ? 'text-red-600' : 'text-green-600'}`}>
                   {notificationCount}/10
@@ -615,12 +618,12 @@ export default function VendorDashboard() {
               </div>
               {notificationCount >= 7 && notificationCount < 10 && (
                 <p className="text-xs text-orange-600 mt-1">
-                  ?? Plus que {10 - notificationCount} demande{10 - notificationCount > 1 ? 's' : ''} disponible{10 - notificationCount > 1 ? 's' : ''}
+                  {10 - notificationCount} {t('vendor.moreAvailable')}
                 </p>
               )}
               {notificationCount >= 10 && (
                 <p className="text-xs text-red-600 mt-1">
-                  ?? Limite atteinte. Passez a Premium pour des demandes illimites.
+                  {t('vendor.limitReachedShort')}
                 </p>
               )}
             </div>
@@ -634,42 +637,42 @@ export default function VendorDashboard() {
             onClick={() => setIsMembershipDialogOpen(true)}
           >
             <Crown className="w-4 h-4 mr-2 text-amber-500" />
-            {membershipStatus === 'premium' ? 'Plan Premium' : membershipStatus === 'gold' ? 'Plan Gold' : 'Amliorer'}
+            {membershipStatus === 'premium' ? t('vendor.premiumPlan') : membershipStatus === 'gold' ? t('vendor.goldPlan') : t('vendor.upgradeShort')}
           </Button>
           <Dialog open={isNewServiceOpen} onOpenChange={setIsNewServiceOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="bg-rose-600 hover:bg-rose-700">
                 <Plus className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Creer une Offre</span>
-                <span className="sm:hidden">Crer</span>
+                <span className="hidden sm:inline">{t('vendor.listNewService')}</span>
+                <span className="sm:hidden">{t('vendor.createOfferShort')}</span>
               </Button>
             </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh]">
             <DialogHeader>
-              <DialogTitle>{editingService ? "Modifier le Service" : "Creer une Offre de Service"}</DialogTitle>
+              <DialogTitle>{editingService ? t('vendor.editService') : t('vendor.createServiceTitle')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4 overflow-y-auto max-h-[70vh] px-1">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-stone-600">Titre du Service</label>
-                <Input placeholder="ex. Organisation de Mariage de Luxe" value={newService.title} onChange={e => setNewService({...newService, title: e.target.value})} />
+                <label className="text-xs font-medium text-stone-600">{t('vendor.serviceTitleLabel')}</label>
+                <Input placeholder={t('vendor.serviceTitlePlaceholder')} value={newService.title} onChange={e => setNewService({...newService, title: e.target.value})} />
               </div>
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Catgorie</label>
+                  <label className="text-xs font-medium text-stone-600">{t('vendor.categoryLabel')}</label>
                   <Select value={newService.category} onValueChange={val => {
-                    const selectedType = serviceTypes.find(t => t.name === val);
+                    const selectedType = serviceTypes.find(t2 => t2.name === val);
                     setNewService({...newService, category: val, service_type_code: selectedType ? selectedType.code_service : ""});
                     if (selectedType) setAvailableFunctions(allFunctions.filter(f => f.service_type_code === selectedType.code_service));
                     else setAvailableFunctions([]);
                   }}>
-                    <SelectTrigger><SelectValue placeholder="Choisir categorie" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t('vendor.chooseCategoryPlaceholder')} /></SelectTrigger>
                     <SelectContent>
-                      {serviceTypes.length > 0 ? serviceTypes.map(t => (<SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>)) : (<SelectItem value="Event Planner">Event Planner</SelectItem>)}
+                      {serviceTypes.map(t2 => (<SelectItem key={t2.id} value={t2.name}>{t2.name}</SelectItem>))}
                     </SelectContent>
                   </Select>
                   {availableFunctions.length > 0 && (
                     <div className="mt-2 space-y-2 border rounded-md p-2 max-h-40 overflow-y-auto">
-                      <label className="text-xs font-medium text-stone-500 block mb-1">Specialites</label>
+                      <label className="text-xs font-medium text-stone-500 block mb-1">{t('vendor.specialties')}</label>
                       {availableFunctions.map(func => (
                         <div key={func.id} className="flex items-center space-x-2">
                           <input type="checkbox" id={`func-${func.code}`} checked={newService.function_codes?.includes(func.code)} onChange={(e) => { const checked = e.target.checked; setNewService(prev => { const current = prev.function_codes || []; if (checked) return {...prev, function_codes: [...current, func.code]}; return {...prev, function_codes: current.filter(c => c !== func.code)}; }); }} className="h-4 w-4 rounded border-gray-300 text-rose-600" />
@@ -679,28 +682,28 @@ export default function VendorDashboard() {
                     </div>
                   )}
                   <div className="flex justify-end mt-1">
-                    <SuggestServiceTypeDialog onSubmitted={() => toast({ title: "Submitted" })} />
+                    <SuggestServiceTypeDialog onSubmitted={() => toast({ title: t('vendor.submitted') })} />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Types d'evenements Supportes</label>
+                  <label className="text-xs font-medium text-stone-600">{t('vendor.supportedEventTypes')}</label>
                   <div className="grid grid-cols-2 gap-2 border rounded-md p-3 max-h-48 overflow-y-auto">
                     {["Wedding","Birthday","Corporate","Conference","Baby Shower","Graduation","Religious","Funeral","Concert","Other"].map(eventType => (
                       <div key={eventType} className="flex items-center space-x-2">
-                        <input type="checkbox" id={`event-${eventType}`} checked={newService.supported_event_types?.includes(eventType)} onChange={(e) => { const checked = e.target.checked; setNewService(prev => { const current = prev.supported_event_types || []; if (checked) return {...prev, supported_event_types: [...current, eventType]}; return {...prev, supported_event_types: current.filter(t => t !== eventType)}; }); }} className="h-4 w-4 rounded border-gray-300 text-rose-600" />
+                        <input type="checkbox" id={`event-${eventType}`} checked={newService.supported_event_types?.includes(eventType)} onChange={(e) => { const checked = e.target.checked; setNewService(prev => { const current = prev.supported_event_types || []; if (checked) return {...prev, supported_event_types: [...current, eventType]}; return {...prev, supported_event_types: current.filter(t3 => t3 !== eventType)}; }); }} className="h-4 w-4 rounded border-gray-300 text-rose-600" />
                         <label htmlFor={`event-${eventType}`} className="text-xs text-stone-700 cursor-pointer">{eventType}</label>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Prix Minimum (FCFA)</label>
+                  <label className="text-xs font-medium text-stone-600">{t('vendor.minPriceLabel')}</label>
                   <Input type="number" placeholder="50000" value={newService.price_min} onChange={e => setNewService({...newService, price_min: e.target.value})} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Zone de Disponibilit</label>
+                  <label className="text-xs font-medium text-stone-600">{t('vendor.availabilityZone')}</label>
                   <Select value={newService.availability_level} onValueChange={val => setNewService({...newService, availability_level: val})}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -715,7 +718,7 @@ export default function VendorDashboard() {
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Code Zone</label>
+                  <label className="text-xs font-medium text-stone-600">{t('vendor.zoneCode')}</label>
                   <Input placeholder="ex. LT, DLA, CM" value={newService.availability_code} onChange={e => setNewService({...newService, availability_code: e.target.value})} />
                 </div>
               </div>
@@ -725,40 +728,40 @@ export default function VendorDashboard() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <Input placeholder="Quartier" value={newService.neighborhood_code} onChange={e => setNewService({...newService, neighborhood_code: e.target.value})} />
-                <Input placeholder="Adresse precise" value={newService.address_details} onChange={e => setNewService({...newService, address_details: e.target.value})} />
+                <Input placeholder={t('vendor.preciseAddress')} value={newService.address_details} onChange={e => setNewService({...newService, address_details: e.target.value})} />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-stone-600">Image de Couverture</label>
+                <label className="text-sm font-medium text-stone-600">{t('vendor.coverImage')}</label>
                 <input type="file" id="media-upload" accept="image/*" onChange={handleMediaUpload} className="hidden" />
                 <Button type="button" variant="outline" className="w-full" onClick={() => document.getElementById('media-upload').click()} disabled={uploadingMedia}>
-                  {uploadingMedia ? "Telechargement..." : newService.image_url ? "Changer l'image" : "Telecharger une image"}
+                  {uploadingMedia ? t('vendor.uploadingShort') : newService.image_url ? t('vendor.changeImage') : t('vendor.uploadImage')}
                 </Button>
-                {newService.image_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Image telechargee</div>}
+                {newService.image_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {t('vendor.imageUploaded')}</div>}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-stone-600">Video de Presentation</label>
+                <label className="text-sm font-medium text-stone-600">{t('vendor.presentationVideo')}</label>
                 <input type="file" id="video-upload" accept="video/*" onChange={handleVideoUpload} className="hidden" />
                 <Button type="button" variant="outline" className="w-full" onClick={() => document.getElementById('video-upload').click()} disabled={uploadingVideo}>
-                  {uploadingVideo ? "Telechargement..." : newService.video_url ? "Changer la video" : "Telecharger une vido"}
+                  {uploadingVideo ? t('vendor.uploadingShort') : newService.video_url ? t('vendor.changeVideo') : t('vendor.uploadVideo')}
                 </Button>
-                {newService.video_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Video telecharge</div>}
+                {newService.video_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {t('vendor.videoUploaded')}</div>}
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">Description Generale</label>
-                  <Textarea placeholder="Presentez votre service..." className="h-24" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')}</label>
+                  <Textarea placeholder={t('vendor.presentServicePlaceholder')} className="h-24" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">Details & Prestations Incluses</label>
-                  <Textarea placeholder="Detaillez ce qui est inclus..." className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} />
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.detailsIncluded')}</label>
+                  <Textarea placeholder={t('vendor.detailPlaceholder')} className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">Conditions & Prrequis</label>
-                  <Textarea placeholder="Conditions importantes..." className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} />
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')}</label>
+                  <Textarea placeholder={t('vendor.termsPlaceholder')} className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} />
                 </div>
               </div>
               <Button onClick={handleCreateService} className="w-full bg-rose-600">
-                {editingService ? "Enregistrer les modifications" : "Crer l'Offre"}
+                {editingService ? t('vendor.saveModifications') : t('vendor.createOfferButton')}
               </Button>
             </div>
           </DialogContent>
@@ -784,12 +787,12 @@ export default function VendorDashboard() {
       <Tabs defaultValue="dossiers" className="w-full">
         <div className="mb-6 overflow-x-auto -mx-4 px-4">
         <TabsList className="w-max min-w-full justify-start bg-stone-100 p-1 gap-0">
-          <TabsTrigger value="dossiers" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">?? Dossiers</TabsTrigger>
-          <TabsTrigger value="listings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">?? Catalogue</TabsTrigger>
-          <TabsTrigger value="leads" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">?? Prospects</TabsTrigger>
-          <TabsTrigger value="growth" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">?? Croissance</TabsTrigger>
-          <TabsTrigger value="availability" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">?? Calendrier</TabsTrigger>
-          <TabsTrigger value="settings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Parametres</TabsTrigger>
+          <TabsTrigger value="dossiers" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabDossiers')}</TabsTrigger>
+          <TabsTrigger value="listings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabCatalogue')}</TabsTrigger>
+          <TabsTrigger value="leads" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabProspects')}</TabsTrigger>
+          <TabsTrigger value="growth" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabCroissance')}</TabsTrigger>
+          <TabsTrigger value="availability" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabCalendrier')}</TabsTrigger>
+          <TabsTrigger value="settings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabParametres')}</TabsTrigger>
         </TabsList>
         </div>
 
@@ -822,8 +825,9 @@ export default function VendorDashboard() {
               />
             </div>
             
-            <LeadCreditPacks 
+            <LeadCreditPacks
               vendorProfile={vendorProfile}
+              currentUser={user}
               onUpdate={refetch}
             />
           </div>
@@ -856,7 +860,7 @@ export default function VendorDashboard() {
                       <div>
                         <CardTitle className="flex items-center gap-2">
                           <ShieldCheck className="w-5 h-5 text-amber-600" />
-                          Verification Documents
+                          {t('vendor.verificationDocs')}
                         </CardTitle>
                       </div>
                       <Badge className={`${statusInfo.bg} ${statusInfo.color}`}>
@@ -869,9 +873,9 @@ export default function VendorDashboard() {
                     {canRequest ? (
                       <>
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">Expliquez votre demande</label>
+                          <label className="text-sm font-medium">{t('vendor.explainRequest')}</label>
                           <Textarea
-                            placeholder="Bonjour, je souhaite faire verifier mon entreprise..."
+                            placeholder={t('vendor.explainPlaceholder')}
                             value={verifMessage}
                             onChange={(e) => setVerifMessage(e.target.value)}
                             rows={3}
@@ -886,17 +890,17 @@ export default function VendorDashboard() {
                             const files = Array.from(e.target.files || []);
                             if (files.length === 0) return;
                             try {
-                              toast({ title: "Upload en cours..." });
+                              toast({ title: t('vendor.uploadingInProgress') });
                               const results = await Promise.all(files.map(file => UploadFile({ file })));
                               const urls = results.map(r => r.file_url);
                               const currentDocs = vendorProfile.verification_docs || [];
                               await base44.entities.VendorProfile.update(vendorProfile.id, {
                                 verification_docs: [...currentDocs, ...urls]
                               });
-                              toast({ title: "Documents televerses" });
+                              toast({ title: t('vendor.docsUploaded') });
                               refetch();
                             } catch (error) {
-                              toast({ title: "Echec du televersement", variant: "destructive" });
+                              toast({ title: t('vendor.uploadFailed'), variant: "destructive" });
                             }
                           }}
                           className="hidden"
@@ -908,15 +912,15 @@ export default function VendorDashboard() {
                           onClick={() => document.getElementById('settings-verification-docs').click()}
                         >
                           <FileSignature className="w-4 h-4 mr-2" />
-                          Telecharger Document
+                          {t('vendor.uploadDocument')}
                         </Button>
                         {vendorProfile.verification_docs?.length > 0 && (
                           <div className="space-y-1">
-                            <p className="text-xs font-medium text-stone-500">Documents televerses :</p>
+                            <p className="text-xs font-medium text-stone-500">{t('vendor.uploadedDocs')}</p>
                             {vendorProfile.verification_docs.map((doc, i) => (
                               <a key={i} href={doc} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 bg-stone-50 rounded hover:bg-stone-100 text-sm">
                                 <FileSignature className="w-4 h-4 text-rose-600" />
-                                Document {i + 1}
+                                {t('vendor.document')} {i + 1}
                               </a>
                             ))}
                           </div>
@@ -926,7 +930,7 @@ export default function VendorDashboard() {
                           disabled={sendingVerif}
                           onClick={handleSendVerifRequest}
                         >
-                          {sendingVerif ? "Envoi en cours..." : (<><Send className="w-4 h-4 mr-2" />Envoyer la demande</>)}
+                          {sendingVerif ? t('vendor.sendingRequest') : (<><Send className="w-4 h-4 mr-2" />{t('vendor.sendRequestButton')}</>)}
                         </Button>
                       </>
                     ) : (
@@ -935,8 +939,8 @@ export default function VendorDashboard() {
                           <StatusIcon className={`w-8 h-8 ${statusInfo.color}`} />
                         </div>
                         <p className="text-sm text-stone-600">
-                          {vendorProfile.verification_status === 'pending' && "Votre demande est en cours de traitement."}
-                          {vendorProfile.verification_status === 'verified' && "Felicitations ! Votre entreprise est verifiee."}
+                          {vendorProfile.verification_status === 'pending' && t('vendor.pendingReview')}
+                          {vendorProfile.verification_status === 'verified' && t('vendor.congratsVerified')}
                         </p>
                       </div>
                     )}
@@ -958,13 +962,13 @@ export default function VendorDashboard() {
                    <div className="flex-1">
                      <h3 className="font-semibold text-stone-900 mb-2 flex items-center gap-2">
                        <TrendingUp className="w-4 h-4 text-blue-600" />
-                       Credits Demandes Prospects
+                       {t('vendor.creditsTitle')}
                      </h3>
                      <div className="space-y-2">
                        <div className="flex items-center justify-between text-sm">
-                         <span className="text-stone-600">Ce mois</span>
+                         <span className="text-stone-600">{t('vendor.thisMonth')}</span>
                          <span className={`font-bold ${notificationCount >= 10 ? 'text-red-600' : 'text-stone-900'}`}>
-                           {notificationCount}/10 notifications reues
+                           {notificationCount}/10 {t('vendor.notificationsReceived')}
                          </span>
                        </div>
                        <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
@@ -979,7 +983,7 @@ export default function VendorDashboard() {
                        </div>
                        {notificationCount < 10 && (
                          <p className="text-xs text-stone-500">
-                           ?? Encore {10 - notificationCount} demande{10 - notificationCount > 1 ? 's' : ''} disponible{10 - notificationCount > 1 ? 's' : ''} ce mois
+                           {10 - notificationCount} {t('vendor.moreAvailableThisMonth')}
                          </p>
                        )}
                      </div>
@@ -991,7 +995,7 @@ export default function VendorDashboard() {
                        onClick={() => setIsMembershipDialogOpen(true)}
                      >
                        <Crown className="w-3 h-3 mr-1" />
-                       Passer Premium
+                       {t('vendor.passPremium')}
                      </Button>
                    )}
                  </div>
@@ -1005,13 +1009,13 @@ export default function VendorDashboard() {
                  <div className="flex-1">
                    <h3 className="text-xl font-bold flex items-center gap-2 mb-2">
                      <AlertCircle className="w-6 h-6" /> 
-                     Limite de Notifications Atteinte
+                     {t('vendor.limitReached')}
                    </h3>
                    <p className="text-white/90 mb-2">
-                     Vous avez recu {notificationCount}/10 notifications ce mois. Vous ne recevrez plus de nouvelles demandes clients.
+                     {t('vendor.limitDesc').replace('{count}', notificationCount)}
                    </p>
                    <p className="text-white font-semibold">
-                     Passez a Premium ou Gold pour recevoir des notifications illimites !
+                     {t('vendor.limitCTA')}
                    </p>
                  </div>
                  <Button 
@@ -1019,7 +1023,7 @@ export default function VendorDashboard() {
                    onClick={() => setIsMembershipDialogOpen(true)}
                  >
                    <Crown className="w-4 h-4 mr-2" />
-                   Ameliorer l'Abonnement
+                   {t('vendor.upgradePlan')}
                  </Button>
                </div>
              </div>
@@ -1031,10 +1035,10 @@ export default function VendorDashboard() {
                  <div>
                    <h3 className="text-lg font-bold flex items-center gap-2">
                      <CheckCircle2 className="w-5 h-5" /> 
-                     Plan Free: {notificationCount}/10 notifications utilises ce mois
+                     {t('vendor.freePlanUsage').replace('{count}', notificationCount)}
                    </h3>
                    <p className="text-blue-100 mt-1">
-                     Passez a Premium ou Gold pour des notifications illimitees et plus d'avantages.
+                     {t('vendor.freePlanCTA')}
                    </p>
                  </div>
                  <Button 
@@ -1042,15 +1046,15 @@ export default function VendorDashboard() {
                    onClick={() => setIsMembershipDialogOpen(true)}
                  >
                    <Crown className="w-4 h-4 mr-2" />
-                   Voir les Plans
+                   {t('vendor.viewPlans')}
                  </Button>
                </div>
              </div>
            )}
 
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <StatCard icon={Eye} label="Vues Totales" value={analytics.views} className="text-rose-400" />
-              <StatCard icon={TrendingUp} label="Prospects Totaux" value={analytics.leads} className="text-green-400" />
+              <StatCard icon={Eye} label={t('vendor.totalViews')} value={analytics.views} className="text-rose-400" />
+              <StatCard icon={TrendingUp} label={t('vendor.totalLeads')} value={analytics.leads} className="text-green-400" />
            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1103,9 +1107,9 @@ export default function VendorDashboard() {
             )) : (
               <div className="col-span-full text-center py-20 bg-stone-50 rounded-xl border border-dashed border-stone-200">
                 <Package className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-stone-900">Aucun service repertorie</h3>
-                <p className="text-stone-500 mb-6">Commencez a gagner en listant vos services d'organisation d'evenements.</p>
-                <Button onClick={() => setIsNewServiceOpen(true)} variant="outline">Creer Premiere Offre</Button>
+                <h3 className="text-lg font-medium text-stone-900">{t('vendor.noServices')}</h3>
+                <p className="text-stone-500 mb-6">{t('vendor.noServicesDesc')}</p>
+                <Button onClick={() => setIsNewServiceOpen(true)} variant="outline">{t('vendor.createFirst')}</Button>
               </div>
             )}
           </div>
@@ -1129,7 +1133,7 @@ export default function VendorDashboard() {
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                <StatCard 
                  icon={Wallet}
-                 label="Gains en Attente"
+                 label={t('vendor.pendingEarnings')}
                  value={`${bookings
                    .filter(b => b.status === 'confirmed' || b.status === 'completed')
                    .reduce((acc, curr) => acc + (curr.total_amount || 0), 0)
@@ -1138,7 +1142,7 @@ export default function VendorDashboard() {
                />
                <StatCard 
                  icon={Crown}
-                 label="Frais Plateforme (5%)"
+                 label={t('vendor.platformFees')}
                  value={`${bookings
                    .filter(b => b.status === 'confirmed' || b.status === 'completed')
                    .reduce((acc, curr) => acc + (curr.commission_amount || 0), 0)
