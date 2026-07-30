@@ -1,14 +1,18 @@
+import { Service, VendorProfile, ClientProfile, Booking, Event, Conversation, Message, Review, Notification, Membership, MembershipType, Invoice, Region, Departement, Ville, Quartier, Fonction, PlatformFeedback, Contract, Dispute, Lead, Transaction, Payout, Refund, AppUser, Country, ServiceType } from '@/api/entities';
+import { base44 } from '@/api/apiClient';
 import React, { useState, useEffect } from 'react';
-import { base44 } from "@/api/apiClient";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Check, Star, Zap, Shield } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { useLocationContext } from '@/components/LocationContext';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function Pricing() {
   const { formatPrice } = useLocationContext();
+  const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [currentPlan, setCurrentPlan] = useState("free");
   const [plans, setPlans] = useState([]);
@@ -22,7 +26,7 @@ export default function Pricing() {
         setUser(currentUser);
         
         // Fetch Membership Types dynamically
-        const types = await base44.entities.MembershipType.list();
+        const types = await MembershipType.list();
         // Fallback to static if empty or error (optional, but good for stability during dev)
         if (types.length > 0) {
             setPlans(types.map(t => ({
@@ -37,14 +41,14 @@ export default function Pricing() {
         } else {
              // Default static plans if entity is empty
              setPlans([
-                { id: "free", name: "Basic", price: 0, description: "Outils essentiels.", features: ["Listing Standard"], icon: Shield },
-                { id: "premium", name: "Premium", price: 10000, description: "Meilleure visibilité.", features: ["Listing en Vedette"], icon: Star, popular: true },
-                { id: "gold", name: "Gold", price: 25000, description: "Traitement VIP.", features: ["Top des Recherches"], icon: Zap }
+                { id: "free", name: t('pricing.fallbackBasicName'), price: 0, description: t('pricing.fallbackBasicDesc'), features: [t('pricing.fallbackBasicFeature')], icon: Shield },
+                { id: "premium", name: t('pricing.fallbackPremiumName'), price: 10000, description: t('pricing.fallbackPremiumDesc'), features: [t('pricing.fallbackPremiumFeature')], icon: Star, popular: true },
+                { id: "gold", name: t('pricing.fallbackGoldName'), price: 25000, description: t('pricing.fallbackGoldDesc'), features: [t('pricing.fallbackGoldFeature')], icon: Zap }
              ]);
         }
 
         // Fetch vendor profile
-        const profiles = await base44.entities.VendorProfile.list();
+        const profiles = await VendorProfile.list();
         const myProfile = profiles.find(p => p.user_id === currentUser.id);
         if (myProfile) {
           setCurrentPlan(myProfile.plan);
@@ -64,33 +68,33 @@ export default function Pricing() {
 
     // Mock Payment Process
     toast({
-      title: "Traitement du paiement...",
-      description: "Veuillez patienter pendant que nous sécurisons votre abonnement.",
+      title: t('pricing.processingPayment'),
+      description: t('pricing.processingDesc'),
     });
 
     setTimeout(async () => {
       try {
         if (price === 0) {
              // Free plan flow (Immediate activation)
-             const profiles = await base44.entities.VendorProfile.list();
+             const profiles = await VendorProfile.list();
              const myProfile = profiles.find(p => p.user_id === user.id);
              
              if (myProfile) {
-               await base44.entities.VendorProfile.update(myProfile.id, {
+               await VendorProfile.update(myProfile.id, {
                  plan: plan,
                  subscription_status: "active"
                });
              } else {
-               await base44.entities.VendorProfile.create({
+               await VendorProfile.create({
                  user_id: user.id,
                  plan: plan,
                  subscription_status: "active",
-                 business_name: "Entreprise de " + user.first_name,
+                 business_name: user.first_name + "'s Business",
                  phone: ""
                });
              }
              setCurrentPlan(plan);
-             toast({ title: "Plan mis à jour", description: "Vous êtes maintenant sur le plan Gratuit." });
+             toast({ title: t('pricing.planUpdated'), description: t('pricing.freePlanDesc') });
              return;
         }
 
@@ -98,7 +102,7 @@ export default function Pricing() {
         const endDate = new Date(new Date().setMonth(new Date().getMonth() + 1));
         
         // 1. Create Membership (Pending)
-        const membership = await base44.entities.Membership.create({
+        const membership = await Membership.create({
             user_id: user.id,
             membership_type_code: plan,
             start_date: startDate.toISOString(),
@@ -110,7 +114,7 @@ export default function Pricing() {
         });
 
         // 2. Generate Contract
-        const contract = await base44.entities.Contract.create({
+        const contract = await Contract.create({
              contract_number: `CTR-SUB-${Date.now()}`,
              membership_id: membership.id,
              type: 'subscription',
@@ -122,7 +126,7 @@ export default function Pricing() {
         });
 
         // 3. Generate Invoice
-        const invoice = await base44.entities.Invoice.create({
+        const invoice = await Invoice.create({
              invoice_number: `INV-SUB-${Date.now()}`,
              membership_id: membership.id,
              contract_id: contract.id,
@@ -133,7 +137,7 @@ export default function Pricing() {
              due_date: startDate.toISOString(),
              recipient_id: user.id,
              items: [{
-                 description: `Abonnement ${plan} (30 jours)`,
+                 description: `${plan} Plan Subscription (30 Days)`,
                  quantity: 1,
                  unit_price: price,
                  total: price
@@ -141,7 +145,7 @@ export default function Pricing() {
         });
 
         // 4. Link everything to membership
-        await base44.entities.Membership.update(membership.id, {
+        await Membership.update(membership.id, {
             contract_id: contract.id,
             invoice_id: invoice.id
         });
@@ -152,8 +156,8 @@ export default function Pricing() {
       } catch (error) {
         console.error(error);
         toast({
-          title: "Erreur",
-          description: "Une erreur est survenue. Veuillez réessayer.",
+          title: t('pricing.error'),
+          description: t('pricing.errorDesc'),
           variant: "destructive"
         });
       }
@@ -165,10 +169,9 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-stone-50 py-20 px-4">
       <div className="text-center max-w-3xl mx-auto mb-16">
-        <h1 className="text-4xl font-bold text-stone-900 mb-4">Choisissez Votre Plan</h1>
+        <h1 className="text-4xl font-bold text-stone-900 mb-4">{t('pricing.title')}</h1>
         <p className="text-xl text-stone-500">
-          Développez votre activité avec nos abonnements sur mesure. 
-          Passez à un plan supérieur à tout moment pour toucher plus de clients.
+          {t('pricing.subtitle')}
         </p>
       </div>
 
@@ -177,7 +180,7 @@ export default function Pricing() {
           <Card key={plan.id} className={`relative flex flex-col ${plan.popular ? 'border-rose-500 border-2 shadow-xl' : 'hover:shadow-lg transition-shadow'}`}>
             {plan.popular && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-rose-500 text-white px-4 py-1 rounded-full text-sm font-bold">
-                Le Plus Populaire
+                {t('pricing.mostPopular')}
               </div>
             )}
             <CardHeader>
@@ -190,7 +193,7 @@ export default function Pricing() {
             <CardContent className="flex-grow">
               <div className="mb-6">
                 <span className="text-4xl font-bold text-stone-900">{formatPrice(plan.price)}</span>
-                <span className="text-stone-500 text-sm font-medium"> / mois</span>
+                <span className="text-stone-500 text-sm font-medium"> {t('pricing.perMonth')}</span>
               </div>
               <ul className="space-y-3">
                 {plan.features.map((feature, i) => (
@@ -208,7 +211,7 @@ export default function Pricing() {
                 onClick={() => handleSubscribe(plan.id, plan.price)}
                 disabled={currentPlan === plan.id}
               >
-                {currentPlan === plan.id ? "Plan Actuel" : `Passer à ${plan.name}`}
+                {currentPlan === plan.id ? t('pricing.currentPlan') : `${t('pricing.upgradeTo')} ${plan.name}`}
               </Button>
             </CardFooter>
           </Card>

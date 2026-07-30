@@ -377,6 +377,29 @@ export const translations = {
         funeral: "Funeral",
         other: "Other"
       }
+    },
+    pricing: {
+      title: "Choose Your Plan",
+      subtitle: "Unlock more business with our tailored subscription tiers. Upgrade anytime to reach more clients.",
+      mostPopular: "Most Popular",
+      perMonth: "/ month",
+      currentPlan: "Current Plan",
+      upgradeTo: "Upgrade to",
+      processingPayment: "Processing Payment...",
+      processingDesc: "Please wait while we secure your subscription.",
+      planUpdated: "Plan Updated",
+      freePlanDesc: "You are now on the Free plan.",
+      error: "Error",
+      errorDesc: "Something went wrong. Please try again.",
+      fallbackBasicName: "Basic",
+      fallbackBasicDesc: "Essential tools.",
+      fallbackBasicFeature: "Standard Listing",
+      fallbackPremiumName: "Premium",
+      fallbackPremiumDesc: "Better visibility.",
+      fallbackPremiumFeature: "Featured Listing",
+      fallbackGoldName: "Gold",
+      fallbackGoldDesc: "VIP treatment.",
+      fallbackGoldFeature: "Top of Search"
     }
   },
   fr: {
@@ -824,6 +847,29 @@ export const translations = {
       sendErrorTitle: "Echec de l'envoi",
       sendErrorDesc: "Le message n'a pas pu etre envoye. Verifiez votre connexion.",
       newMessageNotif: "Nouveau message"
+    },
+    pricing: {
+      title: "Choisissez Votre Plan",
+      subtitle: "Debloquez plus d'opportunites avec nos formules d'abonnement adaptees. Passez a un plan superieur a tout moment pour toucher plus de clients.",
+      mostPopular: "Le Plus Populaire",
+      perMonth: "/ mois",
+      currentPlan: "Plan Actuel",
+      upgradeTo: "Passer a",
+      processingPayment: "Traitement du Paiement...",
+      processingDesc: "Veuillez patienter pendant que nous securisons votre abonnement.",
+      planUpdated: "Plan Mis a Jour",
+      freePlanDesc: "Vous etes maintenant sur le plan Gratuit.",
+      error: "Erreur",
+      errorDesc: "Une erreur est survenue. Veuillez reessayer.",
+      fallbackBasicName: "Basique",
+      fallbackBasicDesc: "Outils essentiels.",
+      fallbackBasicFeature: "Annonce Standard",
+      fallbackPremiumName: "Premium",
+      fallbackPremiumDesc: "Meilleure visibilite.",
+      fallbackPremiumFeature: "Annonce en Vedette",
+      fallbackGoldName: "Gold",
+      fallbackGoldDesc: "Traitement VIP.",
+      fallbackGoldFeature: "Haut des Resultats"
     }
   },
   pcm: {
