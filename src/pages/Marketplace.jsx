@@ -103,7 +103,7 @@ export default function Marketplace() {
       } catch (error) {
         toast({
           title: "Erreur de chargement",
-          description: "Impossible de charger les catÈgories",
+          description: "Impossible de charger les cat√©gories",
           variant: "destructive"
         });
       }
@@ -147,7 +147,7 @@ export default function Marketplace() {
     staleTime: 5 * 60 * 1000,
   });
   
-  // Charger les conversations pour dÈterminer les vendeurs actifs
+  // Charger les conversations pour d√©terminer les vendeurs actifs
   const { data: allConversations = [] } = useQuery({
     queryKey: ['all-conversations'],
     queryFn: () => Conversation.list(),
@@ -170,7 +170,7 @@ export default function Marketplace() {
     loadUser();
   }, []);
 
-  // Appliquer le ranking system de maniËre asynchrone
+  // Appliquer le ranking system de mani√®re asynchrone
   React.useEffect(() => {
     const applyRanking = async () => {
       if (allServices && allServices.length > 0) {
@@ -221,7 +221,7 @@ export default function Marketplace() {
         const vendorBookings = (allBookings || []).filter(b => b?.planner_id === service?.planner_id);
         const completedContracts = vendorBookings.filter(b => b?.status === 'completed' || b?.status === 'delivered').length;
         
-        // Conversations uniques avec diffÈrents clients
+        // Conversations uniques avec diff√©rents clients
         const vendorConversations = (allConversations || []).filter(conv => 
           conv?.participants && Array.isArray(conv.participants) && conv.participants.includes(service?.planner_id)
         );
@@ -231,7 +231,7 @@ export default function Marketplace() {
           )
         ).size;
         
-        // Badge "Active" si: contrat conclu OU 3+ clients rÈguliers
+        // Badge "Active" si: contrat conclu OU 3+ clients r√©guliers
         const isActiveVendor = completedContracts > 0 || uniqueClients >= 3;
         
         return {
@@ -248,7 +248,7 @@ export default function Marketplace() {
       }
     });
 
-    // Appliquer le systËme de recommandations intelligent
+    // Appliquer le syst√®me de recommandations intelligent
     if (currentUser && currentUser.id && vendorProfiles && vendorProfiles.length > 0 && allBookings && allBookings.length > 0) {
       try {
         const userBookings = allBookings.filter(b => b && b.created_by === currentUser.id);
@@ -444,7 +444,7 @@ export default function Marketplace() {
   }, [rankedServices, allServices, page, selectedCategory, selectedSubCategory, searchTerm, sortBy, cityFilter, filterCultural, filterLanguage, filterReligion, filterDiaspora, locLevel, locCode, geoData, currentUser, vendorProfiles, allBookings]);
 
   const seoCity = locName || cityFilter || 'Cameroun';
-  const seoCategory = selectedCategory !== 'all' ? selectedCategory : 'Prestataires …vÈnements';
+  const seoCategory = selectedCategory !== 'all' ? selectedCategory : 'Prestataires √âv√©nements';
 
   return (
     <div
@@ -459,13 +459,13 @@ export default function Marketplace() {
           style={{ opacity: Math.min(pullDistance / 72, 1) }}
         >
           <svg className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-          {isRefreshing ? 'Actualisation...' : isPulling ? 'Rel‚cher pour actualiser' : 'Tirer pour actualiser'}
+          {isRefreshing ? 'Actualisation...' : isPulling ? 'Rel√¢cher pour actualiser' : 'Tirer pour actualiser'}
         </div>
       )}
       <SEOHead 
-        title={`${seoCategory} ‡ ${seoCity} - EventCrafter Cameroun | Trouvez votre Prestataire`}
-        description={`DÈcouvrez les meilleurs ${seoCategory.toLowerCase()} ‡ ${seoCity}. Comparez les prix, consultez les avis et rÈservez en ligne. ${services.length}+ prestataires disponibles.`}
-        keywords={`${seoCategory} ${seoCity}, prestataire ÈvÈnement ${seoCity}, organisation ${seoCity}, ${seoCategory} Cameroun`}
+        title={`${seoCategory} √† ${seoCity} - EventCrafter Cameroun | Trouvez votre Prestataire`}
+        description={`D√©couvrez les meilleurs ${seoCategory.toLowerCase()} √† ${seoCity}. Comparez les prix, consultez les avis et r√©servez en ligne. ${services.length}+ prestataires disponibles.`}
+        keywords={`${seoCategory} ${seoCity}, prestataire √©v√©nement ${seoCity}, organisation ${seoCity}, ${seoCategory} Cameroun`}
       />
       
       {services && services.length > 0 && vendorProfiles && vendorProfiles.length > 0 && services[0] && vendorProfiles[0] && (
@@ -544,8 +544,8 @@ export default function Marketplace() {
                 <SelectValue placeholder={t('marketplace.sortBy')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="relevance">?? Meilleur Classement</SelectItem>
-                {currentUser && <SelectItem value="recommended">? RecommandÈ pour vous</SelectItem>}
+                <SelectItem value="relevance">üèÜ Meilleur Classement</SelectItem>
+                {currentUser && <SelectItem value="recommended">‚ú® Recommand√© pour vous</SelectItem>}
                 <SelectItem value="featured">{t('marketplace.sort.featured')}</SelectItem>
                 <SelectItem value="price_low">{t('marketplace.sort.priceLow')}</SelectItem>
                 <SelectItem value="price_high">{t('marketplace.sort.priceHigh')}</SelectItem>
@@ -564,19 +564,19 @@ export default function Marketplace() {
               <SheetContent>
                 <SheetHeader>
                   <SheetTitle>{t('marketplace.filterTitle')}</SheetTitle>
-                  <SheetDescription>Refine your search with specific criteria</SheetDescription>
+                  <SheetDescription>Affinez votre recherche avec des crit√®res sp√©cifiques</SheetDescription>
                 </SheetHeader>
                 <div className="py-6 space-y-6 overflow-y-auto max-h-[80vh]">
 
                   {selectedCategory !== 'all' && (
                       <div>
-                          <h3 className="text-sm font-medium mb-3">Sub-Category</h3>
+                          <h3 className="text-sm font-medium mb-3">Sous-Cat√©gorie</h3>
                           <Select value={selectedSubCategory} onValueChange={setSelectedSubCategory}>
                               <SelectTrigger>
-                                  <SelectValue placeholder="Select Sub-Category" />
+                                  <SelectValue placeholder="S√©lectionner une Sous-Cat√©gorie" />
                               </SelectTrigger>
                               <SelectContent>
-                                  <SelectItem value="all">All Sub-Categories</SelectItem>
+                                  <SelectItem value="all">Toutes les Sous-Cat√©gories</SelectItem>
                                   {functions
                                       .filter(f => {
                                           const cat = serviceTypes.find(t => t.name === selectedCategory);
@@ -592,14 +592,14 @@ export default function Marketplace() {
                   )}
 
                   <div>
-                      <h3 className="text-sm font-medium mb-3">Cultural Affinity</h3>
+                      <h3 className="text-sm font-medium mb-3">Affinit√© Culturelle</h3>
                       <Select value={filterCultural} onValueChange={setFilterCultural}>
                           <SelectTrigger>
-                              <SelectValue placeholder="Any Culture" />
+                              <SelectValue placeholder="Toute Culture" />
                           </SelectTrigger>
                           <SelectContent>
-                              <SelectItem value="all">Any Culture</SelectItem>
-                              {["Aire Sawa", "Aire Grassfields", "Aire Fang-BÈti", "Grand Nord (Soudano-SahÈlien)", "BamilÈkÈ", "Bamoun", "Bakweri"].map(z => (
+                              <SelectItem value="all">Toute Culture</SelectItem>
+                              {["Aire Sawa", "Aire Grassfields", "Aire Fang-B√©ti", "Grand Nord (Soudano-Sah√©lien)", "Bamil√©k√©", "Bamoun", "Bakweri"].map(z => (
                                   <SelectItem key={z} value={z}>{z}</SelectItem>
                               ))}
                           </SelectContent>
@@ -607,14 +607,14 @@ export default function Marketplace() {
                   </div>
 
                   <div>
-                      <h3 className="text-sm font-medium mb-3">Language</h3>
+                      <h3 className="text-sm font-medium mb-3">Langue</h3>
                       <Select value={filterLanguage} onValueChange={setFilterLanguage}>
                           <SelectTrigger>
-                              <SelectValue placeholder="Any Language" />
+                              <SelectValue placeholder="Toute Langue" />
                           </SelectTrigger>
                           <SelectContent>
-                              <SelectItem value="all">Any Language</SelectItem>
-                              {["FranÁais", "English", "Pidgin", "Local Dialects"].map(l => (
+                              <SelectItem value="all">Toute Langue</SelectItem>
+                              {["Fran√ßais", "Anglais", "Pidgin", "Dialectes Locaux"].map(l => (
                                   <SelectItem key={l} value={l}>{l}</SelectItem>
                               ))}
                           </SelectContent>
@@ -625,11 +625,11 @@ export default function Marketplace() {
                       <h3 className="text-sm font-medium mb-3">Religion & Tradition</h3>
                       <Select value={filterReligion} onValueChange={setFilterReligion}>
                           <SelectTrigger>
-                              <SelectValue placeholder="Any Preference" />
+                              <SelectValue placeholder="Toute Pr√©f√©rence" />
                           </SelectTrigger>
                           <SelectContent>
-                              <SelectItem value="all">Any Preference</SelectItem>
-                              {["Christian", "Muslim", "Traditional/Ancestral", "Secular"].map(r => (
+                              <SelectItem value="all">Toute Pr√©f√©rence</SelectItem>
+                              {["Chr√©tien", "Musulman", "Traditionnel/Ancestral", "La√Øc"].map(r => (
                                   <SelectItem key={r} value={r}>{r}</SelectItem>
                               ))}
                           </SelectContent>
@@ -638,8 +638,8 @@ export default function Marketplace() {
 
                   <div className="flex items-center justify-between pt-2 border-t border-stone-100">
                       <label htmlFor="diaspora-filter" className="text-sm font-medium cursor-pointer">
-                          Diaspora Ready
-                          <span className="block text-xs text-stone-500 font-normal">Available for clients abroad</span>
+                          Adapt√© √† la Diaspora
+                          <span className="block text-xs text-stone-500 font-normal">Disponible pour les clients √† l'√©tranger</span>
                       </label>
                       <div 
                           className={`w-10 h-6 rounded-full p-1 cursor-pointer transition-colors ${filterDiaspora ? 'bg-rose-600' : 'bg-stone-200'}`}
@@ -660,7 +660,7 @@ export default function Marketplace() {
                           setSelectedSubCategory("all");
                       }}
                   >
-                      Reset Filters
+                      R√©initialiser les Filtres
                   </Button>
                 </div>
                 </SheetContent>
@@ -679,14 +679,14 @@ export default function Marketplace() {
         {currentUser && sortBy === "recommended" && recommendedServices.length > 0 && (
           <div className="mb-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">?</span>
-              <h2 className="text-xl font-bold text-stone-900">SÈlection personnalisÈe pour vous</h2>
+              <span className="text-2xl">‚ú®</span>
+              <h2 className="text-xl font-bold text-stone-900">S√©lection personnalis√©e pour vous</h2>
               <span className="ml-auto text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">
-                Premium & Gold en prioritÈ
+                Premium & Gold en priorit√©
               </span>
             </div>
             <p className="text-sm text-stone-600 mb-4">
-              BasÈ sur vos prÈfÈrences et les choix d'utilisateurs similaires
+              Bas√© sur vos pr√©f√©rences et les choix d'utilisateurs similaires
             </p>
           </div>
         )}
