@@ -58,11 +58,13 @@ import DisputeDialog from '@/components/dashboard/DisputeDialog';
 import { AlertTriangle } from 'lucide-react';
 import DeleteAccountDialog from '@/components/DeleteAccountDialog';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function ClientDashboard() {
   const [searchParams] = useSearchParams();
   const [user, setUser] = useState(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'contact_cart');
   
@@ -372,12 +374,12 @@ export default function ClientDashboard() {
     };
 
     const labels = {
-      contract_pending: "En Attente de Signature",
-      awaiting_payment: "En Attente de Paiement",
-      in_progress: "En Cours",
-      delivered: "Livre (Attente Reception)",
-      warranty_period: "Garantie",
-      disputed: "En Litige"
+      contract_pending: t('clientDashboard.statusWaitingSignature'),
+      awaiting_payment: t('clientDashboard.statusWaitingPayment'),
+      in_progress: t('clientDashboard.statusInProgress'),
+      delivered: t('clientDashboard.statusDelivered'),
+      warranty_period: t('clientDashboard.statusWarranty'),
+      disputed: t('clientDashboard.statusDispute')
     };
 
     return (
@@ -401,12 +403,12 @@ export default function ClientDashboard() {
 
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-stone-900">Tableau de Bord Client</h1>
-          <p className="text-stone-500">Bienvenue, {user.first_name || user.email}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-900">{t('clientDashboard.title')}</h1>
+          <p className="text-stone-500">{t('vendor.welcome')} {user.first_name || user.email}</p>
         </div>
         <Button asChild className="bg-rose-600 hover:bg-rose-700 w-full sm:w-auto">
           <a href="/Marketplace">
-            <ShoppingCart className="w-4 h-4 mr-2" /> Parcourir les Services
+            <ShoppingCart className="w-4 h-4 mr-2" /> {t('clientDashboard.browseServices')}
           </a>
         </Button>
       </div>
@@ -426,13 +428,13 @@ export default function ClientDashboard() {
       <AlertDialog open={!!deletingEvent} onOpenChange={(open) => !open && setDeletingEvent(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer l'evenement ?</AlertDialogTitle>
+            <AlertDialogTitle>{t('clientDashboard.deleteEventTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action supprimera l'evenement et tous les services associes. Cette action est irreversible.
+              {t('clientDashboard.deleteEventDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{t('clientDashboard.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 deleteEventMutation.mutate(deletingEvent);
@@ -440,7 +442,7 @@ export default function ClientDashboard() {
               }}
               className="bg-red-600 hover:bg-red-700"
             >
-              Supprimer
+              {t('clientDashboard.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -449,13 +451,13 @@ export default function ClientDashboard() {
       <AlertDialog open={!!deletingBooking} onOpenChange={(open) => !open && setDeletingBooking(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Retirer ce service ?</AlertDialogTitle>
+            <AlertDialogTitle>{t('clientDashboard.removeServiceTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Le service sera retire de votre evenement. Cette action est irreversible.
+              {t('clientDashboard.removeServiceDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{t('clientDashboard.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 deleteBookingMutation.mutate(deletingBooking);
@@ -463,7 +465,7 @@ export default function ClientDashboard() {
               }}
               className="bg-red-600 hover:bg-red-700"
             >
-              Retirer
+              {t('clientDashboard.remove')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -472,11 +474,11 @@ export default function ClientDashboard() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="mb-6 overflow-x-auto -mx-4 px-4">
         <TabsList className="w-max min-w-full justify-start bg-stone-100 p-1">
-          <TabsTrigger value="contact_cart" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Panier</TabsTrigger>
-          <TabsTrigger value="my_bookings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Evenements</TabsTrigger>
-          <TabsTrigger value="my_requests" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Demandes</TabsTrigger>
-          <TabsTrigger value="client_profile" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Profil</TabsTrigger>
-          <TabsTrigger value="reviews" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Avis</TabsTrigger>
+          <TabsTrigger value="contact_cart" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('clientDashboard.tabCart')}</TabsTrigger>
+          <TabsTrigger value="my_bookings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('clientDashboard.tabEvents')}</TabsTrigger>
+          <TabsTrigger value="my_requests" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('clientDashboard.tabRequests')}</TabsTrigger>
+          <TabsTrigger value="client_profile" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('clientDashboard.tabProfile')}</TabsTrigger>
+          <TabsTrigger value="reviews" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('clientDashboard.tabReviews')}</TabsTrigger>
         </TabsList>
         </div>
 
@@ -486,7 +488,7 @@ export default function ClientDashboard() {
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <CardTitle className="flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5" />
-                  Mon Panier de Services
+                  {t('clientDashboard.myCart')}
                 </CardTitle>
                 <Button 
                   variant="outline"
@@ -494,7 +496,7 @@ export default function ClientDashboard() {
                   className="text-rose-600 border-rose-200 hover:bg-rose-50 w-full sm:w-auto"
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
-                  Ajouter des services
+                  {t('clientDashboard.addServices')}
                 </Button>
               </div>
             </CardHeader>
@@ -513,7 +515,7 @@ export default function ClientDashboard() {
                           <h4 className="font-semibold text-stone-900">{service.title}</h4>
                           <p className="text-sm text-stone-500">{service.city}</p>
                           <p className="text-sm font-bold text-rose-600 mt-1">
-                            A partir de {service.price_min?.toLocaleString()} FCFA
+                            {t('clientDashboard.startingFrom')} {service.price_min?.toLocaleString()} FCFA
                           </p>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0 self-start sm:self-center">
@@ -542,7 +544,7 @@ export default function ClientDashboard() {
                               }
                             }}
                             className="text-rose-600 border-rose-200 hover:bg-rose-50"
-                            title="Contacter le prestataire"
+                            title={t('clientDashboard.contactProvider')}
                           >
                             <MessageCircle className="w-4 h-4" />
                           </Button>
@@ -551,7 +553,7 @@ export default function ClientDashboard() {
                             size="icon"
                             onClick={() => removeFromCart(service.id)}
                             className="text-stone-400 hover:text-red-600 hover:bg-red-50"
-                            title="Retirer du panier"
+                            title={t('clientDashboard.removeFromCart')}
                           >
                             <X className="w-4 h-4" />
                           </Button>
@@ -561,13 +563,13 @@ export default function ClientDashboard() {
                   </div>
 
                   <div className="border-t pt-6 space-y-4">
-                    <h3 className="font-semibold text-lg">Creer un Evenement</h3>
+                    <h3 className="font-semibold text-lg">{t('clientDashboard.createEventSection')}</h3>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Nom de l'evenement *</label>
+                      <label className="text-sm font-medium">{t('clientDashboard.eventNameLabel')}</label>
                       <input 
                         type="text"
-                        placeholder="Ex: Mon Mariage 2025"
+                        placeholder={t('clientDashboard.eventNamePlaceholder')}
                         value={eventName}
                         onChange={(e) => setEventName(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md"
@@ -575,7 +577,7 @@ export default function ClientDashboard() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Date de l'evenement *</label>
+                      <label className="text-sm font-medium">{t('clientDashboard.eventDateLabel')}</label>
                       <input 
                         type="date"
                         value={eventDate}
@@ -586,9 +588,9 @@ export default function ClientDashboard() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Description (optionnel)</label>
+                      <label className="text-sm font-medium">{t('clientDashboard.descriptionLabel')}</label>
                       <textarea 
-                        placeholder="Details sur votre evenement..."
+                        placeholder={t('clientDashboard.descriptionPlaceholder')}
                         value={eventDescription}
                         onChange={(e) => setEventDescription(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md min-h-[80px]"
@@ -601,17 +603,17 @@ export default function ClientDashboard() {
                       disabled={createEventMutation.isPending || !eventName?.trim() || !eventDate}
                     >
                       {createEventMutation.isPending ? (
-                        <>Creation en cours...</>
+                        <>{t('clientDashboard.creating')}</>
                       ) : (
                         <>
                           <CalendarCheck className="w-4 h-4 mr-2" />
-                          Creer Evenement avec {cart.length} Service{cart.length > 1 ? 's' : ''}
+                          {t('clientDashboard.createEventButton')} {cart.length} {t('clientDashboard.service')}{cart.length > 1 ? 's' : ''}
                         </>
                       )}
                     </Button>
                     {(!eventName?.trim() || !eventDate) && (
                       <p className="text-xs text-amber-600 mt-2">
-                        Vos informations seront conservees apres connexion
+                        {t('clientDashboard.infoSaved')}
                       </p>
                     )}
                   </div>
@@ -620,13 +622,13 @@ export default function ClientDashboard() {
                 <div className="text-center py-12 space-y-4">
                   <ShoppingCart className="w-12 h-12 text-stone-300 mx-auto mb-3" />
                   <p className="text-stone-500">
-                    Votre panier est vide
+                    {t('clientDashboard.emptyCart')}
                   </p>
                   <div className="flex flex-col items-center gap-3">
                     <Button asChild className="bg-rose-600 hover:bg-rose-700">
                       <a href="/Marketplace">
                         <ShoppingCart className="w-4 h-4 mr-2" />
-                        Explorer les Services
+                        {t('clientDashboard.exploreServices')}
                       </a>
                     </Button>
                   </div>
@@ -641,7 +643,7 @@ export default function ClientDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Megaphone className="w-5 h-5" />
-                Mes Demandes Postees
+                {t('clientDashboard.myPostedRequests')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -656,20 +658,20 @@ export default function ClientDashboard() {
                             <p className="text-sm text-stone-500">{lead.service_category}</p>
                           </div>
                           <Badge className={lead.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-stone-100 text-stone-800'}>
-                            {lead.status === 'open' ? 'Ouverte' : 'Fermee'}
+                            {lead.status === 'open' ? t('clientDashboard.open') : t('clientDashboard.closed')}
                           </Badge>
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex items-center gap-2 text-stone-600">
                             <CalendarCheck className="w-4 h-4" />
-                            {lead.event_date ? format(new Date(lead.event_date), 'dd MMMM yyyy', { locale: fr }) : 'Date non specifiee'}
+                            {lead.event_date ? format(new Date(lead.event_date), 'dd MMMM yyyy', { locale: fr }) : t('clientDashboard.dateNotSpecified')}
                           </div>
                           <p className="text-stone-600">{lead.location}</p>
                           {lead.budget && <p className="text-stone-600">{lead.budget}</p>}
                           <p className="text-stone-700 mt-2">{lead.description}</p>
                         </div>
                         <div className="mt-4 text-xs text-stone-400">
-                          Postee le {format(new Date(lead.created_date), 'dd/MM/yyyy a HH:mm')}
+                          {t('clientDashboard.postedOn')} {format(new Date(lead.created_date), 'dd/MM/yyyy a HH:mm')}
                         </div>
                       </CardContent>
                     </Card>
@@ -678,12 +680,12 @@ export default function ClientDashboard() {
               ) : (
                 <div className="text-center py-12">
                   <Megaphone className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-stone-900">Aucune demande</h3>
-                  <p className="text-stone-500 mb-6">Vous n'avez pas encore poste de demande de service.</p>
+                  <h3 className="text-lg font-medium text-stone-900">{t('clientDashboard.noRequestTitle')}</h3>
+                  <p className="text-stone-500 mb-6">{t('clientDashboard.noRequestDesc')}</p>
                   <Button asChild className="bg-rose-600 hover:bg-rose-700">
                     <a href="/PostRequest">
                       <Plus className="w-4 h-4 mr-2" />
-                      Poster une Demande
+                      {t('clientDashboard.postRequestButton')}
                     </a>
                   </Button>
                 </div>
@@ -736,7 +738,7 @@ export default function ClientDashboard() {
               onSuccess={() => {
                 setSelectedPaymentBooking(null);
                 queryClient.invalidateQueries(['bookings']);
-                toast({ title: "Paiement effectue avec succes!" });
+                toast({ title: t('clientDashboard.paymentSuccess') });
               }}
             />
           )}
@@ -761,7 +763,7 @@ export default function ClientDashboard() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="bg-white">
-                            {eventBookings.length} service{eventBookings.length > 1 ? 's' : ''}
+                            {eventBookings.length} {t('clientDashboard.service')}{eventBookings.length > 1 ? 's' : ''}
                           </Badge>
                           
                           <DropdownMenu>
@@ -773,7 +775,7 @@ export default function ClientDashboard() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => window.location.href = `/Marketplace?event_id=${event.id}`}>
                                 <Plus className="w-4 h-4 mr-2" />
-                                Ajouter un service
+                                {t('clientDashboard.addService')}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
@@ -781,7 +783,7 @@ export default function ClientDashboard() {
                                 className="text-red-600 focus:text-red-600"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Supprimer l'evenement
+                                {t('clientDashboard.deleteEvent')}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -826,15 +828,15 @@ export default function ClientDashboard() {
                                     <div className="flex-grow min-w-0">
                                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                                         <h4 className="font-semibold text-stone-900">
-                                          {service?.title || 'Service'}
+                                          {service?.title || t('clientDashboard.service')}
                                         </h4>
                                         <StatusBadge status={booking.status} />
                                       </div>
 
                                       <div className="space-y-1">
                                         <p className="text-sm text-stone-600 flex items-center gap-2">
-                                          <span className="font-medium">Vendeur:</span>
-                                          {vendor?.business_name || 'Prestataire'}
+                                          <span className="font-medium">{t('clientDashboard.vendorLabel')}</span>
+                                          {vendor?.business_name || t('clientDashboard.vendor')}
                                         </p>
                                         {booking.total_amount > 0 && (
                                           <p className="text-sm font-semibold text-green-600">
@@ -854,7 +856,7 @@ export default function ClientDashboard() {
                                         className="border-rose-200 text-rose-600 hover:bg-rose-50 w-full md:w-auto justify-center"
                                       >
                                         <MessageCircle className="w-4 h-4 mr-2" />
-                                        Discussion
+                                        {t('clientDashboard.discussion')}
                                       </Button>
 
                                       <Button 
@@ -867,7 +869,7 @@ export default function ClientDashboard() {
                                         }}
                                       >
                                         <FileSignature className="w-4 h-4 mr-2" />
-                                        Gerer Contrat
+                                        {t('clientDashboard.manageContract')}
                                       </Button>
 
                                       {booking.status !== 'draft' && (
@@ -879,7 +881,7 @@ export default function ClientDashboard() {
                                              onClick={() => setSelectedPaymentBooking(booking)}
                                            >
                                              <DollarSign className="w-4 h-4 mr-2" />
-                                             Effectuer le Paiement
+                                             {t('clientDashboard.makePayment')}
                                            </Button>
                                          )}
                                        </>
@@ -899,7 +901,7 @@ export default function ClientDashboard() {
                                         }}
                                       >
                                         <AlertTriangle className="w-4 h-4 mr-2" />
-                                        Litige
+                                        {t('clientDashboard.dispute')}
                                       </Button>
                                     </div>
                                   </div>
@@ -911,7 +913,7 @@ export default function ClientDashboard() {
                         </div>
                       ) : (
                         <div className="p-8 text-center text-stone-500">
-                          Aucun service ajoute a cet evenement
+                          {t('clientDashboard.noServiceInEvent')}
                         </div>
                       )}
                     </CardContent>
@@ -923,10 +925,10 @@ export default function ClientDashboard() {
             <Card>
               <CardContent className="p-20 text-center">
                 <CalendarCheck className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-stone-900">Aucun evenement</h3>
-                <p className="text-stone-500 mb-6">Creez votre premier evenement en ajoutant des services a votre panier.</p>
+                <h3 className="text-lg font-medium text-stone-900">{t('clientDashboard.noEventTitle')}</h3>
+                <p className="text-stone-500 mb-6">{t('clientDashboard.noEventDesc')}</p>
                 <Button asChild>
-                  <a href="/Marketplace">Explorer les Services</a>
+                  <a href="/Marketplace">{t('clientDashboard.exploreServices')}</a>
                 </Button>
               </CardContent>
             </Card>
@@ -956,15 +958,15 @@ export default function ClientDashboard() {
                           <div className="flex-grow min-w-0">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <h4 className="font-semibold text-stone-900">
-                                {service?.title || 'Service'}
+                                {service?.title || t('clientDashboard.service')}
                               </h4>
                               <StatusBadge status={booking.status} />
                             </div>
                             
                             <div className="space-y-1">
                               <p className="text-sm text-stone-600 flex items-center gap-2">
-                                <span className="font-medium">Vendeur:</span>
-                                {vendor?.business_name || 'Prestataire'}
+                                <span className="font-medium">{t('clientDashboard.vendorLabel')}</span>
+                                {vendor?.business_name || t('clientDashboard.vendor')}
                               </p>
                               <p className="text-sm text-stone-600 flex items-center gap-2">
                                 <CalendarCheck className="w-4 h-4" />
@@ -991,10 +993,10 @@ export default function ClientDashboard() {
                ) : (
                  <div className="p-20 text-center">
                    <CalendarCheck className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                   <h3 className="text-lg font-medium text-stone-900">Aucune reservation</h3>
-                   <p className="text-stone-500 mb-6">Explorez la plateforme pour trouver des prestataires pour votre prochain evenement.</p>
+                   <h3 className="text-lg font-medium text-stone-900">{t('clientDashboard.noReservationTitle')}</h3>
+                   <p className="text-stone-500 mb-6">{t('clientDashboard.noReservationDesc')}</p>
                    <Button asChild>
-                     <a href="/Marketplace">Explorer les Services</a>
+                     <a href="/Marketplace">{t('clientDashboard.exploreServices')}</a>
                    </Button>
                  </div>
                )}
