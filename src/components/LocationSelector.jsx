@@ -7,30 +7,27 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import AddLocationDialog from './AddLocationDialog';
 import { useLocationContext } from '@/components/LocationContext';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function LocationSelector({ className, onSearch, minimal }) {
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
-    
-    // Global Location Context
+
     const { selectedCountry: globalCountryCode, countries: globalCountries } = useLocationContext();
 
-    // Data Lists
     const [countries, setCountries] = useState([]);
     const [regions, setRegions] = useState([]);
     const [cities, setCities] = useState([]);
-    const [neighborhoods, setNeighborhoods] = useState([]); // Only fetch when needed
+    const [neighborhoods, setNeighborhoods] = useState([]);
 
-    // Selected Values
     const [selectedCountry, setSelectedCountry] = useState("");
     const [selectedRegion, setSelectedRegion] = useState("");
     const [selectedCity, setSelectedCity] = useState("");
     const [selectedNeighborhood, setSelectedNeighborhood] = useState("");
 
-    // Add Dialog State
     const [addDialog, setAddDialog] = useState({ open: false, level: 'ville' });
 
-    // Load Initial Data (Countries)
     const loadData = async () => {
         setLoading(true);
         try {
@@ -40,10 +37,10 @@ export default function LocationSelector({ className, onSearch, minimal }) {
                  const c = await Country.list();
                  setCountries(c.filter(i => i.status !== 'rejected').sort((a, b) => a.name.localeCompare(b.name)));
             }
-            
+
             const r = await Region.list();
             setRegions(r.filter(i => i.status !== 'rejected'));
-            
+
             const v = await Ville.list();
             setCities(v.filter(i => i.status !== 'rejected'));
 
@@ -83,13 +80,13 @@ export default function LocationSelector({ className, onSearch, minimal }) {
         fetchQuartiers();
     }, [selectedCity, cities]);
 
-    const availableRegions = selectedCountry 
+    const availableRegions = selectedCountry
         ? regions.filter(r => r.country_code === countries.find(c => c.name === selectedCountry)?.code)
         : regions;
 
     const availableCities = selectedRegion
         ? cities.filter(c => {
-            return true; 
+            return true;
         })
         : cities;
 
@@ -102,7 +99,7 @@ export default function LocationSelector({ className, onSearch, minimal }) {
         if (!selectedRegion) return cities;
         const regionCode = regions.find(r => r.name === selectedRegion)?.code;
         if (!regionCode) return cities;
-        
+
         const deptCodes = departments.filter(d => d.region_code === regionCode).map(d => d.code);
         return cities.filter(c => deptCodes.includes(c.departement_code));
     };
@@ -152,11 +149,11 @@ export default function LocationSelector({ className, onSearch, minimal }) {
     return (
         <div className={`flex flex-col gap-2 ${className}`}>
             <div className="flex flex-col md:flex-row gap-2">
-                
+
                 {!minimal && (
                     <Select value={selectedCountry} onValueChange={setSelectedCountry}>
                         <SelectTrigger className="w-full md:w-[140px] bg-white border-0 shadow-sm h-12">
-                            <SelectValue placeholder="Pays" />
+                            <SelectValue placeholder={t('location.country')} />
                         </SelectTrigger>
                         <SelectContent>
                             {countries.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
@@ -166,7 +163,7 @@ export default function LocationSelector({ className, onSearch, minimal }) {
 
                 <Select value={selectedRegion} onValueChange={setSelectedRegion} disabled={!selectedCountry && regions.length > 0}>
                     <SelectTrigger className="w-full md:w-[140px] bg-white border-0 shadow-sm h-12">
-                        <SelectValue placeholder="Région" />
+                        <SelectValue placeholder={t('location.region')} />
                     </SelectTrigger>
                     <SelectContent>
                         {availableRegions.map(r => <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>)}
@@ -175,7 +172,7 @@ export default function LocationSelector({ className, onSearch, minimal }) {
 
                 <Select value={selectedCity} onValueChange={setSelectedCity}>
                     <SelectTrigger className="w-full md:w-[140px] bg-white border-0 shadow-sm h-12">
-                        <SelectValue placeholder="Ville" />
+                        <SelectValue placeholder={t('location.city')} />
                     </SelectTrigger>
                     <SelectContent>
                         {filteredCities.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
@@ -184,11 +181,11 @@ export default function LocationSelector({ className, onSearch, minimal }) {
 
                 <Select value={selectedNeighborhood} onValueChange={setSelectedNeighborhood} disabled={!selectedCity}>
                     <SelectTrigger className="w-full md:w-[160px] bg-white border-0 shadow-sm h-12">
-                        <SelectValue placeholder="Quartier" />
+                        <SelectValue placeholder={t('location.neighborhood')} />
                     </SelectTrigger>
                     <SelectContent>
                          {neighborhoods.length === 0 ? (
-                             <SelectItem value="none" disabled>Aucun quartier chargé</SelectItem>
+                             <SelectItem value="none" disabled>{t('location.noNeighborhoodLoaded')}</SelectItem>
                          ) : (
                              neighborhoods.map(q => <SelectItem key={q.id} value={q.name}>{q.name}</SelectItem>)
                          )}
@@ -196,26 +193,26 @@ export default function LocationSelector({ className, onSearch, minimal }) {
                 </Select>
 
                 {!minimal && (
-                    <Button 
+                    <Button
                         onClick={handleSearch}
                         className="bg-[#FF6B35] hover:bg-[#e05a2b] text-white h-12 px-6 rounded-md md:rounded-l-none shadow-sm font-medium"
                     >
-                        {loading ? <Loader2 className="animate-spin" /> : "Explorer"}
+                        {loading ? <Loader2 className="animate-spin" /> : t('location.exploreButton')}
                     </Button>
                 )}
             </div>
 
             <div className="flex gap-4 text-xs text-rose-600 justify-end px-2">
                 <button onClick={() => setAddDialog({open: true, level: 'ville'})} className="hover:underline flex items-center gap-1">
-                    <PlusCircle className="w-3 h-3" /> Ajouter une Ville
+                    <PlusCircle className="w-3 h-3" /> {t('location.addCity')}
                 </button>
                 <button onClick={() => setAddDialog({open: true, level: 'quartier'})} className="hover:underline flex items-center gap-1" disabled={!selectedCity}>
-                    <PlusCircle className="w-3 h-3" /> Ajouter un Quartier
+                    <PlusCircle className="w-3 h-3" /> {t('location.addNeighborhood')}
                 </button>
             </div>
 
-            <AddLocationDialog 
-                open={addDialog.open} 
+            <AddLocationDialog
+                open={addDialog.open}
                 onOpenChange={(val) => setAddDialog(prev => ({ ...prev, open: val }))}
                 level={addDialog.level}
                 parentContext={{

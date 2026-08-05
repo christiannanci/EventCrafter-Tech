@@ -887,6 +887,16 @@ export const translations = {
       loginButton: "Log In",
       noReviewsYet: "No reviews yet. Be the first to leave a review!",
       anonymousUser: "User"
+    },
+    location: {
+      country: "Country",
+      region: "Region",
+      city: "City",
+      neighborhood: "Neighborhood",
+      exploreButton: "Explore",
+      noNeighborhoodLoaded: "No neighborhood loaded",
+      addCity: "Add a City",
+      addNeighborhood: "Add a Neighborhood"
     }
   },
   fr: {
@@ -1793,6 +1803,16 @@ export const translations = {
       loginButton: "Se Connecter",
       noReviewsYet: "Aucun avis pour le moment. Soyez le premier a donner votre avis !",
       anonymousUser: "Utilisateur"
+    },
+    location: {
+      country: "Pays",
+      region: "Region",
+      city: "Ville",
+      neighborhood: "Quartier",
+      exploreButton: "Explorer",
+      noNeighborhoodLoaded: "Aucun quartier charge",
+      addCity: "Ajouter une Ville",
+      addNeighborhood: "Ajouter un Quartier"
     }
   },
   pcm: {
