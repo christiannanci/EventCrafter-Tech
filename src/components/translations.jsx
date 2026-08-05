@@ -870,6 +870,23 @@ export const translations = {
       reviewsLabel: "reviews",
       scoreLabel: "Score",
       addButton: "+ Add"
+    },
+    reviews: {
+      loadingReviews: "Loading reviews...",
+      reviewsTitle: "Reviews",
+      writeAReview: "Write a Review",
+      excellent: "Excellent",
+      good: "Good",
+      average: "Average",
+      weak: "Weak",
+      poor: "Poor",
+      sharePlaceholderPrefix: "Share your experience with",
+      publishing: "Publishing...",
+      publishReview: "Publish Review",
+      loginToReview: "Please log in to leave a review.",
+      loginButton: "Log In",
+      noReviewsYet: "No reviews yet. Be the first to leave a review!",
+      anonymousUser: "User"
     }
   },
   fr: {
@@ -1759,6 +1776,23 @@ export const translations = {
       reviewsLabel: "avis",
       scoreLabel: "Score",
       addButton: "+ Ajouter"
+    },
+    reviews: {
+      loadingReviews: "Chargement des avis...",
+      reviewsTitle: "Avis",
+      writeAReview: "Ecrire un Avis",
+      excellent: "Excellent",
+      good: "Bien",
+      average: "Moyen",
+      weak: "Faible",
+      poor: "Mauvais",
+      sharePlaceholderPrefix: "Partagez votre experience avec",
+      publishing: "Publication...",
+      publishReview: "Publier l'Avis",
+      loginToReview: "Veuillez vous connecter pour laisser un avis.",
+      loginButton: "Se Connecter",
+      noReviewsYet: "Aucun avis pour le moment. Soyez le premier a donner votre avis !",
+      anonymousUser: "Utilisateur"
     }
   },
   pcm: {
