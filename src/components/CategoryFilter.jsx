@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from '@/components/LanguageContext';
@@ -7,6 +7,13 @@ import { base44 } from "@/api/apiClient";
 
 export default function CategoryFilter({ selected, onSelect }) {
   const { t } = useLanguage();
+
+  const tr = (val) => {
+    if (!val) return val;
+    const translated = t(`dynamicLabels.${val}`);
+    return translated === `dynamicLabels.${val}` ? val : translated;
+  };
+
   const [categories, setCategories] = React.useState([
     { id: 'all', label: t('categories.All') || 'Tous les Services' }
   ]);
@@ -19,7 +26,7 @@ export default function CategoryFilter({ selected, onSelect }) {
         
         const mapped = activeTypes.map(type => ({
           id: type.name, // Using name for compatibility with legacy category string
-          label: type.name // potentially translate later
+          label: tr(type.name)
         }));
         
         setCategories([
