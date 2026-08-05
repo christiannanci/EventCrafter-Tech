@@ -4,8 +4,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, StarHalf, Building2, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function ClientReviewsDisplay({ clientUserId }) {
+  const { t } = useLanguage();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [averageRating, setAverageRating] = useState(0);
@@ -15,28 +17,25 @@ export default function ClientReviewsDisplay({ clientUserId }) {
     const fetchReviews = async () => {
       try {
         const allReviews = await base44.entities.ClientReview.list();
-        const clientReviews = allReviews.filter(r => 
+        const clientReviews = allReviews.filter(r =>
           r.client_id === clientUserId && r.status === 'approved'
         );
-        
-        // Sort by most recent
+
         clientReviews.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-        
+
         setReviews(clientReviews);
-        
-        // Calculate average
+
         if (clientReviews.length > 0) {
           const avg = clientReviews.reduce((sum, r) => sum + r.rating, 0) / clientReviews.length;
           setAverageRating(avg);
         }
 
-        // Fetch vendor names
         const providerIds = [...new Set(clientReviews.map(r => r.provider_id))];
         const vendorProfiles = await base44.entities.VendorProfile.list();
         const names = {};
         for (const id of providerIds) {
           const profile = vendorProfiles.find(p => p.user_id === id);
-          names[id] = profile?.business_name || 'Prestataire';
+          names[id] = profile?.business_name || t('clientReviews.providerFallback');
         }
         setVendorNames(names);
       } catch (e) {
@@ -78,11 +77,11 @@ export default function ClientReviewsDisplay({ clientUserId }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Star className="w-5 h-5 text-amber-500" />
-            Avis des Prestataires
+            {t('clientReviews.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-stone-500 text-center py-8">Chargement des avis...</p>
+          <p className="text-stone-500 text-center py-8">{t('clientReviews.loading')}</p>
         </CardContent>
       </Card>
     );
@@ -95,14 +94,14 @@ export default function ClientReviewsDisplay({ clientUserId }) {
           <div>
             <CardTitle className="flex items-center gap-2 mb-2">
               <Star className="w-5 h-5 text-amber-500" />
-              Avis des Prestataires
+              {t('clientReviews.title')}
             </CardTitle>
-            <p className="text-sm text-stone-500">Ce que les vendors pensent de vous</p>
+            <p className="text-sm text-stone-500">{t('clientReviews.subtitle')}</p>
             {reviews.length > 0 && (
               <div className="flex items-center gap-2 mt-2">
                 <div className="flex">{renderStars(averageRating)}</div>
                 <span className="text-2xl font-bold text-stone-900">{averageRating.toFixed(1)}</span>
-                <span className="text-sm text-stone-500">({reviews.length} avis)</span>
+                <span className="text-sm text-stone-500">({reviews.length} {t('serviceCard.reviewsLabel')})</span>
               </div>
             )}
           </div>
@@ -119,7 +118,7 @@ export default function ClientReviewsDisplay({ clientUserId }) {
                       <Building2 className="w-4 h-4 text-rose-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-stone-900">{vendorNames[review.provider_id] || 'Prestataire'}</p>
+                      <p className="font-medium text-stone-900">{vendorNames[review.provider_id] || t('clientReviews.providerFallback')}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <div className="flex">{renderStars(review.rating)}</div>
                         <Badge variant="outline" className="text-xs">
@@ -140,9 +139,9 @@ export default function ClientReviewsDisplay({ clientUserId }) {
         ) : (
           <div className="text-center py-12">
             <Star className="w-12 h-12 text-stone-200 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-stone-900 mb-2">Aucun avis pour le moment</h3>
+            <h3 className="text-lg font-medium text-stone-900 mb-2">{t('clientReviews.noReviewsTitle')}</h3>
             <p className="text-stone-500 text-sm">
-              Les avis des prestataires avec qui vous avez travaillé apparaîtront ici.
+              {t('clientReviews.noReviewsDesc')}
             </p>
           </div>
         )}

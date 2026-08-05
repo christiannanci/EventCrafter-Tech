@@ -953,6 +953,14 @@ export const translations = {
       notificationsTitle: "Notifications",
       markAllRead: "Mark all as read",
       noNotifications: "No notifications yet"
+    },
+    clientReviews: {
+      title: "Vendor Reviews",
+      subtitle: "What vendors think of you",
+      loading: "Loading reviews...",
+      providerFallback: "Vendor",
+      noReviewsTitle: "No reviews yet",
+      noReviewsDesc: "Reviews from vendors you've worked with will appear here."
     }
   },
   fr: {
@@ -1925,6 +1933,14 @@ export const translations = {
       notificationsTitle: "Notifications",
       markAllRead: "Tout marquer comme lu",
       noNotifications: "Aucune notification pour le moment"
+    },
+    clientReviews: {
+      title: "Avis des Prestataires",
+      subtitle: "Ce que les vendors pensent de vous",
+      loading: "Chargement des avis...",
+      providerFallback: "Prestataire",
+      noReviewsTitle: "Aucun avis pour le moment",
+      noReviewsDesc: "Les avis des prestataires avec qui vous avez travaille apparaitront ici."
     }
   },
   pcm: {
