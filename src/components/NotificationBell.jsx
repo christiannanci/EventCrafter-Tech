@@ -9,63 +9,59 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-
-const TYPE_LABELS = {
-  booking: 'Réservation',
-  payment: 'Paiement',
-  admin_alert: 'Alerte Admin',
-  system: 'Système',
-  dispute: 'Litige',
-  message: 'Message',
-  post_request: 'Demande',
-  verification_approved: 'Vérification',
-  verification_rejected: 'Vérification',
-  verification_response: 'Vérification',
-  contract: 'Contrat',
-  completion: 'Terminé',
-  dispute_resolved: 'Litige',
-  dispute_alert_flash: 'Litige',
-  admin_message: 'Admin',
-  payment_reminder: 'Rappel',
-  admin_action: 'Admin',
-  alert: 'Alerte'
-};
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function NotificationBell({ user }) {
+  const { t } = useLanguage();
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  const TYPE_LABELS = {
+    booking: t('notifications.typeBooking'),
+    payment: t('notifications.typePayment'),
+    admin_alert: t('notifications.typeAdminAlert'),
+    system: t('notifications.typeSystem'),
+    dispute: t('notifications.typeDispute'),
+    message: t('notifications.typeMessage'),
+    post_request: t('notifications.typeRequest'),
+    verification_approved: t('notifications.typeVerification'),
+    verification_rejected: t('notifications.typeVerification'),
+    verification_response: t('notifications.typeVerification'),
+    contract: t('notifications.typeContract'),
+    completion: t('notifications.typeCompletion'),
+    dispute_resolved: t('notifications.typeDispute'),
+    dispute_alert_flash: t('notifications.typeDispute'),
+    admin_message: t('notifications.typeAdmin'),
+    payment_reminder: t('notifications.typeReminder'),
+    admin_action: t('notifications.typeAdmin'),
+    alert: t('notifications.typeAlert')
+  };
+
   const loadNotifications = async () => {
-      // In a real app, this would be a subscription or polled
       try {
-          // OPTIMIZED: Limit to 20 recent notifications only
           const all = await base44.entities.Notification.list('-created_date', 20);
-          // Client side filter
           let userNotifs = all
             .filter(n => n.user_id === user.id)
             .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
-          // If Admin, inject system alerts as notifications
           if (user.role === 'admin') {
-               // OPTIMIZED: Fetch only pending items
                const pendingPayouts = await base44.entities.ProviderPayout.filter({ transaction_status: 'pending_approval' });
                const pendingRefunds = await base44.entities.ClientRefund.filter({ status: 'pending_approval' });
-               
+
                const actionablePayouts = pendingPayouts;
                const actionableRefunds = pendingRefunds;
 
                const systemAlerts = [];
-               
-               // Récupérer l'état dismissed du sessionStorage
+
                const dismissedAlerts = JSON.parse(sessionStorage.getItem('dismissedAdminAlerts') || '{}');
-               
+
                if (actionablePayouts.length > 0 && !dismissedAlerts['sys-payouts']) {
                    systemAlerts.push({
                        id: 'sys-payouts',
                        type: 'admin_alert',
-                       title: 'Paiements en Attente',
-                       message: `${actionablePayouts.length} paiement(s) en attente d'approbation.`,
+                       title: t('notifications.pendingPayoutsTitle'),
+                       message: `${actionablePayouts.length} ${t('notifications.pendingPayoutsMessage')}`,
                        created_date: new Date().toISOString(),
                        is_read: false,
                        link: '/AdminPayouts'
@@ -76,8 +72,8 @@ export default function NotificationBell({ user }) {
                    systemAlerts.push({
                        id: 'sys-refunds',
                        type: 'admin_alert',
-                       title: 'Remboursements en Attente',
-                       message: `${actionableRefunds.length} remboursement(s) en attente d'approbation.`,
+                       title: t('notifications.pendingRefundsTitle'),
+                       message: `${actionableRefunds.length} ${t('notifications.pendingRefundsMessage')}`,
                        created_date: new Date().toISOString(),
                        is_read: false,
                        link: '/AdminPayouts'
@@ -86,7 +82,7 @@ export default function NotificationBell({ user }) {
 
                userNotifs = [...systemAlerts, ...userNotifs];
           }
-          
+
           setNotifications(userNotifs);
           setUnreadCount(userNotifs.filter(n => !n.is_read).length);
       } catch (e) {
@@ -98,15 +94,14 @@ export default function NotificationBell({ user }) {
     if (!user) return;
 
     loadNotifications();
-    
-    // Écouter les nouvelles notifications en temps réel
+
     const handleNewNotification = () => {
       loadNotifications();
     };
     window.addEventListener('notification-received', handleNewNotification);
 
-    const interval = setInterval(loadNotifications, 30000); // Poll every 30s (backup)
-    
+    const interval = setInterval(loadNotifications, 30000);
+
     return () => {
       window.removeEventListener('notification-received', handleNewNotification);
       clearInterval(interval);
@@ -115,18 +110,17 @@ export default function NotificationBell({ user }) {
 
   const markAsRead = async (notification) => {
     if (notification.is_read) return;
-    
-    // Pour les alertes admin système, sauvegarder le dismiss dans sessionStorage
+
     if (notification.type?.includes('admin_alert')) {
       const dismissedAlerts = JSON.parse(sessionStorage.getItem('dismissedAdminAlerts') || '{}');
       dismissedAlerts[notification.id] = true;
       sessionStorage.setItem('dismissedAdminAlerts', JSON.stringify(dismissedAlerts));
-      
+
       setNotifications(prev => prev.filter(n => n.id !== notification.id));
       setUnreadCount(prev => Math.max(0, prev - 1));
       return;
     }
-    
+
     try {
       await base44.entities.Notification.update(notification.id, { is_read: true });
       setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, is_read: true } : n));
@@ -152,7 +146,7 @@ export default function NotificationBell({ user }) {
             console.error("Failed to mark as read:", e);
         }
     }
-    setNotifications(prev => prev.map(n => 
+    setNotifications(prev => prev.map(n =>
         n.type?.includes('admin_alert') ? n : { ...n, is_read: true }
     ));
     setUnreadCount(prev => Math.max(0, prev - unread.length));
@@ -172,10 +166,10 @@ export default function NotificationBell({ user }) {
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between px-4 py-2 border-b bg-stone-50/50">
-            <h4 className="font-semibold text-sm">Notifications</h4>
+            <h4 className="font-semibold text-sm">{t('notifications.notificationsTitle')}</h4>
             {unreadCount > 0 && (
                 <Button variant="ghost" size="sm" className="h-auto px-2 text-xs text-rose-600" onClick={markAllRead}>
-                    Tout marquer comme lu
+                    {t('notifications.markAllRead')}
                 </Button>
             )}
         </div>
@@ -183,13 +177,13 @@ export default function NotificationBell({ user }) {
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-stone-400 p-4 text-center">
                 <Bell className="w-8 h-8 mb-2 opacity-20" />
-                <p className="text-sm">Aucune notification pour le moment</p>
+                <p className="text-sm">{t('notifications.noNotifications')}</p>
             </div>
           ) : (
             <div className="divide-y divide-stone-100">
               {notifications.map((n) => (
-                <div 
-                    key={n.id} 
+                <div
+                    key={n.id}
                     className={cn(
                         "p-4 cursor-pointer hover:bg-stone-50 transition-colors",
                         !n.is_read && "bg-rose-50/30"
@@ -197,7 +191,7 @@ export default function NotificationBell({ user }) {
                     onClick={() => handleNotificationClick(n)}
                 >
                     <div className="flex justify-between items-start gap-2 mb-1">
-                        <span className={cn("text-xs font-semibold px-1.5 py-0.5 rounded", 
+                        <span className={cn("text-xs font-semibold px-1.5 py-0.5 rounded",
                             n.type === 'booking' ? "bg-blue-100 text-blue-700" :
                             n.type === 'payment' ? "bg-green-100 text-green-700" :
                             n.type === 'admin_alert' ? "bg-rose-100 text-rose-700 animate-pulse" :

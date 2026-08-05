@@ -931,6 +931,28 @@ export const translations = {
       seatingPlan: "Seating Plan",
       vendorChecklist: "Vendor Checklist",
       scheduleCreator: "Schedule Creator"
+    },
+    notifications: {
+      typeBooking: "Booking",
+      typePayment: "Payment",
+      typeAdminAlert: "Admin Alert",
+      typeSystem: "System",
+      typeDispute: "Dispute",
+      typeMessage: "Message",
+      typeRequest: "Request",
+      typeVerification: "Verification",
+      typeContract: "Contract",
+      typeCompletion: "Completed",
+      typeAdmin: "Admin",
+      typeReminder: "Reminder",
+      typeAlert: "Alert",
+      pendingPayoutsTitle: "Pending Payouts",
+      pendingPayoutsMessage: "payout(s) awaiting approval.",
+      pendingRefundsTitle: "Pending Refunds",
+      pendingRefundsMessage: "refund(s) awaiting approval.",
+      notificationsTitle: "Notifications",
+      markAllRead: "Mark all as read",
+      noNotifications: "No notifications yet"
     }
   },
   fr: {
@@ -1881,6 +1903,28 @@ export const translations = {
       seatingPlan: "Plan de Table",
       vendorChecklist: "Checklist Prestataires",
       scheduleCreator: "Createur de Planning"
+    },
+    notifications: {
+      typeBooking: "Reservation",
+      typePayment: "Paiement",
+      typeAdminAlert: "Alerte Admin",
+      typeSystem: "Systeme",
+      typeDispute: "Litige",
+      typeMessage: "Message",
+      typeRequest: "Demande",
+      typeVerification: "Verification",
+      typeContract: "Contrat",
+      typeCompletion: "Termine",
+      typeAdmin: "Admin",
+      typeReminder: "Rappel",
+      typeAlert: "Alerte",
+      pendingPayoutsTitle: "Paiements en Attente",
+      pendingPayoutsMessage: "paiement(s) en attente d'approbation.",
+      pendingRefundsTitle: "Remboursements en Attente",
+      pendingRefundsMessage: "remboursement(s) en attente d'approbation.",
+      notificationsTitle: "Notifications",
+      markAllRead: "Tout marquer comme lu",
+      noNotifications: "Aucune notification pour le moment"
     }
   },
   pcm: {
