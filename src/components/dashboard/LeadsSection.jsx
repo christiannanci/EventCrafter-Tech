@@ -192,8 +192,8 @@ export default function LeadsSection({
   };
 
   const blurContact = (text) => {
-    if (!text) return '????????';
-    return text.substring(0, 2) + '??????' + text.substring(text.length - 2);
+    if (!text) return '';
+    return text.substring(0, 2) + '' + text.substring(text.length - 2);
   };
 
   const handleRequestRefund = async (lead) => {
@@ -249,7 +249,7 @@ export default function LeadsSection({
             <p className="text-sm text-stone-500">
               {membershipStatus === 'premium' || membershipStatus === 'gold' 
                 ? `? ${t('vendor.unlimitedInstantAccess')}` 
-                : `?? ${t('vendor.freePlanUsage2LeadsWeek')}`}
+                : `${t('vendor.freePlanUsage2LeadsWeek')}`}
             </p>
           </div>
           {vendorProfile && (
@@ -366,19 +366,19 @@ export default function LeadsSection({
                         {!isUnlocked ? (
                           <>
                             <div className="flex items-center gap-2 text-stone-400">
-                              ?? {t('vendor.phoneLabel')}: {blurContact(lead.client_phone || '237670934378')}
+                              {t('vendor.phoneLabel')}: {blurContact(lead.client_phone || '237670934378')}
                             </div>
                             <div className="flex items-center gap-2 text-stone-400">
-                              ?? {t('vendor.emailLabel')}: {blurContact(lead.client_email || 'client@example.com')}
+                              {t('vendor.emailLabel')}: {blurContact(lead.client_email || 'client@example.com')}
                             </div>
                           </>
                         ) : (
                           <>
                             <div className="flex items-center gap-2 text-green-700 font-medium">
-                              ?? {t('vendor.phoneLabel')}: {lead.client_phone || '+237 670 93 43 78'}
+                              {t('vendor.phoneLabel')}: {lead.client_phone || '+237 670 93 43 78'}
                             </div>
                             <div className="flex items-center gap-2 text-green-700 font-medium">
-                              ?? {t('vendor.emailLabel')}: {lead.client_email || 'client@example.com'}
+                              {t('vendor.emailLabel')}: {lead.client_email || 'client@example.com'}
                             </div>
                           </>
                         )}
@@ -427,7 +427,7 @@ export default function LeadsSection({
                               variant="outline"
                               className="border-amber-500 text-amber-700 hover:bg-amber-50 whitespace-nowrap"
                             >
-                              ?? {t('vendor.useOneCredit')}
+                              {t('vendor.useOneCredit')}
                             </Button>
                           )}
                           <Button 
