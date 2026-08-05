@@ -8,6 +8,7 @@ import { Award, Shield, Sparkles, Clock } from "lucide-react";
 import { base44 } from "@/api/apiClient";
 import { useToast } from "@/components/ui/use-toast";
 import { format, addMonths } from "date-fns";
+import { useLanguage } from '@/components/LanguageContext';
 
 const CULTURAL_BADGES = [
   { value: "bamileke", label: "Décorateur Certifié Bamiléké", icon: "🏔️" },
@@ -21,6 +22,7 @@ const CULTURAL_BADGES = [
 const BADGE_PRICE_MONTHLY = 3000; // 3000 FCFA/mois
 
 export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [selectedBadge, setSelectedBadge] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -41,8 +43,8 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
   const handlePurchaseBadge = async () => {
     if (!selectedBadge) {
       toast({
-        title: "Sélection requise",
-        description: "Choisissez un badge culturel",
+        title: t('vendor.selectionRequired'),
+        description: t('vendor.chooseCulturalBadge'),
         variant: "destructive"
       });
       return;
@@ -50,17 +52,15 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
 
     setProcessing(true);
     try {
-      // Vérifier le solde
       if ((vendorProfile.account_balance || 0) < BADGE_PRICE_MONTHLY) {
         toast({
-          title: "Solde insuffisant",
-          description: `Vous avez besoin de ${BADGE_PRICE_MONTHLY.toLocaleString()} FCFA pour activer ce badge.`,
+          title: t('vendor.insufficientBalanceTitle'),
+          description: `${t('vendor.insufficientBalanceDescPrefix')} ${BADGE_PRICE_MONTHLY.toLocaleString()} FCFA ${t('vendor.toActivateBadge')}`,
           variant: "destructive"
         });
         return;
       }
 
-      // Débiter le compte
       await base44.entities.VendorProfile.update(vendorProfile.id, {
         account_balance: (vendorProfile.account_balance || 0) - BADGE_PRICE_MONTHLY,
         cultural_badge_active: true,
@@ -68,18 +68,17 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
         cultural_badge_expiry: addMonths(new Date(), 1).toISOString()
       });
 
-      // Créer transaction
       await base44.entities.Transaction.create({
         user_id: vendorProfile.user_id,
         amount: -BADGE_PRICE_MONTHLY,
         type: 'subscription',
         status: 'completed',
-        description: `Badge Culturel: ${CULTURAL_BADGES.find(b => b.value === selectedBadge)?.label}`
+        description: `${t('vendor.culturalBadgeLabel')}: ${CULTURAL_BADGES.find(b => b.value === selectedBadge)?.label}`
       });
 
       toast({
-        title: "✅ Badge Activé !",
-        description: `Votre badge culturel est actif pour 30 jours. +10% visibilité !`
+        title: t('vendor.badgeActivatedTitle'),
+        description: t('vendor.badgeActivatedDesc')
       });
 
       setDialogOpen(false);
@@ -87,8 +86,8 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
     } catch (error) {
       console.error('Badge purchase error:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'activer le badge. Réessayez.",
+        title: t('vendor.genericError'),
+        description: t('vendor.badgeActivationError'),
         variant: "destructive"
       });
     } finally {
@@ -101,8 +100,8 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
     try {
       if ((vendorProfile.account_balance || 0) < BADGE_PRICE_MONTHLY) {
         toast({
-          title: "Solde insuffisant",
-          description: `Rechargez votre portefeuille de ${BADGE_PRICE_MONTHLY.toLocaleString()} FCFA.`,
+          title: t('vendor.insufficientBalanceTitle'),
+          description: `${t('vendor.topUpWalletPrefix')} ${BADGE_PRICE_MONTHLY.toLocaleString()} FCFA.`,
           variant: "destructive"
         });
         return;
@@ -124,19 +123,19 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
         amount: -BADGE_PRICE_MONTHLY,
         type: 'subscription',
         status: 'completed',
-        description: `Renouvellement Badge Culturel: ${activeBadge?.label}`
+        description: `${t('vendor.badgeRenewalLabel')}: ${activeBadge?.label}`
       });
 
       toast({
-        title: "✅ Badge Renouvelé !",
-        description: `Valide jusqu'au ${format(newExpiry, 'dd/MM/yyyy')}`
+        title: t('vendor.badgeRenewedTitle'),
+        description: `${t('vendor.validUntil')} ${format(newExpiry, 'dd/MM/yyyy')}`
       });
 
       if (onUpdate) onUpdate();
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Impossible de renouveler le badge.",
+        title: t('vendor.genericError'),
+        description: t('vendor.badgeRenewalError'),
         variant: "destructive"
       });
     } finally {
@@ -149,11 +148,11 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Award className="w-5 h-5 text-amber-600" />
-          Badge d'Affinité Tribale
-          <Badge className="bg-amber-500 text-white text-xs">{BADGE_PRICE_MONTHLY.toLocaleString()} FCFA/mois</Badge>
+          {t('vendor.tribalAffinityBadge')}
+          <Badge className="bg-amber-500 text-white text-xs">{BADGE_PRICE_MONTHLY.toLocaleString()} FCFA{t('vendor.perMonthShort')}</Badge>
         </CardTitle>
         <p className="text-sm text-stone-500">
-          Affichez votre expertise culturelle et augmentez votre classement de +10%
+          {t('vendor.tribalBadgeSubtitle')}
         </p>
       </CardHeader>
       <CardContent>
@@ -165,14 +164,14 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
                 <h4 className="font-bold text-stone-900">{activeBadge.label}</h4>
                 <div className="flex items-center gap-2 text-sm text-stone-600 mt-1">
                   <Clock className="w-4 h-4" />
-                  Expire le {format(new Date(vendorProfile.cultural_badge_expiry), 'dd/MM/yyyy')}
+                  {t('vendor.expiresOn')} {format(new Date(vendorProfile.cultural_badge_expiry), 'dd/MM/yyyy')}
                 </div>
               </div>
-              <Badge className="bg-green-500 text-white">ACTIF</Badge>
+              <Badge className="bg-green-500 text-white">{t('vendor.activeBadge')}</Badge>
             </div>
             <Button onClick={handleRenewBadge} disabled={processing} variant="outline" className="w-full">
               <Sparkles className="w-4 h-4 mr-2" />
-              Renouveler pour {BADGE_PRICE_MONTHLY.toLocaleString()} FCFA
+              {t('vendor.renewFor')} {BADGE_PRICE_MONTHLY.toLocaleString()} FCFA
             </Button>
           </div>
         ) : (
@@ -180,20 +179,20 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
             <DialogTrigger asChild>
               <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white">
                 <Award className="w-4 h-4 mr-2" />
-                {activeBadge ? 'Réactiver Badge' : 'Activer un Badge Culturel'}
+                {activeBadge ? t('vendor.reactivateBadge') : t('vendor.activateCulturalBadge')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Choisissez votre Badge Culturel</DialogTitle>
+                <DialogTitle>{t('vendor.chooseYourCulturalBadge')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <p className="text-sm text-stone-600">
-                  Les badges culturels augmentent votre visibilité et votre crédibilité auprès des clients recherchant une expertise spécifique.
+                  {t('vendor.culturalBadgeExplainer')}
                 </p>
                 <Select value={selectedBadge} onValueChange={setSelectedBadge}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez un badge" />
+                    <SelectValue placeholder={t('vendor.selectABadge')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CULTURAL_BADGES.map((badge) => (
@@ -205,11 +204,11 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
                 </Select>
                 <div className="bg-stone-50 p-4 rounded-lg space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-stone-600">Prix mensuel:</span>
+                    <span className="text-stone-600">{t('vendor.monthlyPrice')}:</span>
                     <span className="font-bold">{BADGE_PRICE_MONTHLY.toLocaleString()} FCFA</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-stone-600">Votre solde:</span>
+                    <span className="text-stone-600">{t('vendor.yourBalance')}:</span>
                     <span className={`font-bold ${(vendorProfile.account_balance || 0) >= BADGE_PRICE_MONTHLY ? 'text-green-600' : 'text-red-600'}`}>
                       {(vendorProfile.account_balance || 0).toLocaleString()} FCFA
                     </span>
@@ -220,7 +219,7 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
                   disabled={processing || !selectedBadge}
                   className="w-full bg-amber-600 hover:bg-amber-700"
                 >
-                  {processing ? 'Activation...' : `Activer Badge - ${BADGE_PRICE_MONTHLY.toLocaleString()} FCFA`}
+                  {processing ? t('vendor.activating') : `${t('vendor.activateBadgeButton')} - ${BADGE_PRICE_MONTHLY.toLocaleString()} FCFA`}
                 </Button>
               </div>
             </DialogContent>
@@ -233,15 +232,15 @@ export default function CulturalBadgeManager({ vendorProfile, onUpdate }) {
               <Shield className="w-8 h-8 text-yellow-600" />
               <div>
                 <h4 className="font-bold text-stone-900 flex items-center gap-2">
-                  Garantie d'Intégrité Spirituelle
+                  {t('vendor.spiritualIntegrityGuarantee')}
                   {vendorProfile.spiritual_integrity_verified && (
-                    <Badge className="bg-yellow-600 text-white text-xs">VÉRIFIÉ</Badge>
+                    <Badge className="bg-yellow-600 text-white text-xs">{t('vendor.verified')}</Badge>
                   )}
                 </h4>
                 <p className="text-sm text-stone-600">
                   {vendorProfile.spiritual_integrity_verified 
-                    ? `Audité le ${format(new Date(vendorProfile.spiritual_audit_date), 'dd/MM/yyyy')} - Respect des rites confirmé`
-                    : 'Avantage GOLD: Audit de respect des traditions et rites pour crédibilité maximale'}
+                    ? `${t('vendor.auditedOn')} ${format(new Date(vendorProfile.spiritual_audit_date), 'dd/MM/yyyy')} - ${t('vendor.ritesRespectConfirmed')}`
+                    : t('vendor.goldAuditAdvantage')}
                 </p>
               </div>
             </div>

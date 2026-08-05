@@ -13,8 +13,8 @@ const CREDIT_PACKS = [
   {
     id: 'pack_5',
     credits: 5,
-    price: 250,
-    pricePerLead: 50,
+    price: 18,
+    pricePerLead: 3.6,
     badge: 'Starter',
     color: 'from-blue-500 to-cyan-500',
     popular: false
@@ -22,22 +22,22 @@ const CREDIT_PACKS = [
   {
     id: 'pack_10',
     credits: 10,
-    price: 400,
-    pricePerLead: 40,
+    price: 35,
+    pricePerLead: 3.5,
     badge: 'Popular',
     color: 'from-purple-500 to-pink-500',
     popular: true,
-    savings: 100
+    savings: 2.5
   },
   {
     id: 'pack_25',
     credits: 25,
-    price: 1000,
-    pricePerLead: 40,
+    price: 80,
+    pricePerLead: 3.2,
     badge: 'Pro',
     color: 'from-amber-500 to-orange-500',
     popular: false,
-    savings: 250
+    savings: 10
   }
 ];
 
@@ -55,7 +55,7 @@ export default function LeadCreditPacks({ vendorProfile, currentUser, onUpdate }
   const handlePurchasePack = async (pack) => {
     setProcessing(true);
     try {
-      // Verifier le solde
+      // Vérifier le solde
       if ((vendorProfile.account_balance || 0) < pack.price) {
         toast({
           title: "Solde insuffisant",
@@ -65,24 +65,24 @@ export default function LeadCreditPacks({ vendorProfile, currentUser, onUpdate }
         return;
       }
 
-      // Debiter et ajouter les credits
+      // Débiter et ajouter les crédits
       await base44.entities.VendorProfile.update(vendorProfile.id, {
         account_balance: (vendorProfile.account_balance || 0) - pack.price,
         reward_credits: (vendorProfile.reward_credits || 0) + pack.credits
       });
 
-      // Creer transaction
+      // Créer transaction
       await base44.entities.Transaction.create({
         user_id: vendorProfile.user_id,
         amount: -pack.price,
         type: 'ad_fee',
         status: 'completed',
-        description: `Pack ${pack.credits} Credits Leads - ${pack.badge}`
+        description: `Pack ${pack.credits} Crédits Leads - ${pack.badge}`
       });
 
       toast({
         title: "Pack Achete !",
-        description: `+${pack.credits} credits ajoutes. Total: ${(vendorProfile.reward_credits || 0) + pack.credits} credits`
+        description: `+${pack.credits} crédits ajoutés. Total: ${(vendorProfile.reward_credits || 0) + pack.credits} crédits`
       });
 
       setDialogOpen(false);
@@ -91,7 +91,7 @@ export default function LeadCreditPacks({ vendorProfile, currentUser, onUpdate }
       console.error('Pack purchase error:', error);
       toast({
         title: "Erreur",
-        description: "Impossible d'acheter le pack. Reessayez.",
+        description: "Impossible d'acheter le pack. Réessayez.",
         variant: "destructive"
       });
     } finally {
@@ -104,10 +104,10 @@ export default function LeadCreditPacks({ vendorProfile, currentUser, onUpdate }
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Package className="w-5 h-5 text-purple-600" />
-          Packs de Credits Leads
+          Packs de Crédits Leads
         </CardTitle>
         <p className="text-sm text-stone-500">
-          Achetez des credits en gros pour debloquer des leads a moindre cout
+          Achetez des crédits en gros pour débloquer des leads à moindre coût
         </p>
       </CardHeader>
       <CardContent>
@@ -121,12 +121,12 @@ export default function LeadCreditPacks({ vendorProfile, currentUser, onUpdate }
             >
               {pack.popular && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-600 text-white">
-                  POPULAIRE
+                  ⭐ POPULAIRE
                 </Badge>
               )}
               <div className={`bg-gradient-to-r ${pack.color} text-white rounded-lg p-3 mb-3`}>
                 <div className="text-3xl font-bold mb-1">{pack.credits}</div>
-                <div className="text-sm opacity-90">Credits Leads</div>
+                <div className="text-sm opacity-90">Crédits Leads</div>
               </div>
               <div className="space-y-2 mb-4">
                 <div className="flex items-baseline justify-center gap-2">
@@ -157,10 +157,10 @@ export default function LeadCreditPacks({ vendorProfile, currentUser, onUpdate }
           <div className="flex items-start gap-3">
             <TrendingUp className="w-6 h-6 text-cyan-600 flex-shrink-0 mt-1" />
             <div>
-              <h4 className="font-bold text-stone-900 mb-1">Credits vs Paiement a l'unite</h4>
+              <h4 className="font-bold text-stone-900 mb-1">Crédits vs Paiement à l'unité</h4>
               <p className="text-sm text-stone-600">
-                Avec les packs, vous payez <strong>{formatPrice(40)}-{formatPrice(50)} par lead</strong>. 
-                Ideal si vous traitez plusieurs demandes par mois !
+                Avec les packs, vous payez <strong>{formatPrice(3.20)}-{formatPrice(3.60)} par lead</strong> au lieu de {formatPrice(2)}-{formatPrice(10)} individuellement. 
+                Idéal si vous traitez plusieurs demandes par mois !
               </p>
             </div>
           </div>
@@ -168,9 +168,9 @@ export default function LeadCreditPacks({ vendorProfile, currentUser, onUpdate }
 
         <div className="mt-4 flex items-center justify-between p-3 bg-stone-50 rounded-lg">
           <div>
-            <span className="text-sm text-stone-600">Vos credits actuels:</span>
+            <span className="text-sm text-stone-600">Vos crédits actuels:</span>
             <span className="ml-2 text-lg font-bold text-purple-600">
-              {vendorProfile.reward_credits || 0} credits
+              {vendorProfile.reward_credits || 0} crédits
             </span>
           </div>
           <div>
