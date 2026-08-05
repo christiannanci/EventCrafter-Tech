@@ -9,6 +9,7 @@ import { base44 } from "@/api/apiClient";
 import { useToast } from "@/components/ui/use-toast";
 import { getLeadPricingInfo } from '@/components/LeadPricingCalculator';
 import { useRewardCredit } from '@/components/RewardSystem';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function LeadsSection({ 
   leads, 
@@ -23,6 +24,7 @@ export default function LeadsSection({
   vendorProfile,
   onLeadsUpdate
 }) {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [processingUnlock, setProcessingUnlock] = React.useState(false);
   const [unlockedLeads, setUnlockedLeads] = React.useState(new Set());
@@ -32,7 +34,6 @@ export default function LeadsSection({
   const totalPages = Math.ceil(leads.length / itemsPerPage);
   const paginatedLeads = leads.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-  // Charger les leads déjà débloqués + politique remboursement
   React.useEffect(() => {
     const loadData = async () => {
       if (!user?.id) return;
@@ -45,7 +46,6 @@ export default function LeadsSection({
         setUnlockedLeads(new Set(unlocks.map(u => u.lead_id)));
         setRefundPolicy(policyConfig[0] || { waiting_period_days: 7 });
 
-        // Vérifier éligibilité remboursement
         const eligible = new Set();
         const now = new Date();
         
@@ -54,7 +54,6 @@ export default function LeadsSection({
           const daysSince = Math.floor((now - unlockDate) / (1000 * 60 * 60 * 24));
           
           if (daysSince >= (policyConfig[0]?.waiting_period_days || 7)) {
-            // Vérifier si pas déjà demandé
             const existingRequest = await base44.entities.LeadRefundRequest.filter({ 
               vendor_id: user.id, 
               lead_id: unlock.lead_id 
@@ -74,25 +73,20 @@ export default function LeadsSection({
     loadData();
   }, [user?.id]);
 
-  // Déterminer si un lead est visible selon le plan
   const getLeadVisibility = (leadIndex) => {
-    // Premium & Gold: Accès illimité et instantané
     if (membershipStatus === 'premium' || membershipStatus === 'gold') {
       return { visible: true, unlocked: true, realtime: true };
     }
     
-    // Gratuit: 1-2 leads par semaine (différés)
-    // Pour simplifier: les 2 premiers leads de la liste sont visibles mais floutés
-    const isVisible = leadIndex < 2; // Limite à 2 leads/semaine pour Gratuit
+    const isVisible = leadIndex < 2;
     
     return { 
       visible: isVisible, 
-      unlocked: false, // Contacts floutés, nécessite déblocage payant
+      unlocked: false,
       realtime: false 
     };
   };
 
-  // Gérer le déblocage d'un lead avec paiement
   const handleUnlockLead = async (lead, useCredit = false) => {
     setProcessingUnlock(true);
     try {
@@ -100,18 +94,16 @@ export default function LeadsSection({
       let unlockType = 'pay_per_lead';
       let amountPaid = pricing.priceFCFA_raw;
 
-      // Utiliser un crédit reward si demandé
       if (useCredit) {
         if ((vendorProfile.reward_credits || 0) < 1) {
           toast({
-            title: "❌ Pas assez de crédits",
-            description: "Vous n'avez pas de crédit reward disponible.",
+            title: `❌ ${t('vendor.notEnoughCreditsTitle')}`,
+            description: t('vendor.notEnoughCreditsDesc'),
             variant: "destructive"
           });
           return;
         }
         
-        // Déduire 1 crédit
         await base44.entities.VendorProfile.update(vendorProfile.id, {
           reward_credits: vendorProfile.reward_credits - 1
         });
@@ -119,14 +111,10 @@ export default function LeadsSection({
         unlockType = 'reward_credit';
         amountPaid = 0;
       } else {
-        // TODO: Intégration paiement réel (Mobile Money/Stripe)
-        // Pour l'instant, simulation
-        
-        // Déduire du wallet
         if ((vendorProfile.account_balance || 0) < amountPaid) {
           toast({
-            title: "❌ Solde insuffisant",
-            description: `Vous avez besoin de ${amountPaid.toLocaleString()} FCFA pour débloquer ce lead. Rechargez votre portefeuille.`,
+            title: `❌ ${t('vendor.insufficientBalanceTitle')}`,
+            description: `${t('vendor.insufficientBalanceDescPrefix')} ${amountPaid.toLocaleString()} FCFA ${t('vendor.insufficientBalanceDescSuffix')}`,
             variant: "destructive"
           });
           return;
@@ -137,7 +125,6 @@ export default function LeadsSection({
         });
       }
       
-      // Créer l'enregistrement de déblocage
       await base44.entities.LeadUnlock.create({
         vendor_id: user.id,
         lead_id: lead.id,
@@ -146,23 +133,21 @@ export default function LeadsSection({
         unlocked_at: new Date().toISOString()
       });
 
-      // Créer transaction
       await base44.entities.Transaction.create({
         user_id: user.id,
         amount: -amountPaid,
         type: 'ad_fee',
         status: 'completed',
-        description: `Déblocage lead: ${lead.event_type} - ${pricing.category}`
+        description: `${t('vendor.leadUnlockTransaction')}: ${lead.event_type} - ${pricing.category}`
       });
 
-      // Mettre à jour l'état local
       setUnlockedLeads(new Set([...unlockedLeads, lead.id]));
 
       toast({
-        title: useCredit ? "✅ Lead débloqué avec crédit !" : "✅ Lead débloqué !",
+        title: useCredit ? `✅ ${t('vendor.leadUnlockedCreditTitle')}` : `✅ ${t('vendor.leadUnlockedTitle')}`,
         description: useCredit 
-          ? `Crédit utilisé. Reste: ${(vendorProfile.reward_credits || 0) - 1} crédits`
-          : `${pricing.priceFCFA} débité. Contacts complets maintenant visibles.`,
+          ? `${t('vendor.creditUsed')} ${(vendorProfile.reward_credits || 0) - 1} ${t('vendor.creditsRemaining')}`
+          : `${pricing.priceFCFA} ${t('vendor.debitedContactsVisible')}`,
       });
 
       if (onLeadsUpdate) onLeadsUpdate();
@@ -170,8 +155,8 @@ export default function LeadsSection({
     } catch (error) {
       console.error('Unlock error:', error);
       toast({
-        title: "❌ Erreur",
-        description: "Impossible de débloquer le lead. Réessayez.",
+        title: `❌ ${t('vendor.genericError')}`,
+        description: t('vendor.unlockLeadError'),
         variant: "destructive"
       });
     } finally {
@@ -192,27 +177,25 @@ export default function LeadsSection({
       } else {
         const newConv = await base44.entities.Conversation.create({
           participants: [String(user.id), String(lead.client_id)],
-          last_message: `Réponse à la demande: ${lead.event_type}`,
+          last_message: `${t('vendor.responseToRequest')}: ${lead.event_type}`,
           last_message_at: new Date().toISOString()
         });
         window.location.href = `/Chat?conversationId=${newConv.id}`;
       }
     } catch (error) {
       toast({ 
-        title: "Erreur de connexion", 
-        description: "Impossible de démarrer la conversation.",
+        title: t('vendor.connectionErrorTitle'), 
+        description: t('vendor.connectionErrorDesc'),
         variant: "destructive" 
       });
     }
   };
 
-  // Flouter les informations de contact
   const blurContact = (text) => {
     if (!text) return '●●●●●●●●';
     return text.substring(0, 2) + '●●●●●●' + text.substring(text.length - 2);
   };
 
-  // Demander remboursement
   const handleRequestRefund = async (lead) => {
     try {
       const unlock = await base44.entities.LeadUnlock.filter({ 
@@ -228,7 +211,7 @@ export default function LeadsSection({
         unlock_id: unlock[0].id,
         amount_paid: unlock[0].amount_paid || 0,
         unlock_type: unlock[0].unlock_type,
-        reason: "Client ne répond pas après délai d'attente",
+        reason: t('vendor.refundReasonNoResponse'),
         status: 'pending'
       });
 
@@ -239,16 +222,16 @@ export default function LeadsSection({
       });
 
       toast({
-        title: "✅ Demande envoyée",
+        title: `✅ ${t('vendor.refundRequestSentTitle')}`,
         description: unlock[0].unlock_type === 'reward_credit' 
-          ? "Votre crédit sera restauré après validation admin."
-          : `Votre crédit de ${(unlock[0].amount_paid || 0).toLocaleString()} FCFA sera reversé sur votre compte après validation.`,
+          ? t('vendor.refundRequestSentCreditDesc')
+          : `${t('vendor.refundRequestSentAmountPrefix')} ${(unlock[0].amount_paid || 0).toLocaleString()} FCFA ${t('vendor.refundRequestSentAmountSuffix')}`,
       });
     } catch (error) {
       console.error('Refund request error:', error);
       toast({
-        title: "❌ Erreur",
-        description: "Impossible d'envoyer la demande. Réessayez.",
+        title: `❌ ${t('vendor.genericError')}`,
+        description: t('vendor.refundRequestError'),
         variant: "destructive"
       });
     }
@@ -261,24 +244,24 @@ export default function LeadsSection({
           <div>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-rose-600" />
-              Demandes Clients Disponibles
+              {t('vendor.leadsAvailable')}
             </CardTitle>
             <p className="text-sm text-stone-500">
               {membershipStatus === 'premium' || membershipStatus === 'gold' 
-                ? '✅ Accès illimité et instantané' 
-                : '⚠️ Plan Gratuit: 1-2 leads/semaine, contacts floutés'}
+                ? `✅ ${t('vendor.unlimitedInstantAccess')}` 
+                : `⚠️ ${t('vendor.freePlanUsage2LeadsWeek')}`}
             </p>
           </div>
           {vendorProfile && (
             <div className="bg-stone-50 border border-stone-200 rounded-lg p-3 min-w-[200px]">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-stone-600">Crédits Reward</span>
+                <span className="text-xs font-medium text-stone-600">{t('vendor.rewardCredits')}</span>
                 <Badge variant="outline" className="border-green-500 text-green-600">
-                  {vendorProfile.reward_credits || 0} crédits
+                  {vendorProfile.reward_credits || 0} {t('vendor.creditsUnit')}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-stone-600">Solde Wallet</span>
+                <span className="text-xs font-medium text-stone-600">{t('vendor.walletBalance')}</span>
                 <Badge variant="outline" className="border-blue-500 text-blue-600">
                   {(vendorProfile.account_balance || 0).toLocaleString()} FCFA
                 </Badge>
@@ -308,7 +291,6 @@ export default function LeadsSection({
               const isUnlocked = unlockedLeads.has(lead.id) || visibility.unlocked;
               const pricing = getLeadPricingInfo(lead);
               
-              // Lead non visible pour plan Gratuit (au-delà de 2 par semaine)
               if (!visibility.visible) {
                 return (
                   <Card key={lead.id} className="border-l-4 border-l-amber-500 bg-amber-50/30">
@@ -317,15 +299,15 @@ export default function LeadsSection({
                         <div className="flex items-center gap-4">
                           <Lock className="w-10 h-10 text-amber-600" />
                           <div>
-                            <h4 className="font-bold text-stone-900 mb-1">Lead Disponible</h4>
+                            <h4 className="font-bold text-stone-900 mb-1">{t('vendor.leadAvailableTitle')}</h4>
                             <p className="text-sm text-stone-600">
-                              Limite hebdomadaire atteinte. Passez à Premium pour voir plus de leads.
+                              {t('vendor.weeklyLimitReached')}
                             </p>
                           </div>
                         </div>
                         <Button onClick={onUpgradeClick} className="bg-amber-600 hover:bg-amber-700">
                           <Crown className="w-4 h-4 mr-2" />
-                          Passer Premium
+                          {t('vendor.passPremium')}
                         </Button>
                       </div>
                     </CardContent>
@@ -348,12 +330,12 @@ export default function LeadsSection({
                         {!isUnlocked && (
                           <Badge className="bg-amber-500 text-white">
                             <Lock className="w-3 h-3 mr-1" />
-                            Contacts Floutés
+                            {t('vendor.blurredContacts')}
                           </Badge>
                         )}
                         {visibility.realtime && (
                           <Badge className="bg-green-500 text-white">
-                            ⚡ Temps Réel
+                            ⚡ {t('vendor.realtimeBadge')}
                           </Badge>
                         )}
                       </div>
@@ -381,23 +363,22 @@ export default function LeadsSection({
                           </div>
                         )}
                         
-                        {/* Contacts floutés ou dévoilés */}
                         {!isUnlocked ? (
                           <>
                             <div className="flex items-center gap-2 text-stone-400">
-                              📞 Téléphone: {blurContact(lead.client_phone || '237670934378')}
+                              📞 {t('vendor.phoneLabel')}: {blurContact(lead.client_phone || '237670934378')}
                             </div>
                             <div className="flex items-center gap-2 text-stone-400">
-                              📧 Email: {blurContact(lead.client_email || 'client@example.com')}
+                              📧 {t('vendor.emailLabel')}: {blurContact(lead.client_email || 'client@example.com')}
                             </div>
                           </>
                         ) : (
                           <>
                             <div className="flex items-center gap-2 text-green-700 font-medium">
-                              📞 Téléphone: {lead.client_phone || '+237 670 93 43 78'}
+                              📞 {t('vendor.phoneLabel')}: {lead.client_phone || '+237 670 93 43 78'}
                             </div>
                             <div className="flex items-center gap-2 text-green-700 font-medium">
-                              📧 Email: {lead.client_email || 'client@example.com'}
+                              📧 {t('vendor.emailLabel')}: {lead.client_email || 'client@example.com'}
                             </div>
                           </>
                         )}
@@ -416,7 +397,7 @@ export default function LeadsSection({
                             onClick={() => handleContactClient(lead)}
                           >
                             <MessageSquare className="w-4 h-4 mr-2" />
-                            Contacter Client
+                            {t('vendor.contactClient')}
                           </Button>
                           {refundEligible.has(lead.id) && (
                             <Button 
@@ -425,7 +406,7 @@ export default function LeadsSection({
                               className="border-orange-500 text-orange-700 hover:bg-orange-50 whitespace-nowrap text-xs"
                             >
                               <AlertOctagon className="w-3 h-3 mr-1" />
-                              Pas de réponse?
+                              {t('vendor.noResponseQuestion')}
                             </Button>
                           )}
                         </>
@@ -437,7 +418,7 @@ export default function LeadsSection({
                             className="bg-green-600 hover:bg-green-700 whitespace-nowrap"
                           >
                             <Unlock className="w-4 h-4 mr-2" />
-                            Débloquer {pricing.priceFCFA}
+                            {t('vendor.unlockButton')} {pricing.priceFCFA}
                           </Button>
                           {(vendorProfile?.reward_credits || 0) > 0 && (
                             <Button 
@@ -446,7 +427,7 @@ export default function LeadsSection({
                               variant="outline"
                               className="border-amber-500 text-amber-700 hover:bg-amber-50 whitespace-nowrap"
                             >
-                              🎁 Utiliser 1 Crédit
+                              🎁 {t('vendor.useOneCredit')}
                             </Button>
                           )}
                           <Button 
@@ -455,12 +436,12 @@ export default function LeadsSection({
                             className="whitespace-nowrap"
                           >
                             <Crown className="w-4 h-4 mr-2" />
-                            Upgrade Plan
+                            {t('vendor.upgradePlan')}
                           </Button>
                         </>
                       )}
                       <span className="text-xs text-stone-400 text-center">
-                        Posté {format(new Date(lead.created_date), 'dd/MM')}
+                        {t('vendor.postedOn')} {format(new Date(lead.created_date), 'dd/MM')}
                       </span>
                     </div>
                   </div>
@@ -479,7 +460,7 @@ export default function LeadsSection({
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
                 <span className="text-sm text-stone-600">
-                  Page {page} sur {totalPages}
+                  {t('vendor.pageOf').replace('{page}', page).replace('{total}', totalPages)}
                 </span>
                 <Button
                   variant="outline"
@@ -495,8 +476,8 @@ export default function LeadsSection({
         ) : (
           <div className="text-center py-12">
             <TrendingUp className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-stone-900 mb-2">Aucune demande disponible</h3>
-            <p className="text-stone-500">Les demandes clients correspondant à vos services apparaîtront ici.</p>
+            <h3 className="text-lg font-medium text-stone-900 mb-2">{t('vendor.noLeads')}</h3>
+            <p className="text-stone-500">{t('vendor.noLeadsDesc')}</p>
           </div>
         )}
       </CardContent>

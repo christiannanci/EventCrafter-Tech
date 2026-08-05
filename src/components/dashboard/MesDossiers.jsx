@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { createPageUrl } from '@/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 import ContractFlow from './ContractFlow';
 import ServiceCompletionPrompt from './ServiceCompletionPrompt';
 import DisputeDialog from './DisputeDialog';
@@ -32,6 +33,7 @@ import PaymentModal from '@/components/PaymentModal';
 import DossierDetailDialog from './DossierDetailDialog';
 
 export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick }) {
+  const { t } = useLanguage();
   const [dossiers, setDossiers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, nouveau, discussion, confirme, termine
@@ -72,8 +74,8 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
           smart_match_boost_active: false
         });
         toast({
-          title: "⚠️ Boost Suspendu",
-          description: "Vos boosts sont suspendus pendant la résolution du litige",
+          title: t('vendor.boostSuspendedTitle'),
+          description: t('vendor.boostSuspendedDesc'),
           variant: "destructive"
         });
       }
@@ -115,7 +117,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
             clientName: lead.client_name || 'Client',
             clientEmail: lead.client_email || '',
             clientPhone: lead.client_phone || '',
-            eventType: lead.event_type || 'Other',
+            eventType: lead.event_type || 'Autre',
             eventDate: lead.event_date || null,
             location: lead.location || '',
             budget: lead.budget || '',
@@ -176,7 +178,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
               id: booking.id,
               type: 'booking',
               clientName: booking.client_name || 'Client',
-              eventType: booking.event_type || 'Other',
+              eventType: booking.event_type || 'Autre',
               eventDate: booking.event_date || null,
               status: status,
               bookingId: booking.id,
@@ -205,8 +207,8 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
     } catch (error) {
       console.error('Error loading dossiers:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les dossiers",
+        title: t('vendor.genericError'),
+        description: t('vendor.dossierLoadError'),
         variant: "destructive"
       });
     } finally {
@@ -219,53 +221,53 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
       const configs = {
         nouveau: {
           icon: Lightbulb,
-          label: '💡 Nouveau Lead',
+          label: `💡 ${t('vendor.statusNewLead')}`,
           bg: 'bg-yellow-50',
           border: 'border-yellow-200',
           badge: 'bg-yellow-100 text-yellow-800',
-          action: 'Débloquer / Répondre'
+          action: t('vendor.actionUnlockReply')
         },
         discussion: {
           icon: MessageCircle,
-          label: '💬 En Discussion',
+          label: `💬 ${t('vendor.statusDiscussion')}`,
           bg: 'bg-blue-50',
           border: 'border-blue-200',
           badge: 'bg-blue-100 text-blue-800',
-          action: 'Négocier / Envoyer Devis'
+          action: t('vendor.actionNegotiateQuote')
         },
         confirme: bookingStatus === 'in_progress' ? {
           icon: MessageSquare,
-          label: '🚀 En Cours d\'Exécution',
+          label: `🚀 ${t('vendor.statusInExecution')}`,
           bg: 'bg-indigo-50',
           border: 'border-indigo-200',
           badge: 'bg-indigo-100 text-indigo-800',
-          action: 'Mode Chantier'
+          action: t('vendor.actionWorksiteMode')
         } : {
           icon: CheckCircle2,
-          label: '✅ Confirmé',
+          label: `✅ ${t('vendor.statusConfirmed')}`,
           bg: 'bg-green-50',
           border: 'border-green-200',
           badge: 'bg-green-100 text-green-800',
-          action: 'Voir Détails / Gérer'
+          action: t('vendor.actionViewManage')
         },
         termine: {
           icon: Flag,
-          label: '🏁 Terminé',
+          label: `🏁 ${t('vendor.statusCompleted')}`,
           bg: 'bg-stone-50',
           border: 'border-stone-200',
           badge: 'bg-stone-100 text-stone-800',
-          action: 'Demander Avis'
+          action: t('vendor.actionRequestReview')
         }
       };
       return configs[status] || configs.nouveau;
     } catch {
       return {
         icon: Lightbulb,
-        label: 'Lead',
+        label: t('vendor.leadFallback'),
         bg: 'bg-stone-50',
         border: 'border-stone-200',
         badge: 'bg-stone-100 text-stone-800',
-        action: 'Voir Détails'
+        action: t('vendor.actionViewDetails')
       };
     }
   };
@@ -276,13 +278,12 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
       const { status, bookingStatus } = dossier;
       
       if (status === 'nouveau') {
-        // Ouvrir le chat pour commencer la discussion
         if (dossier.conversationId) {
           window.location.href = createPageUrl(`Chat?conversationId=${dossier.conversationId}`);
         } else {
           toast({ 
-            title: "Commencer la discussion",
-            description: "Contactez le client via les détails fournis"
+            title: t('vendor.startDiscussionTitle'),
+            description: t('vendor.startDiscussionDesc')
           });
         }
       } else if (status === 'discussion') {
@@ -292,13 +293,12 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
       } else if (status === 'confirme' && bookingStatus === 'in_progress') {
         window.location.href = createPageUrl(`VendorDashboard?tab=bookings_received`);
       } else if (status === 'confirme') {
-        // Voir Détails / Gérer : ouvre le dialogue de détail fusionné (Booking + Lead)
         setDetailDossier(dossier);
         setShowDetailDialog(true);
       } else if (status === 'termine') {
         toast({ 
-          title: "Demander un avis",
-          description: "Fonctionnalité à venir"
+          title: t('vendor.requestReviewTitle'),
+          description: t('vendor.featureComingSoon')
         });
       }
     } catch (e) {
@@ -308,10 +308,9 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
 
   const openContractFlow = async (dossier) => {
     if (!dossier?.bookingId) {
-      // Créer un booking d'abord si nécessaire
       toast({ 
-        title: "Créer d'abord une réservation",
-        description: "Finalisez les détails de négociation avant de générer le contrat"
+        title: t('vendor.createBookingFirstTitle'),
+        description: t('vendor.createBookingFirstDesc')
       });
       return;
     }
@@ -325,16 +324,16 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
         setShowContractFlow(true);
       } else {
         toast({ 
-          title: "Erreur",
-          description: "Impossible de charger la réservation",
+          title: t('vendor.genericError'),
+          description: t('vendor.bookingLoadError'),
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error('Error loading booking:', error);
       toast({ 
-        title: "Erreur",
-        description: "Impossible de charger la réservation",
+        title: t('vendor.genericError'),
+        description: t('vendor.bookingLoadError'),
         variant: "destructive"
       });
     }
@@ -355,7 +354,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 animate-spin text-rose-600" />
-        <span className="ml-3 text-stone-600">Chargement de vos dossiers...</span>
+        <span className="ml-3 text-stone-600">{t('vendor.loadingDossiers')}</span>
       </div>
     );
   }
@@ -416,8 +415,8 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
       
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-stone-900">Mes Dossiers</h2>
-          <p className="text-stone-500 text-sm mt-1">Vue d'ensemble de votre tunnel de vente</p>
+          <h2 className="text-2xl font-bold text-stone-900">{t('vendor.mesDossiersTitle')}</h2>
+          <p className="text-stone-500 text-sm mt-1">{t('vendor.mesDossiersSubtitle')}</p>
         </div>
       </div>
 
@@ -430,7 +429,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-stone-600">Nouveaux Leads</p>
+                <p className="text-xs text-stone-600">{t('vendor.statNewLeads')}</p>
                 <p className="text-2xl font-bold text-yellow-600">{stats.nouveau}</p>
               </div>
               <Lightbulb className="w-8 h-8 text-yellow-400" />
@@ -445,7 +444,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-stone-600">En Discussion</p>
+                <p className="text-xs text-stone-600">{t('vendor.statDiscussion')}</p>
                 <p className="text-2xl font-bold text-blue-600">{stats.discussion}</p>
               </div>
               <MessageCircle className="w-8 h-8 text-blue-400" />
@@ -460,7 +459,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-stone-600">Confirmés</p>
+                <p className="text-xs text-stone-600">{t('vendor.statConfirmed')}</p>
                 <p className="text-2xl font-bold text-green-600">{stats.confirme}</p>
               </div>
               <CheckCircle2 className="w-8 h-8 text-green-400" />
@@ -475,7 +474,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-stone-600">Terminés</p>
+                <p className="text-xs text-stone-600">{t('vendor.statCompleted')}</p>
                 <p className="text-2xl font-bold text-stone-600">{stats.termine}</p>
               </div>
               <Flag className="w-8 h-8 text-stone-400" />
@@ -490,10 +489,10 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
           <CardContent className="py-20 text-center">
             <MessageCircle className="w-12 h-12 text-stone-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-stone-900 mb-2">
-              {filter === 'all' ? 'Aucun dossier' : `Aucun dossier ${getStatusConfig(filter).label.toLowerCase()}`}
+              {filter === 'all' ? t('vendor.noDossier') : `${t('vendor.noDossier')} ${getStatusConfig(filter).label.toLowerCase()}`}
             </h3>
             <p className="text-stone-500">
-              Vos dossiers clients apparaîtront ici au fur et à mesure
+              {t('vendor.noDossierDesc')}
             </p>
           </CardContent>
         </Card>
@@ -504,7 +503,6 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
             const config = getStatusConfig(dossier.status, dossier.bookingStatus);
             const Icon = config.icon;
             
-            // Calculer le compte à rebours pour "En cours d'exécution"
             const isInProgress = dossier?.bookingStatus === 'in_progress';
             let daysUntilEvent = null;
             if (dossier?.eventDate) {
@@ -532,7 +530,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                       </div>
                     </div>
                     <div className="text-right text-xs text-stone-500">
-                      Mis à jour {dossier?.lastUpdate ? new Date(dossier.lastUpdate).toLocaleDateString('fr-FR') : 'N/A'}
+                      {t('vendor.updatedOn')} {dossier?.lastUpdate ? new Date(dossier.lastUpdate).toLocaleDateString('fr-FR') : 'N/A'}
                     </div>
                   </div>
 
@@ -541,7 +539,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                       <div className="flex items-center gap-2 text-sm">
                         <Calendar className="w-4 h-4 text-stone-500" />
                         <span className="text-stone-700">
-                          {dossier.eventType} - {dossier?.eventDate ? new Date(dossier.eventDate).toLocaleDateString('fr-FR') : 'Date à définir'}
+                          {dossier.eventType} - {dossier?.eventDate ? new Date(dossier.eventDate).toLocaleDateString('fr-FR') : t('vendor.dateToBeSet')}
                         </span>
                       </div>
                     )}
@@ -556,7 +554,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                     {dossier.budget && (
                       <div className="flex items-center gap-2 text-sm">
                         <DollarSign className="w-4 h-4 text-stone-500" />
-                        <span className="text-stone-700">Budget: {dossier.budget}</span>
+                        <span className="text-stone-700">{t('vendor.budgetLabel')}: {dossier.budget}</span>
                       </div>
                     )}
 
@@ -591,23 +589,21 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                     </div>
                   )}
 
-                  {/* Prompt de clôture si événement passé */}
                   <ServiceCompletionPrompt 
                     dossier={dossier}
                     userType="vendor"
                     onComplete={loadAllDossiers}
                   />
 
-                  {/* Mode Chantier - Compte à rebours */}
                   {isInProgress && daysUntilEvent !== null && daysUntilEvent > 0 && (
                     <div className="mb-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border-2 border-indigo-200">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs font-medium text-indigo-600 mb-1">🚀 Mode Chantier Actif</p>
+                          <p className="text-xs font-medium text-indigo-600 mb-1">🚀 {t('vendor.worksiteModeActive')}</p>
                           <p className="text-2xl font-bold text-indigo-900">
-                            {daysUntilEvent} jour{daysUntilEvent > 1 ? 's' : ''}
+                            {daysUntilEvent} {daysUntilEvent > 1 ? t('vendor.daysPlural') : t('vendor.daySingular')}
                           </p>
-                          <p className="text-xs text-indigo-600">avant l'événement</p>
+                          <p className="text-xs text-indigo-600">{t('vendor.beforeEvent')}</p>
                         </div>
                         <Calendar className="w-12 h-12 text-indigo-300" />
                       </div>
@@ -618,9 +614,9 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                     <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs font-medium text-green-600 mb-1">🎉 C'est le jour J !</p>
+                          <p className="text-xs font-medium text-green-600 mb-1">🎉 {t('vendor.dDayTitle')}</p>
                           <p className="text-xl font-bold text-green-900">
-                            L'événement a lieu aujourd'hui
+                            {t('vendor.dDayDesc')}
                           </p>
                         </div>
                         <Calendar className="w-12 h-12 text-green-300" />
@@ -631,7 +627,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                   {dossier.bookingStatus && (
                     <div className="mb-4">
                       <Badge variant="outline" className="text-xs">
-                        Statut: {dossier.bookingStatus}
+                        {t('vendor.statusLabel')}: {dossier.bookingStatus}
                       </Badge>
                     </div>
                   )}
@@ -650,7 +646,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                         onClick={() => openContractFlow(dossier)}
                       >
                         <FileSignature className="w-4 h-4 mr-2" />
-                        Générer Contrat
+                        {t('vendor.generateContract')}
                       </Button>
                     )}
 
@@ -658,11 +654,11 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                       <>
                         <Button variant="outline">
                           <Eye className="w-4 h-4 mr-2" />
-                          Détails Logistiques
+                          {t('vendor.logisticsDetails')}
                         </Button>
                         <Button variant="outline">
                           <MessageCircle className="w-4 h-4 mr-2" />
-                          Contacter
+                          {t('vendor.contactButton')}
                         </Button>
                         <Button 
                           variant="outline"
@@ -676,8 +672,8 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                                 setShowDisputeDialog(true);
                               } else {
                                 toast({ 
-                                  title: "Erreur",
-                                  description: "Impossible de charger la réservation",
+                                  title: t('vendor.genericError'),
+                                  description: t('vendor.bookingLoadError'),
                                   variant: "destructive"
                                 });
                               }
@@ -687,7 +683,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                           }}
                         >
                           <AlertTriangle className="w-4 h-4 mr-2" />
-                          Signaler un Incident
+                          {t('vendor.reportIncident')}
                         </Button>
                       </>
                     )}
@@ -700,26 +696,26 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                             if (dossier.conversationId) {
                               window.location.href = createPageUrl(`Chat?conversationId=${dossier.conversationId}`);
                             } else {
-                              toast({ title: "Pas de conversation", description: "Aucune conversation disponible" });
+                              toast({ title: t('vendor.noConversationTitle'), description: t('vendor.noConversationDesc') });
                             }
                           }}
                         >
                           <MessageCircle className="w-4 h-4 mr-2" />
-                          Discussion
+                          {t('vendor.discussionButton')}
                         </Button>
                         <Button 
                           variant="outline"
                           onClick={() => openContractFlow(dossier)}
                         >
                           <FileSignature className="w-4 h-4 mr-2" />
-                          Gérer Contrat
+                          {t('vendor.manageContract')}
                         </Button>
                         <Button 
                           variant="outline"
                           onClick={() => openContractFlow(dossier)}
                         >
                           <Eye className="w-4 h-4 mr-2" />
-                          Voir Contrat
+                          {t('vendor.viewContract')}
                         </Button>
                       </>
                     )}
@@ -735,7 +731,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                         }}
                       >
                         <Shield className="w-4 h-4 mr-2" />
-                        Répondre au Litige
+                        {t('vendor.replyToDispute')}
                       </Button>
                     )}
 
@@ -743,7 +739,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                       <>
                         <Button variant="outline">
                           <Star className="w-4 h-4 mr-2" />
-                          Demander Avis
+                          {t('vendor.requestReviewButton')}
                         </Button>
                         {dossier.bookingStatus !== 'disputed' && (
                           <Button 
@@ -758,8 +754,8 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                                   setShowDisputeDialog(true);
                                 } else {
                                   toast({ 
-                                    title: "Erreur",
-                                    description: "Impossible de charger la réservation",
+                                    title: t('vendor.genericError'),
+                                    description: t('vendor.bookingLoadError'),
                                     variant: "destructive"
                                   });
                                 }
@@ -769,7 +765,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                             }}
                           >
                             <AlertTriangle className="w-4 h-4 mr-2" />
-                            Signaler un Incident
+                            {t('vendor.reportIncident')}
                           </Button>
                         )}
                       </>

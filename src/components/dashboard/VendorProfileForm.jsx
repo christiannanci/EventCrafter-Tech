@@ -11,8 +11,9 @@ import { Loader2, Save, MapPin, Shield, Wallet, Upload, FileText, Trash2, Camera
 import { Badge } from "@/components/ui/badge";
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+import PhoneInput from '@/components/PhoneInput';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-// Fix for default marker icon in React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -34,6 +35,7 @@ function LocationMarker({ position, setPosition }) {
 }
 
 export default function VendorProfileForm({ user, initialProfile, onSave }) {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState({
     business_name: "",
@@ -72,29 +74,29 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
     try {
         const { compressImage, isImage, formatFileSize } = await import('../ImageCompressor');
         let fileToUpload = file;
-        
+
         if (isImage(file)) {
-            toast.info("Compression de l'image...");
+            toast.info(t('vendor.compressingImage'));
             fileToUpload = await compressImage(file, {
                 maxWidth: 800,
                 maxHeight: 800,
                 quality: 0.85,
                 outputFormat: 'webp'
             });
-            
+
             const savedPercent = Math.round((1 - fileToUpload.size / file.size) * 100);
-            toast.success(`Image optimisée (${savedPercent}% réduit)`);
+            toast.success(`${t('vendor.imageOptimized')} (${savedPercent}% ${t('vendor.reduced')})`);
         }
-        
+
         const { file_url } = await UploadFile({ file: fileToUpload });
         setProfile(prev => ({
             ...prev,
             profile_image: file_url
         }));
-        toast.success("Logo mis à jour avec succès");
+        toast.success(t('vendor.logoUpdatedSuccess'));
     } catch (error) {
         console.error("Upload failed", error);
-        toast.error("Échec du téléchargement du logo");
+        toast.error(t('vendor.logoUploadError'));
     } finally {
         if (!originalLoading) setLoading(false);
     }
@@ -112,10 +114,10 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
             ...prev,
             verification_documents: [...(prev.verification_documents || []), file_url]
         }));
-        toast.success("Document téléchargé avec succès");
+        toast.success(t('vendor.imageUploadedSuccess'));
     } catch (error) {
         console.error("Upload failed", error);
-        toast.error("Échec du téléchargement du document");
+        toast.error(t('vendor.uploadFailed'));
     } finally {
         if (!originalLoading) setLoading(false);
     }
@@ -137,7 +139,7 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
     };
     return (
         <Badge className={styles[status] || styles.unverified}>
-            {status?.toUpperCase() || "NON VÉRIFIÉ"}
+            {status?.toUpperCase() || t('vendor.unverified')}
         </Badge>
     );
   };
@@ -146,7 +148,6 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
     e.preventDefault();
     setLoading(true);
     try {
-      // Determine verification status logic
       let newStatus = profile.verification_status || 'unverified';
       if (profile.verification_documents?.length > 0 && (newStatus === 'unverified' || newStatus === 'rejected')) {
           newStatus = 'pending';
@@ -177,11 +178,11 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
             account_balance: 0
         });
       }
-      toast.success("Profil mis à jour avec succès");
+      toast.success(t('vendor.serviceUpdated'));
       if (onSave) onSave();
     } catch (error) {
       console.error(error);
-      toast.error("Échec de la mise à jour du profil");
+      toast.error(t('vendor.saveErrorDesc'));
     } finally {
       setLoading(false);
     }
@@ -206,8 +207,8 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
                     </label>
                 </div>
                 <div>
-                    <CardTitle>Profil Professionnel</CardTitle>
-                    <CardDescription>Gérez votre identité commerciale et vérification.</CardDescription>
+                    <CardTitle>{t('vendor.professionalProfile')}</CardTitle>
+                    <CardDescription>{t('vendor.professionalProfileDesc')}</CardDescription>
                 </div>
             </div>
             {initialProfile && (
@@ -217,22 +218,21 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
                 profile.verification_status === 'rejected' ? 'bg-red-100 text-red-800' :
                 'bg-gray-100 text-gray-800'
               }>
-                {profile.verification_status === 'verified' ? 'VÉRIFIÉ' :
-                 profile.verification_status === 'pending' ? 'EN ATTENTE' :
-                 profile.verification_status === 'rejected' ? 'REJETÉ' : 'NON VÉRIFIÉ'}
+                {profile.verification_status === 'verified' ? t('vendor.verified') :
+                 profile.verification_status === 'pending' ? t('vendor.pending') :
+                 profile.verification_status === 'rejected' ? t('vendor.rejected') : t('vendor.unverified')}
               </Badge>
             )}
         </div>
       </CardHeader>
       <CardContent>
-        {/* Balance & Status Summary */}
         <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 bg-stone-50 p-4 rounded-lg border border-stone-100">
             <div className="flex items-center gap-3">
                 <div className="p-2 bg-white rounded-full border border-stone-200">
                     <Wallet className="w-5 h-5 text-stone-500" />
                 </div>
                 <div>
-                    <p className="text-xs text-stone-500 uppercase font-semibold">Solde du Portefeuille</p>
+                    <p className="text-xs text-stone-500 uppercase font-semibold">{t('vendor.walletBalanceLabel')}</p>
                     <p className="text-xl font-bold text-stone-900">
                         {profile.account_balance?.toLocaleString() || 0} FCFA
                     </p>
@@ -243,11 +243,11 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
                     <Shield className="w-5 h-5 text-stone-500" />
                 </div>
                 <div>
-                    <p className="text-xs text-stone-500 uppercase font-semibold">Vérification</p>
+                    <p className="text-xs text-stone-500 uppercase font-semibold">{t('vendor.verificationLabel')}</p>
                     <p className="text-sm font-medium text-stone-900">
-                        {profile.verification_status === 'verified' 
-                            ? 'Entreprise Vérifiée' 
-                            : 'Documents Requis pour le Badge'}
+                        {profile.verification_status === 'verified'
+                            ? t('vendor.businessVerified')
+                            : t('vendor.documentsRequiredForBadge')}
                     </p>
                 </div>
             </div>
@@ -256,36 +256,35 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Nom de l'Entreprise</Label>
-              <Input 
-                value={profile.business_name || ""} 
+              <Label>{t('vendor.businessNameLabel')}</Label>
+              <Input
+                value={profile.business_name || ""}
                 onChange={e => setProfile({...profile, business_name: e.target.value})}
                 placeholder="ex. Elite Events"
               />
             </div>
             <div className="space-y-2">
-              <Label>Numéro de Téléphone</Label>
-              <Input 
-                value={profile.phone || ""} 
-                onChange={e => setProfile({...profile, phone: e.target.value})}
-                placeholder="+237 ..."
+              <Label>{t('vendor.phoneNumberLabel')}</Label>
+              <PhoneInput
+                value={profile.phone || ""}
+                onChange={(val) => setProfile({...profile, phone: val})}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div className="space-y-2">
-              <Label>Ville / Zone d'Activité</Label>
-              <Input 
-                value={profile.city || ""} 
+              <Label>{t('vendor.cityZoneLabel')}</Label>
+              <Input
+                value={profile.city || ""}
                 onChange={e => setProfile({...profile, city: e.target.value})}
                 placeholder="ex. Douala"
               />
             </div>
             <div className="space-y-2">
-              <Label>Site Web (Optionnel)</Label>
-              <Input 
-                value={profile.website || ""} 
+              <Label>{t('vendor.websiteLabel')}</Label>
+              <Input
+                value={profile.website || ""}
                 onChange={e => setProfile({...profile, website: e.target.value})}
                 placeholder="https://..."
               />
@@ -293,33 +292,32 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
           </div>
 
           <div className="space-y-2">
-            <Label>À Propos de l'Entreprise</Label>
-            <Textarea 
-              value={profile.description || ""} 
+            <Label>{t('vendor.aboutBusinessLabel')}</Label>
+            <Textarea
+              value={profile.description || ""}
               onChange={e => setProfile({...profile, description: e.target.value})}
-              placeholder="Parlez de votre expérience et de vos services aux clients..."
+              placeholder={t('vendor.presentServicePlaceholder')}
               className="h-32"
             />
           </div>
 
-          {/* Verification Documents */}
           <div className="border-t border-stone-100 pt-4">
             <h3 className="text-sm font-semibold mb-4 text-stone-900 flex items-center gap-2">
-                <Shield className="w-4 h-4" /> Documents de Vérification
+                <Shield className="w-4 h-4" /> {t('vendor.verificationDocs')}
             </h3>
             <div className="bg-stone-50 p-4 rounded-lg border border-stone-200 mb-6">
                 <p className="text-sm text-stone-500 mb-4">
-                    Téléchargez l'enregistrement commercial, pièce d'identité ou portfolio (PDF, Word, Audio, Vidéo acceptés).
+                    {t('vendor.verificationDocsDesc')}
                 </p>
-                
+
                 <div className="flex items-center gap-4 mb-4">
                     <Button type="button" variant="outline" onClick={() => document.getElementById('vendor-doc-upload').click()} disabled={loading}>
-                        <Upload className="w-4 h-4 mr-2" /> Télécharger un Document
+                        <Upload className="w-4 h-4 mr-2" /> {t('vendor.uploadDocument')}
                     </Button>
-                    <input 
-                        id="vendor-doc-upload" 
-                        type="file" 
-                        className="hidden" 
+                    <input
+                        id="vendor-doc-upload"
+                        type="file"
+                        className="hidden"
                         accept=".pdf,.doc,.docx,audio/*,video/*,image/*"
                         onChange={handleFileUpload}
                     />
@@ -332,7 +330,7 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
                                 <div className="flex items-center gap-2 overflow-hidden">
                                     <FileText className="w-4 h-4 text-rose-500 flex-shrink-0" />
                                     <a href={doc} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline truncate max-w-[200px]">
-                                        Document {index + 1}
+                                        {t('vendor.document')} {index + 1}
                                     </a>
                                 </div>
                                 <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-stone-400 hover:text-red-500" onClick={() => removeDocument(index)}>
@@ -345,16 +343,15 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
             </div>
           </div>
 
-          {/* Location Map */}
           <div className="border-t border-stone-100 pt-4">
             <h3 className="text-sm font-semibold mb-4 text-stone-900 flex items-center gap-2">
-                <MapPin className="w-4 h-4" /> Détails de Localisation
+                <MapPin className="w-4 h-4" /> {t('vendor.locationDetails')}
             </h3>
-            
+
             <div className="mb-4 h-[300px] w-full rounded-lg overflow-hidden border border-stone-200 z-0 relative">
-                <MapContainer 
-                    center={[profile.gps_latitude || 4.0511, profile.gps_longitude || 9.7679]} 
-                    zoom={13} 
+                <MapContainer
+                    center={[profile.gps_latitude || 4.0511, profile.gps_longitude || 9.7679]}
+                    zoom={13}
                     scrollWheelZoom={false}
                     style={{ height: '100%', width: '100%' }}
                 >
@@ -362,34 +359,34 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <LocationMarker 
-                        position={profile.gps_latitude && profile.gps_longitude ? [profile.gps_latitude, profile.gps_longitude] : null} 
-                        setPosition={handleLocationSelect} 
+                    <LocationMarker
+                        position={profile.gps_latitude && profile.gps_longitude ? [profile.gps_latitude, profile.gps_longitude] : null}
+                        setPosition={handleLocationSelect}
                     />
                 </MapContainer>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
                 <div className="space-y-2">
-                    <Label>Code de Quartier</Label>
-                    <Input 
-                        placeholder="ex. AKWA-001" 
-                        value={profile.neighborhood_code || ""} 
+                    <Label>{t('vendor.neighborhoodCodeLabel')}</Label>
+                    <Input
+                        placeholder="ex. AKWA-001"
+                        value={profile.neighborhood_code || ""}
                         onChange={e => setProfile({...profile, neighborhood_code: e.target.value})}
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label>Latitude</Label>
-                    <Input 
-                        value={profile.gps_latitude || ""} 
+                    <Label>{t('vendor.latitudeLabel')}</Label>
+                    <Input
+                        value={profile.gps_latitude || ""}
                         readOnly
                         className="bg-stone-50"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label>Longitude</Label>
-                    <Input 
-                        value={profile.gps_longitude || ""} 
+                    <Label>{t('vendor.longitudeLabel')}</Label>
+                    <Input
+                        value={profile.gps_longitude || ""}
                         readOnly
                         className="bg-stone-50"
                     />
@@ -399,7 +396,7 @@ export default function VendorProfileForm({ user, initialProfile, onSave }) {
 
           <Button type="submit" className="bg-rose-600 hover:bg-rose-700 w-full md:w-auto" disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-            Enregistrer le Profil Professionnel
+            {t('vendor.saveProfileButton')}
           </Button>
         </form>
       </CardContent>
