@@ -897,6 +897,19 @@ export const translations = {
       noNeighborhoodLoaded: "No neighborhood loaded",
       addCity: "Add a City",
       addNeighborhood: "Add a Neighborhood"
+    },
+    inspiration: {
+      badge: "Cameroonian Culture",
+      heroTitle: "Celebrate Tradition",
+      heroSubtitle: "Discover the beauty, meaning, and vibrant customs of Cameroonian weddings. From the Ndop fabric of the Grassfields to the Kabba of the Coast.",
+      categoryAll: "All",
+      categoryTradition: "Tradition",
+      categoryAttire: "Attire",
+      categoryCeremony: "Ceremony",
+      categoryFood: "Food",
+      categoryDecor: "Decor",
+      clickToLearnMore: "Click to learn more",
+      readMore: "Read more"
     }
   },
   fr: {
@@ -1813,6 +1826,19 @@ export const translations = {
       noNeighborhoodLoaded: "Aucun quartier charge",
       addCity: "Ajouter une Ville",
       addNeighborhood: "Ajouter un Quartier"
+    },
+    inspiration: {
+      badge: "Culture Camerounaise",
+      heroTitle: "Celebrer la Tradition",
+      heroSubtitle: "Decouvrez la beaute, la signification et les coutumes vibrantes des mariages camerounais. Du pagne Ndop des Grassfields au Kabba de la Cote.",
+      categoryAll: "Tout",
+      categoryTradition: "Tradition",
+      categoryAttire: "Tenues",
+      categoryCeremony: "Ceremonie",
+      categoryFood: "Gastronomie",
+      categoryDecor: "Decoration",
+      clickToLearnMore: "Cliquez pour en savoir plus",
+      readMore: "Lire la suite"
     }
   },
   pcm: {
