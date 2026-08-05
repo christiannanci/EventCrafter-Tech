@@ -7,8 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Star, MessageSquare, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function PlatformRatingDialog({ open, onOpenChange, user }) {
+  const { t } = useLanguage();
   const [rating, setRating] = useState(0);
   const [npsScore, setNpsScore] = useState(null);
   const [feedbackType, setFeedbackType] = useState('satisfaction');
@@ -16,25 +18,28 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const ratingLabels = [
+    t('rating.poor'), t('rating.weak'), t('rating.acceptable'), t('rating.good'), t('rating.excellent')
+  ];
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!rating || npsScore === null || !comment.trim()) {
       toast({
-        title: "Formulaire incomplet",
-        description: "Veuillez noter la plateforme et laisser un commentaire",
+        title: t('rating.incompleteFormTitle'),
+        description: t('rating.incompleteFormDesc'),
         variant: "destructive"
       });
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
-      // Determine user role
       const vendorProfile = await base44.entities.VendorProfile.filter({ user_id: user.id }).then(p => p[0]);
       const clientProfile = await base44.entities.ClientProfile.filter({ user_id: user.id }).then(p => p[0]);
-      
+
       const userRole = vendorProfile ? 'provider' : clientProfile ? 'client' : 'admin';
 
       await base44.entities.PlatformFeedback.create({
@@ -52,11 +57,10 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
       });
 
       toast({
-        title: "Merci !",
-        description: "Votre avis nous aide a ameliorer la plateforme",
+        title: t('rating.thanksTitle'),
+        description: t('rating.thanksDesc'),
       });
 
-      // Reset form
       setRating(0);
       setNpsScore(null);
       setFeedbackType('satisfaction');
@@ -66,8 +70,8 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
     } catch (error) {
       console.error('Feedback submission error:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'envoyer votre avis",
+        title: t('vendor.genericError'),
+        description: t('rating.submitError'),
         variant: "destructive"
       });
     } finally {
@@ -81,17 +85,17 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Star className="w-5 h-5 text-yellow-500" />
-            Notez EventCrafter
+            {t('rating.dialogTitle')}
           </DialogTitle>
           <DialogDescription>
-            Votre avis nous aide a ameliorer la plateforme
+            {t('rating.dialogSubtitle')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Rating */}
           <div className="space-y-3">
-            <Label className="text-sm font-semibold">Votre satisfaction globale</Label>
+            <Label className="text-sm font-semibold">{t('rating.overallSatisfaction')}</Label>
             <div className="flex gap-3 justify-center">
               {[1, 2, 3, 4, 5].map((value) => (
                 <button
@@ -111,13 +115,13 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
               ))}
             </div>
             <div className="text-xs text-stone-500 text-center">
-              {rating > 0 && ['Mauvais', 'Pauvre', 'Acceptable', 'Bon', 'Excellent'][rating - 1]}
+              {rating > 0 && ratingLabels[rating - 1]}
             </div>
           </div>
 
           {/* NPS */}
           <div className="space-y-3">
-            <Label className="text-sm font-semibold">Recommanderiez-vous EventCrafter ? (0-10)</Label>
+            <Label className="text-sm font-semibold">{t('rating.wouldRecommend')}</Label>
             <div className="grid grid-cols-6 gap-1">
               {Array.from({ length: 11 }, (_, i) => i).map((value) => (
                 <button
@@ -138,29 +142,29 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
 
           {/* Feedback Type */}
           <div className="space-y-3">
-            <Label className="text-sm font-semibold">Type de feedback</Label>
+            <Label className="text-sm font-semibold">{t('rating.feedbackTypeLabel')}</Label>
             <RadioGroup value={feedbackType} onValueChange={setFeedbackType}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="satisfaction" id="satisfaction" />
-                <Label htmlFor="satisfaction" className="text-sm font-normal cursor-pointer">Satisfaction globale</Label>
+                <Label htmlFor="satisfaction" className="text-sm font-normal cursor-pointer">{t('rating.satisfactionOption')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="feature_request" id="feature_request" />
-                <Label htmlFor="feature_request" className="text-sm font-normal cursor-pointer">Suggestion de fonctionnalite</Label>
+                <Label htmlFor="feature_request" className="text-sm font-normal cursor-pointer">{t('rating.featureRequestOption')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="bug_report" id="bug_report" />
-                <Label htmlFor="bug_report" className="text-sm font-normal cursor-pointer">Signaler un bug</Label>
+                <Label htmlFor="bug_report" className="text-sm font-normal cursor-pointer">{t('rating.bugReportOption')}</Label>
               </div>
             </RadioGroup>
           </div>
 
           {/* Comment */}
           <div className="space-y-3">
-            <Label htmlFor="comment" className="text-sm font-semibold">Votre commentaire</Label>
+            <Label htmlFor="comment" className="text-sm font-semibold">{t('rating.yourComment')}</Label>
             <Textarea
               id="comment"
-              placeholder="Dites-nous ce que vous en pensez..."
+              placeholder={t('rating.commentPlaceholder')}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               className="resize-none bg-stone-50 border-stone-200"
@@ -177,12 +181,12 @@ export default function PlatformRatingDialog({ open, onOpenChange, user }) {
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Envoi en cours...
+                {t('rating.sendingInProgress')}
               </>
             ) : (
               <>
                 <Send className="w-4 h-4 mr-2" />
-                Envoyer l'avis
+                {t('rating.sendReviewButton')}
               </>
             )}
           </Button>

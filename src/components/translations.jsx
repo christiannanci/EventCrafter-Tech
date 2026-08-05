@@ -795,6 +795,30 @@ export const translations = {
       createEventButton: "Create Event",
       selectionsSaved: "Your selections will be saved after login",
       emptyCart: "Your cart is empty"
+    },
+    rating: {
+      poor: "Poor",
+      weak: "Weak",
+      acceptable: "Acceptable",
+      good: "Good",
+      excellent: "Excellent",
+      incompleteFormTitle: "Incomplete Form",
+      incompleteFormDesc: "Please rate the platform and leave a comment",
+      thanksTitle: "Thank you!",
+      thanksDesc: "Your feedback helps us improve the platform",
+      submitError: "Unable to send your feedback",
+      dialogTitle: "Rate EventCrafter",
+      dialogSubtitle: "Your feedback helps us improve the platform",
+      overallSatisfaction: "Your overall satisfaction",
+      wouldRecommend: "Would you recommend EventCrafter? (0-10)",
+      feedbackTypeLabel: "Feedback type",
+      satisfactionOption: "Overall satisfaction",
+      featureRequestOption: "Feature suggestion",
+      bugReportOption: "Report a bug",
+      yourComment: "Your comment",
+      commentPlaceholder: "Tell us what you think...",
+      sendingInProgress: "Sending...",
+      sendReviewButton: "Send review"
     }
   },
   fr: {
@@ -1607,6 +1631,30 @@ export const translations = {
       createEventButton: "Creer Evenement",
       selectionsSaved: "Vos selections seront conservees apres connexion",
       emptyCart: "Votre panier est vide"
+    },
+    rating: {
+      poor: "Mauvais",
+      weak: "Pauvre",
+      acceptable: "Acceptable",
+      good: "Bon",
+      excellent: "Excellent",
+      incompleteFormTitle: "Formulaire incomplet",
+      incompleteFormDesc: "Veuillez noter la plateforme et laisser un commentaire",
+      thanksTitle: "Merci !",
+      thanksDesc: "Votre avis nous aide a ameliorer la plateforme",
+      submitError: "Impossible d'envoyer votre avis",
+      dialogTitle: "Notez EventCrafter",
+      dialogSubtitle: "Votre avis nous aide a ameliorer la plateforme",
+      overallSatisfaction: "Votre satisfaction globale",
+      wouldRecommend: "Recommanderiez-vous EventCrafter ? (0-10)",
+      feedbackTypeLabel: "Type de feedback",
+      satisfactionOption: "Satisfaction globale",
+      featureRequestOption: "Suggestion de fonctionnalite",
+      bugReportOption: "Signaler un bug",
+      yourComment: "Votre commentaire",
+      commentPlaceholder: "Dites-nous ce que vous en pensez...",
+      sendingInProgress: "Envoi en cours...",
+      sendReviewButton: "Envoyer l'avis"
     }
   },
   pcm: {
