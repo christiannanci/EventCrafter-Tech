@@ -123,7 +123,8 @@ export const translations = {
       messageVendor: "Message Vendor",
       whatsappChat: "WhatsApp Chat",
       share: "Share",
-      save: "Save"
+      save: "Save",
+      viewDetails: "View Details"
     },
     categories: {
       All: "All Services",
@@ -1753,7 +1754,8 @@ export const translations = {
       messageVendor: "Message Vendor",
       whatsappChat: "WhatsApp Chat",
       share: "Share",
-      save: "Save"
+      save: "Save",
+      viewDetails: "View Details"
     },
     categories: {
       All: "All Services",
