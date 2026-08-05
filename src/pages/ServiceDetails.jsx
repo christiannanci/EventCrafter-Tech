@@ -10,12 +10,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { 
-  MapPin, 
-  Star, 
-  User, 
-  Check, 
-  Calendar as CalendarIcon, 
+import {
+  MapPin,
+  Star,
+  User,
+  Check,
+  Calendar as CalendarIcon,
   CreditCard,
   ShieldCheck,
   MessageSquare,
@@ -36,14 +36,13 @@ export default function ServiceDetails() {
   const [service, setService] = useState(null);
   const { t } = useLanguage();
   const { formatPrice } = useCurrency();
-  const [planner, setPlanner] = useState(null); // In a real app, fetch user details
+  const [planner, setPlanner] = useState(null);
   const [bookingDate, setBookingDate] = useState(null);
   const [bookingNotes, setBookingNotes] = useState("");
   const [isBooking, setIsBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  
-  // Availability
+
   const [availableSlots, setAvailableSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isInCart, setIsInCart] = useState(false);
@@ -55,31 +54,27 @@ export default function ServiceDetails() {
   useEffect(() => {
     const fetchDetails = async () => {
       if (!serviceId) return;
-      
-      const data = await base44.entities.Service.list(); // Ideally .get(id)
+
+      const data = await base44.entities.Service.list();
       const found = data.find(s => s.id === serviceId);
       setService(found);
-      
+
       if (found) {
-          // Fetch planner profile for WhatsApp
           const profiles = await base44.entities.VendorProfile.list();
           const profile = profiles.find(p => p.user_id === (found.planner_id || found.created_by));
           setPlanner(profile);
 
-          // Fetch Availability Slots
           try {
              const plannerId = found.planner_id || found.created_by;
              const slots = await base44.entities.AvailabilitySlot.filter({ planner_id: plannerId });
              setAvailableSlots(slots);
           } catch(e) { console.error("Error fetching slots", e); }
 
-          // Increment Views (Analytics)
-          await base44.entities.Service.update(found.id, { 
-              views: (found.views || 0) + 1 
+          await base44.entities.Service.update(found.id, {
+              views: (found.views || 0) + 1
           });
       }
 
-      // Fetch current user for booking
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) setCurrentUser(user);
@@ -91,17 +86,15 @@ export default function ServiceDetails() {
   }, [serviceId]);
 
   useEffect(() => {
-    // Check if service is in cart
     const checkCart = () => {
       const cart = JSON.parse(localStorage.getItem('contact_cart') || '[]');
       setIsInCart(cart.some(item => item.id === serviceId));
     };
-    
+
     checkCart();
-    
-    // Listen to storage events
+
     window.addEventListener('storage', checkCart);
-    
+
     return () => {
       window.removeEventListener('storage', checkCart);
     };
@@ -109,20 +102,17 @@ export default function ServiceDetails() {
 
   const toggleCart = () => {
     const cart = JSON.parse(localStorage.getItem('contact_cart') || '[]');
-    
+
     if (isInCart) {
-      // Remove from cart
       const newCart = cart.filter(item => item.id !== serviceId);
       localStorage.setItem('contact_cart', JSON.stringify(newCart));
       setIsInCart(false);
     } else {
-      // Add to cart
       const newCart = [...cart, service];
       localStorage.setItem('contact_cart', JSON.stringify(newCart));
       setIsInCart(true);
     }
-    
-    // Dispatch storage event for cart update
+
     window.dispatchEvent(new Event('storage'));
   };
 
@@ -137,8 +127,7 @@ export default function ServiceDetails() {
     setIsBooking(true);
     try {
       const plannerId = service.planner_id || service.created_by;
-      
-      // If a slot was selected, append time info to notes or adjust date
+
       let finalDate = bookingDate;
       if (selectedSlot) {
           finalDate = parseISO(selectedSlot.start_time);
@@ -150,22 +139,20 @@ export default function ServiceDetails() {
         client_name: session.user.email,
         event_date: finalDate.toISOString(),
         status: "pending",
-        notes: selectedSlot 
-            ? `Créneau : ${format(finalDate, 'HH:mm')} - ${format(parseISO(selectedSlot.end_time), 'HH:mm')}\n\n${bookingNotes}`
+        notes: selectedSlot
+            ? `${t('serviceDetails.slotLabel')} : ${format(finalDate, 'HH:mm')} - ${format(parseISO(selectedSlot.end_time), 'HH:mm')}\n\n${bookingNotes}`
             : bookingNotes
       });
-      
-      // Create notification for planner
+
       await base44.entities.Notification.create({
           user_id: plannerId,
-          title: "Nouvelle demande de réservation",
-          message: `Vous avez une nouvelle demande de réservation pour ${service.title} le ${format(bookingDate, 'PPP')}.`,
+          title: t('serviceDetails.newBookingReqTitle'),
+          message: `${t('serviceDetails.newBookingReqMessagePrefix')} ${service.title} ${t('serviceDetails.newBookingReqMessageSuffix')} ${format(bookingDate, 'PPP')}.`,
           type: "booking",
           link: "/Dashboard",
           is_read: false
       });
 
-      // Email au vendeur : nouvelle demande de reservation, action requise
       try {
         const allUsersForEmail = await base44.entities.User.list();
         const vendorUserForEmail = allUsersForEmail.find(u => u.id === plannerId);
@@ -188,15 +175,15 @@ export default function ServiceDetails() {
     }
   };
 
-  if (!service) return <div className="p-20 text-center animate-pulse">Chargement des détails...</div>;
+  if (!service) return <div className="p-20 text-center animate-pulse">{t('serviceDetails.loadingDetails')}</div>;
 
   return (
     <div className="bg-white min-h-screen pb-20">
       {/* Hero Header */}
       <div className="relative h-[50vh] min-h-[400px] bg-stone-900">
         {service.image_url && (service.image_url.endsWith('.mp4') || service.image_url.endsWith('.webm') || service.image_url.includes('video')) ? (
-          <video 
-            src={service.image_url} 
+          <video
+            src={service.image_url}
             className="w-full h-full object-cover"
             autoPlay
             muted
@@ -205,12 +192,12 @@ export default function ServiceDetails() {
             controls
           >
             <source src={service.image_url} type="video/mp4" />
-            Votre navigateur ne supporte pas la vidéo.
+            {t('serviceDetails.videoNotSupported')}
           </video>
         ) : (
-          <img 
-            src={service.image_url} 
-            alt={service.title} 
+          <img
+            src={service.image_url}
+            alt={service.title}
             className="w-full h-full object-cover"
           />
         )}
@@ -230,20 +217,20 @@ export default function ServiceDetails() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          
+
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-10">
             {/* Video Presentation */}
             {service.video_url && (
               <section className="bg-stone-900 rounded-2xl overflow-hidden">
-                <video 
-                  src={service.video_url} 
+                <video
+                  src={service.video_url}
                   className="w-full aspect-video"
                   controls
                   playsInline
                 >
                   <source src={service.video_url} type="video/mp4" />
-                  Votre navigateur ne supporte pas la vidéo.
+                  {t('serviceDetails.videoNotSupported')}
                 </video>
               </section>
             )}
@@ -254,16 +241,16 @@ export default function ServiceDetails() {
               <div className="space-y-6">
                   {service.description && (
                     <div>
-                        <h3 className="text-lg font-semibold text-stone-800 mb-2">Aperçu</h3>
+                        <h3 className="text-lg font-semibold text-stone-800 mb-2">{t('serviceDetails.overview')}</h3>
                         <div className="prose prose-stone max-w-none text-stone-600 leading-relaxed whitespace-pre-line">
                             {service.description}
                         </div>
                     </div>
                   )}
-                  
+
                   {service.description_details && (
                     <div>
-                        <h3 className="text-lg font-semibold text-stone-800 mb-2">Détails du Service & Méthodologie</h3>
+                        <h3 className="text-lg font-semibold text-stone-800 mb-2">{t('serviceDetails.methodologyTitle')}</h3>
                         <div className="prose prose-stone max-w-none text-stone-600 leading-relaxed whitespace-pre-line">
                             {service.description_details}
                         </div>
@@ -272,7 +259,7 @@ export default function ServiceDetails() {
 
                   {service.description_terms && (
                     <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
-                        <h3 className="text-lg font-semibold text-amber-900 mb-2">Conditions & Prérequis</h3>
+                        <h3 className="text-lg font-semibold text-amber-900 mb-2">{t('serviceDetails.termsRequirements')}</h3>
                         <div className="prose prose-sm max-w-none text-amber-900/80 leading-relaxed whitespace-pre-line">
                             {service.description_terms}
                         </div>
@@ -282,7 +269,7 @@ export default function ServiceDetails() {
                   {/* Additional Indicators Section */}
                   {(service.cultural_zones?.length > 0 || service.spoken_languages?.length > 0 || service.diaspora_ready) && (
                       <div className="bg-stone-50 p-6 rounded-xl border border-stone-200 space-y-6">
-                          
+
                           {/* Cultural */}
                           {(service.cultural_zones?.length > 0 || service.cultural_compliance_details) && (
                             <div>
@@ -290,7 +277,7 @@ export default function ServiceDetails() {
                                     <div className="p-1.5 bg-amber-100 text-amber-700 rounded-lg">
                                         <ShieldCheck className="w-4 h-4" />
                                     </div>
-                                    <h3 className="font-bold text-stone-900">Culturel & Traditionnel</h3>
+                                    <h3 className="font-bold text-stone-900">{t('serviceDetails.culturalTraditional')}</h3>
                                 </div>
                                 {service.cultural_zones?.length > 0 && (
                                     <div className="flex flex-wrap gap-2 mb-2">
@@ -315,7 +302,7 @@ export default function ServiceDetails() {
                                     <div>
                                         <div className="flex items-center gap-2 mb-2">
                                             <Globe className="w-4 h-4 text-blue-600" />
-                                            <h4 className="font-semibold text-sm text-stone-800">Langues</h4>
+                                            <h4 className="font-semibold text-sm text-stone-800">{t('serviceDetails.languagesLabel')}</h4>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {service.spoken_languages.map((lang, i) => (
@@ -332,7 +319,7 @@ export default function ServiceDetails() {
                                     <div>
                                         <div className="flex items-center gap-2 mb-2">
                                             <BookOpen className="w-4 h-4 text-purple-600" />
-                                            <h4 className="font-semibold text-sm text-stone-800">Compatibilité Religieuse</h4>
+                                            <h4 className="font-semibold text-sm text-stone-800">{t('serviceDetails.religiousCompatibilityLabel')}</h4>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {service.religious_compatibility.map((rel, i) => (
@@ -351,8 +338,8 @@ export default function ServiceDetails() {
                                   <div className="flex items-center gap-3 bg-green-50 p-3 rounded-lg border border-green-100">
                                       <Plane className="w-5 h-5 text-green-600" />
                                       <div>
-                                          <span className="block font-bold text-green-800 text-sm">Adapté à la Diaspora</span>
-                                          <span className="text-xs text-green-700">Disponible pour travailler avec des clients à l'étranger</span>
+                                          <span className="block font-bold text-green-800 text-sm">{t('serviceDetails.diasporaReadyLabel')}</span>
+                                          <span className="text-xs text-green-700">{t('serviceDetails.diasporaReadyLongDesc')}</span>
                                       </div>
                                   </div>
                               </div>
@@ -366,7 +353,13 @@ export default function ServiceDetails() {
             <section className="bg-stone-50 p-6 rounded-2xl border border-stone-100">
               <h3 className="font-semibold text-lg mb-4">{t('serviceDetails.whatsIncluded')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {['Consultation incluse', 'Planification personnalisée', 'Coordination des prestataires', 'Supervision le jour J', 'Gestion du budget'].map((item, i) => (
+                {[
+                  t('serviceDetails.feature1'),
+                  t('serviceDetails.feature2'),
+                  t('serviceDetails.feature3'),
+                  t('serviceDetails.feature4'),
+                  t('serviceDetails.feature5')
+                ].map((item, i) => (
                   <div key={i} className="flex items-center text-stone-600">
                     <Check className="w-4 h-4 text-green-500 mr-2" />
                     {item}
@@ -376,11 +369,10 @@ export default function ServiceDetails() {
             </section>
 
             {/* Reviews Section */}
-            <ReviewsSection 
-              serviceId={service.id} 
-              serviceTitle={service.title} 
+            <ReviewsSection
+              serviceId={service.id}
+              serviceTitle={service.title}
               onReviewAdded={() => {
-                // Refresh service details to get updated rating
                 const fetchUpdated = async () => {
                   const data = await base44.entities.Service.list();
                   const found = data.find(s => s.id === serviceId);
@@ -451,18 +443,18 @@ export default function ServiceDetails() {
                                  const daysSlots = availableSlots
                                     .filter(s => s.type === 'available' && isSameDay(parseISO(s.start_time), bookingDate))
                                     .sort((a,b) => new Date(a.start_time) - new Date(b.start_time));
-                                 
+
                                  if (daysSlots.length > 0) {
                                      return (
                                          <div className="grid grid-cols-2 gap-2 mb-2">
                                              {daysSlots.map(slot => (
-                                                 <div 
+                                                 <div
                                                     key={slot.id}
                                                     onClick={() => setSelectedSlot(selectedSlot?.id === slot.id ? null : slot)}
                                                     className={cn(
                                                         "text-sm border rounded p-2 text-center cursor-pointer transition-colors",
-                                                        selectedSlot?.id === slot.id 
-                                                            ? "bg-rose-600 text-white border-rose-600" 
+                                                        selectedSlot?.id === slot.id
+                                                            ? "bg-rose-600 text-white border-rose-600"
                                                             : "bg-white hover:border-rose-300 text-stone-700"
                                                     )}
                                                  >
@@ -472,16 +464,15 @@ export default function ServiceDetails() {
                                          </div>
                                      );
                                  } else {
-                                     // No explicit slots, standard booking
-                                     return <p className="text-xs text-stone-500 italic mb-2">Disponibilité journée complète (Standard)</p>;
+                                     return <p className="text-xs text-stone-500 italic mb-2">{t('serviceDetails.fullDayAvailability')}</p>;
                                  }
                              })()}
                           </div>
                       )}
 
                       <div className="space-y-2">
-                        <Label>Message au Prestataire</Label>
-                        <Textarea 
+                        <Label>{t('serviceDetails.messageToProviderLabel')}</Label>
+                        <Textarea
                           placeholder={t('serviceDetails.messagePlaceholder')}
                           className="resize-none"
                           value={bookingNotes}
@@ -489,8 +480,8 @@ export default function ServiceDetails() {
                         />
                       </div>
 
-                      <Button 
-                        className="w-full bg-rose-600 hover:bg-rose-700 h-12 text-lg" 
+                      <Button
+                        className="w-full bg-rose-600 hover:bg-rose-700 h-12 text-lg"
                         onClick={handleBooking}
                         disabled={isBooking || !bookingDate}
                       >
@@ -526,8 +517,8 @@ export default function ServiceDetails() {
               </Card>
 
               <div className="mt-4 flex flex-col gap-2">
-                 <Button 
-                   variant="outline" 
+                 <Button
+                   variant="outline"
                    className="w-full border-rose-200 text-rose-600 hover:bg-rose-50"
                    onClick={async () => {
                      const { data: { session } } = await supabase.auth.getSession();
@@ -536,8 +527,8 @@ export default function ServiceDetails() {
                        return;
                      }
                      const allConvs = await base44.entities.Conversation.list();
-                     const existing = allConvs.find(c => 
-                       c.participants.includes(session.user.id) && 
+                     const existing = allConvs.find(c =>
+                       c.participants.includes(session.user.id) &&
                        c.participants.includes(service.planner_id)
                      );
 
@@ -546,7 +537,7 @@ export default function ServiceDetails() {
                      } else {
                        const newConv = await base44.entities.Conversation.create({
                          participants: [String(session.user.id), String(service.planner_id)],
-                         last_message: "A démarré une conversation",
+                         last_message: t('serviceDetails.conversationStarted'),
                          last_message_at: new Date().toISOString()
                        });
                        window.location.href = `/Chat?conversationId=${newConv.id}`;
@@ -556,24 +547,24 @@ export default function ServiceDetails() {
                    <MessageSquare className="w-4 h-4 mr-2" /> {t('serviceDetails.messageVendor')}
                  </Button>
                  {planner?.phone && (
-                   <Button 
-                     variant="outline" 
+                   <Button
+                     variant="outline"
                      className="w-full border-green-500 text-green-600 hover:bg-green-50"
                      onClick={() => window.open(`https://wa.me/${planner.phone.replace(/[^0-9]/g, '')}`, '_blank')}
                    >
                      <MessageSquare className="w-4 h-4 mr-2" /> {t('serviceDetails.whatsappChat')}
                    </Button>
                  )}
-                 <Button 
+                 <Button
                    variant={isInCart ? "default" : "outline"}
-                   className={isInCart 
-                     ? "w-full bg-green-600 hover:bg-green-700 text-white" 
+                   className={isInCart
+                     ? "w-full bg-green-600 hover:bg-green-700 text-white"
                      : "w-full border-rose-200 text-rose-600 hover:bg-rose-50"
                    }
                    onClick={toggleCart}
                  >
                    <ShoppingCart className="w-4 h-4 mr-2" />
-                   {isInCart ? 'Retirer du Panier' : 'Ajouter au Panier'}
+                   {isInCart ? t('serviceDetails.inCart') : t('serviceDetails.addToCart')}
                  </Button>
                  <div className="flex gap-2 justify-center">
                   <Button variant="ghost" size="sm" className="text-stone-500 flex-1">
