@@ -97,7 +97,7 @@ export default function LeadsSection({
       if (useCredit) {
         if ((vendorProfile.reward_credits || 0) < 1) {
           toast({
-            title: `âŒ ${t('vendor.notEnoughCreditsTitle')}`,
+            title: `❌ ${t('vendor.notEnoughCreditsTitle')}`,
             description: t('vendor.notEnoughCreditsDesc'),
             variant: "destructive"
           });
@@ -113,7 +113,7 @@ export default function LeadsSection({
       } else {
         if ((vendorProfile.account_balance || 0) < amountPaid) {
           toast({
-            title: `âŒ ${t('vendor.insufficientBalanceTitle')}`,
+            title: `❌ ${t('vendor.insufficientBalanceTitle')}`,
             description: `${t('vendor.insufficientBalanceDescPrefix')} ${amountPaid.toLocaleString()} FCFA ${t('vendor.insufficientBalanceDescSuffix')}`,
             variant: "destructive"
           });
@@ -144,7 +144,7 @@ export default function LeadsSection({
       setUnlockedLeads(new Set([...unlockedLeads, lead.id]));
 
       toast({
-        title: useCredit ? `âœ… ${t('vendor.leadUnlockedCreditTitle')}` : `âœ… ${t('vendor.leadUnlockedTitle')}`,
+        title: useCredit ? `✅ ${t('vendor.leadUnlockedCreditTitle')}` : `✅ ${t('vendor.leadUnlockedTitle')}`,
         description: useCredit 
           ? `${t('vendor.creditUsed')} ${(vendorProfile.reward_credits || 0) - 1} ${t('vendor.creditsRemaining')}`
           : `${pricing.priceFCFA} ${t('vendor.debitedContactsVisible')}`,
@@ -155,7 +155,7 @@ export default function LeadsSection({
     } catch (error) {
       console.error('Unlock error:', error);
       toast({
-        title: `âŒ ${t('vendor.genericError')}`,
+        title: `❌ ${t('vendor.genericError')}`,
         description: t('vendor.unlockLeadError'),
         variant: "destructive"
       });
@@ -192,8 +192,8 @@ export default function LeadsSection({
   };
 
   const blurContact = (text) => {
-    if (!text) return 'â—â—â—â—â—â—â—â—';
-    return text.substring(0, 2) + 'â—â—â—â—â—â—' + text.substring(text.length - 2);
+    if (!text) return '●●●●●●●●';
+    return text.substring(0, 2) + '●●●●●●' + text.substring(text.length - 2);
   };
 
   const handleRequestRefund = async (lead) => {
@@ -222,7 +222,7 @@ export default function LeadsSection({
       });
 
       toast({
-        title: `âœ… ${t('vendor.refundRequestSentTitle')}`,
+        title: `✅ ${t('vendor.refundRequestSentTitle')}`,
         description: unlock[0].unlock_type === 'reward_credit' 
           ? t('vendor.refundRequestSentCreditDesc')
           : `${t('vendor.refundRequestSentAmountPrefix')} ${(unlock[0].amount_paid || 0).toLocaleString()} FCFA ${t('vendor.refundRequestSentAmountSuffix')}`,
@@ -230,7 +230,7 @@ export default function LeadsSection({
     } catch (error) {
       console.error('Refund request error:', error);
       toast({
-        title: `âŒ ${t('vendor.genericError')}`,
+        title: `❌ ${t('vendor.genericError')}`,
         description: t('vendor.refundRequestError'),
         variant: "destructive"
       });
@@ -248,8 +248,8 @@ export default function LeadsSection({
             </CardTitle>
             <p className="text-sm text-stone-500">
               {membershipStatus === 'premium' || membershipStatus === 'gold' 
-                ? `âœ… ${t('vendor.unlimitedInstantAccess')}` 
-                : `âš ï¸ ${t('vendor.freePlanUsage2LeadsWeek')}`}
+                ? `✅ ${t('vendor.unlimitedInstantAccess')}` 
+                : `⚠️ ${t('vendor.freePlanUsage2LeadsWeek')}`}
             </p>
           </div>
           {vendorProfile && (
@@ -335,7 +335,7 @@ export default function LeadsSection({
                         )}
                         {visibility.realtime && (
                           <Badge className="bg-green-500 text-white">
-                            âš¡ {t('vendor.realtimeBadge')}
+                            ⚡ {t('vendor.realtimeBadge')}
                           </Badge>
                         )}
                       </div>
@@ -366,19 +366,19 @@ export default function LeadsSection({
                         {!isUnlocked ? (
                           <>
                             <div className="flex items-center gap-2 text-stone-400">
-                              ðŸ“ž {t('vendor.phoneLabel')}: {blurContact(lead.client_phone || '237670934378')}
+                              📞 {t('vendor.phoneLabel')}: {blurContact(lead.client_phone || '237670934378')}
                             </div>
                             <div className="flex items-center gap-2 text-stone-400">
-                              ðŸ“§ {t('vendor.emailLabel')}: {blurContact(lead.client_email || 'client@example.com')}
+                              📧 {t('vendor.emailLabel')}: {blurContact(lead.client_email || 'client@example.com')}
                             </div>
                           </>
                         ) : (
                           <>
                             <div className="flex items-center gap-2 text-green-700 font-medium">
-                              ðŸ“ž {t('vendor.phoneLabel')}: {lead.client_phone || '+237 670 93 43 78'}
+                              📞 {t('vendor.phoneLabel')}: {lead.client_phone || '+237 670 93 43 78'}
                             </div>
                             <div className="flex items-center gap-2 text-green-700 font-medium">
-                              ðŸ“§ {t('vendor.emailLabel')}: {lead.client_email || 'client@example.com'}
+                              📧 {t('vendor.emailLabel')}: {lead.client_email || 'client@example.com'}
                             </div>
                           </>
                         )}
@@ -427,7 +427,7 @@ export default function LeadsSection({
                               variant="outline"
                               className="border-amber-500 text-amber-700 hover:bg-amber-50 whitespace-nowrap"
                             >
-                              ðŸŽ {t('vendor.useOneCredit')}
+                              🎁 {t('vendor.useOneCredit')}
                             </Button>
                           )}
                           <Button 

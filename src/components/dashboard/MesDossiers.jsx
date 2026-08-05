@@ -56,11 +56,11 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
     if (!vendorProfile || !vendorId) return;
     
     try {
-      // Charger les bookings pour vÃ©rifier les litiges
+      // Charger les bookings pour vérifier les litiges
       const allBookings = await base44.entities.Booking.list().catch(() => []);
       const myBookings = (allBookings || []).filter(b => b?.planner_id === vendorId);
       
-      // VÃ©rifier les litiges ouverts
+      // Vérifier les litiges ouverts
       const allDisputes = await base44.entities.Dispute.list().catch(() => []);
       const myOpenDisputes = (allDisputes || []).filter(d => {
         if (!d) return false;
@@ -68,7 +68,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
         return booking && !d.is_closed;
       });
 
-      // Si un litige est ouvert, dÃ©sactiver les boosts
+      // Si un litige est ouvert, désactiver les boosts
       if (myOpenDisputes.length > 0 && vendorProfile.smart_match_boost_active) {
         await base44.entities.VendorProfile.update(vendorProfile.id, {
           smart_match_boost_active: false
@@ -89,7 +89,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
     
     setLoading(true);
     try {
-      // 1. Charger les leads dÃ©bloquÃ©s
+      // 1. Charger les leads débloqués
       const unlockedLeads = await base44.entities.LeadUnlock.filter({ vendor_id: vendorId }).catch(() => []);
       const leadIds = (unlockedLeads || []).map(u => u?.lead_id).filter(Boolean);
       const allLeads = await base44.entities.Lead.list().catch(() => []);
@@ -103,10 +103,10 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
       const allBookings = await base44.entities.Booking.list().catch(() => []);
       const myBookings = (allBookings || []).filter(b => b?.planner_id === vendorId);
 
-      // 4. Construire les dossiers unifiÃ©s
+      // 4. Construire les dossiers unifiés
       const dossierMap = new Map();
 
-      // Ajouter les leads dÃ©bloquÃ©s
+      // Ajouter les leads débloqués
       (myLeads || []).forEach(lead => {
         if (!lead?.id) return;
         try {
@@ -131,7 +131,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
         }
       });
 
-      // Enrichir avec conversations (passage Ã  "discussion")
+      // Enrichir avec conversations (passage à "discussion")
       myConversations.forEach(conv => {
         if (!conv?.id) return;
         try {
@@ -147,20 +147,20 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
         }
       });
 
-      // Enrichir avec bookings (passage Ã  "confirme" ou "termine")
+      // Enrichir avec bookings (passage à "confirme" ou "termine")
       const allContracts = await base44.entities.Contract.list().catch(() => []);
       
       myBookings.forEach(booking => {
         if (!booking) return;
         const dossierId = booking.service_id || booking.id;
         
-        // DÃ©terminer le statut
+        // Déterminer le statut
         let status = 'confirme';
         if (booking.status && ['completed', 'cancelled', 'disputed'].includes(booking.status)) {
           status = 'termine';
         }
 
-        // Trouver le contrat associÃ©
+        // Trouver le contrat associé
         const contract = (allContracts || []).find(c => c?.booking_id === booking.id);
 
         try {
@@ -173,7 +173,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
             dossier.contract = contract || null;
             dossier.lastUpdate = booking.updated_date || dossier.lastUpdate;
           } else {
-            // Booking sans lead dÃ©bloquÃ© (client direct)
+            // Booking sans lead débloqué (client direct)
             dossierMap.set(booking.id, {
               id: booking.id,
               type: 'booking',
@@ -221,7 +221,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
       const configs = {
         nouveau: {
           icon: Lightbulb,
-          label: `ðŸ’¡ ${t('vendor.statusNewLead')}`,
+          label: `💡 ${t('vendor.statusNewLead')}`,
           bg: 'bg-yellow-50',
           border: 'border-yellow-200',
           badge: 'bg-yellow-100 text-yellow-800',
@@ -229,7 +229,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
         },
         discussion: {
           icon: MessageCircle,
-          label: `ðŸ’¬ ${t('vendor.statusDiscussion')}`,
+          label: `💬 ${t('vendor.statusDiscussion')}`,
           bg: 'bg-blue-50',
           border: 'border-blue-200',
           badge: 'bg-blue-100 text-blue-800',
@@ -237,14 +237,14 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
         },
         confirme: bookingStatus === 'in_progress' ? {
           icon: MessageSquare,
-          label: `ðŸš€ ${t('vendor.statusInExecution')}`,
+          label: `🚀 ${t('vendor.statusInExecution')}`,
           bg: 'bg-indigo-50',
           border: 'border-indigo-200',
           badge: 'bg-indigo-100 text-indigo-800',
           action: t('vendor.actionWorksiteMode')
         } : {
           icon: CheckCircle2,
-          label: `âœ… ${t('vendor.statusConfirmed')}`,
+          label: `✅ ${t('vendor.statusConfirmed')}`,
           bg: 'bg-green-50',
           border: 'border-green-200',
           badge: 'bg-green-100 text-green-800',
@@ -252,7 +252,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
         },
         termine: {
           icon: Flag,
-          label: `ðŸ ${t('vendor.statusCompleted')}`,
+          label: `🏁 ${t('vendor.statusCompleted')}`,
           bg: 'bg-stone-50',
           border: 'border-stone-200',
           badge: 'bg-stone-100 text-stone-800',
@@ -599,7 +599,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                     <div className="mb-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border-2 border-indigo-200">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs font-medium text-indigo-600 mb-1">ðŸš€ {t('vendor.worksiteModeActive')}</p>
+                          <p className="text-xs font-medium text-indigo-600 mb-1">🚀 {t('vendor.worksiteModeActive')}</p>
                           <p className="text-2xl font-bold text-indigo-900">
                             {daysUntilEvent} {daysUntilEvent > 1 ? t('vendor.daysPlural') : t('vendor.daySingular')}
                           </p>
@@ -614,7 +614,7 @@ export default function MesDossiers({ vendorId, vendorProfile, onUpgradeClick })
                     <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs font-medium text-green-600 mb-1">ðŸŽ‰ {t('vendor.dDayTitle')}</p>
+                          <p className="text-xs font-medium text-green-600 mb-1">🎉 {t('vendor.dDayTitle')}</p>
                           <p className="text-xl font-bold text-green-900">
                             {t('vendor.dDayDesc')}
                           </p>
