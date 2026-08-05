@@ -910,6 +910,27 @@ export const translations = {
       categoryDecor: "Decor",
       clickToLearnMore: "Click to learn more",
       readMore: "Read more"
+    },
+    tools: {
+      pageTitle: "Event Planning Tools",
+      pageSubtitle: "Everything you need to plan your perfect event, in one place.",
+      underConstructionTitle: "Section Under Construction",
+      underConstructionDesc: "Planning tools are currently in development and will be available very soon.",
+      stayTunedDesc: "Stay tuned to discover our budget tools, guest management, and much more!",
+      budgetTitle: "Budget Calculator",
+      budgetDesc: "Track your expenses, manage your payments and stay within budget.",
+      budgetCta: "Manage Budget",
+      guestsTitle: "Guest Manager",
+      guestsDesc: "Organize your guest list, track RSVPs and manage dietary preferences.",
+      guestsCta: "Manage Guests",
+      inspirationTitle: "Cultural Inspiration",
+      inspirationDesc: "Explore Cameroonian traditions, attire ideas and ceremony guides.",
+      inspirationCta: "Get Inspired",
+      comingSoon: "Coming Soon",
+      moreToolsComing: "More tools coming",
+      seatingPlan: "Seating Plan",
+      vendorChecklist: "Vendor Checklist",
+      scheduleCreator: "Schedule Creator"
     }
   },
   fr: {
@@ -1839,6 +1860,27 @@ export const translations = {
       categoryDecor: "Decoration",
       clickToLearnMore: "Cliquez pour en savoir plus",
       readMore: "Lire la suite"
+    },
+    tools: {
+      pageTitle: "Outils de Planification d'Evenements",
+      pageSubtitle: "Tout ce dont vous avez besoin pour planifier votre evenement parfait, au meme endroit.",
+      underConstructionTitle: "Section en Construction",
+      underConstructionDesc: "Les outils de planification sont actuellement en developpement et seront disponibles tres bientot.",
+      stayTunedDesc: "Restez connecte pour decouvrir nos outils de budget, gestion d'invites, et bien plus encore !",
+      budgetTitle: "Calculateur de Budget",
+      budgetDesc: "Suivez vos depenses, gerez vos paiements et restez dans votre budget.",
+      budgetCta: "Gerer le Budget",
+      guestsTitle: "Gestionnaire d'Invites",
+      guestsDesc: "Organisez votre liste d'invites, suivez les RSVP et gerez les preferences alimentaires.",
+      guestsCta: "Gerer les Invites",
+      inspirationTitle: "Inspiration Culturelle",
+      inspirationDesc: "Explorez les traditions camerounaises, idees de tenues et guides ceremoniels.",
+      inspirationCta: "S'inspirer",
+      comingSoon: "Bientot Disponible",
+      moreToolsComing: "Plus d'outils a venir",
+      seatingPlan: "Plan de Table",
+      vendorChecklist: "Checklist Prestataires",
+      scheduleCreator: "Createur de Planning"
     }
   },
   pcm: {
