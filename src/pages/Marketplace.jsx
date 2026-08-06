@@ -203,6 +203,7 @@ export default function Marketplace() {
     }
     
     data = data.filter(s => s && typeof s === 'object' && s.id);
+    data = data.filter(s => !s.is_hidden && !s.is_suspended);
     
     data = data.map(service => {
       try {
