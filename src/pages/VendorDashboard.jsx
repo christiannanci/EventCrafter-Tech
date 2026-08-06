@@ -660,14 +660,14 @@ export default function VendorDashboard() {
             onClick={() => setIsMembershipDialogOpen(true)}
           >
             <Crown className="w-4 h-4 mr-2 text-amber-500" />
-            {membershipStatus === 'premium' ? 'Plan Premium' : membershipStatus === 'gold' ? 'Plan Gold' : 'Ameliorer'}
+            {membershipStatus === 'premium' ? t('vendor.premiumPlan') : membershipStatus === 'gold' ? t('vendor.goldPlan') : t('vendor.upgradeShort')}
           </Button>
           <Dialog open={isNewServiceOpen} onOpenChange={setIsNewServiceOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="bg-rose-600 hover:bg-rose-700">
                 <Plus className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Creer une Offre</span>
-                <span className="sm:hidden">Creer</span>
+                <span className="hidden sm:inline">{t('vendor.listNewService')}</span>
+                <span className="sm:hidden">{t('vendor.createOfferShort')}</span>
               </Button>
             </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh]">
