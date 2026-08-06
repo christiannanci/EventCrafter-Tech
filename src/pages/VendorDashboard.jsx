@@ -883,7 +883,7 @@ export default function VendorDashboard() {
                       <div>
                         <CardTitle className="flex items-center gap-2">
                           <ShieldCheck className="w-5 h-5 text-amber-600" />
-                          Documents de Verification
+                          {t('vendor.verificationDocs')}
                         </CardTitle>
                       </div>
                       <Badge className={`${statusInfo.bg} ${statusInfo.color}`}>
@@ -896,9 +896,9 @@ export default function VendorDashboard() {
                     {canRequest ? (
                       <>
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">Expliquez votre demande</label>
+                          <label className="text-sm font-medium">{t('vendor.explainRequest')}</label>
                           <Textarea
-                            placeholder="Bonjour, je souhaite faire verifier mon entreprise..."
+                            placeholder={t('vendor.explainPlaceholder')}
                             value={verifMessage}
                             onChange={(e) => setVerifMessage(e.target.value)}
                             rows={3}
@@ -935,7 +935,7 @@ export default function VendorDashboard() {
                           onClick={() => document.getElementById('settings-verification-docs').click()}
                         >
                           <FileSignature className="w-4 h-4 mr-2" />
-                          Telecharger Document
+                          {t('vendor.uploadDocument')}
                         </Button>
                         {vendorProfile.verification_docs?.length > 0 && (
                           <div className="space-y-1">
@@ -953,7 +953,7 @@ export default function VendorDashboard() {
                           disabled={sendingVerif}
                           onClick={handleSendVerifRequest}
                         >
-                          {sendingVerif ? "Envoi en cours..." : (<><Send className="w-4 h-4 mr-2" />Envoyer la demande</>)}
+                          {sendingVerif ? t('vendor.sendingRequest') : (<><Send className="w-4 h-4 mr-2" />{t('vendor.sendRequestButton')}</>)}
                         </Button>
                       </>
                     ) : (
