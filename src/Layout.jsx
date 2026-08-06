@@ -112,7 +112,6 @@ function LayoutContent({ children }) {
   const languages = [
     { code: 'en', label: 'English' },
     { code: 'fr', label: 'Francais' },
-    { code: 'pcm', label: 'Pidgin' },
   ];
 
   return (
