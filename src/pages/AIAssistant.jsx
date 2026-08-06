@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Send, Loader2, Star, MapPin, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Sparkles, Send, Loader2, Star, MapPin, CheckCircle2, ArrowRight, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
+import { fuzzySearch } from '@/components/FuzzySearch';
 
 // Options fixes du parcours guidé
 const EVENT_TYPES = [
@@ -106,14 +107,18 @@ export default function AIAssistantPage() {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
 
-  const [step, setStep] = useState('event_type'); // event_type -> category -> city -> budget -> cultural -> results
+  const [step, setStep] = useState('event_type');
   const [answers, setAnswers] = useState({});
-  const [history, setHistory] = useState([]); // { from: 'bot'|'user', node: JSX }
+  const [history, setHistory] = useState([]);
   const [categories, setCategories] = useState([]);
   const [cityInput, setCityInput] = useState('');
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState(null);
   const [noMatch, setNoMatch] = useState(false);
+
+  // Zone de texte libre (en plus du parcours guidé)
+  const [freeQuestion, setFreeQuestion] = useState('');
+  const [freeSearching, setFreeSearching] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -128,14 +133,13 @@ export default function AIAssistantPage() {
   }, []);
 
   useEffect(() => {
-    // Message d'accueil initial
     setHistory([
       {
         from: 'bot',
         node: (
           <div>
             <p className="text-sm mb-1">Bonjour 👋 Je suis l'Assistant EventCrafter.</p>
-            <p className="text-sm">Répondez à quelques questions et je vous proposerai les meilleurs prestataires pour votre événement.</p>
+            <p className="text-sm">Répondez à quelques questions et je vous proposerai les meilleurs prestataires pour votre événement. Vous pouvez aussi taper directement ce que vous cherchez dans la zone de texte en bas.</p>
           </div>
         )
       },
@@ -238,15 +242,14 @@ export default function AIAssistantPage() {
           });
       };
 
-      // Recherche stricte d'abord, puis on assouplit progressivement si rien trouvé
       let matches = scoreAndFilter(false, false, false);
       let relaxed = false;
       if (matches.length === 0) {
-        matches = scoreAndFilter(false, true, true); // garder ville, lâcher budget/culture
+        matches = scoreAndFilter(false, true, true);
         relaxed = matches.length > 0;
       }
       if (matches.length === 0) {
-        matches = scoreAndFilter(true, true, true); // tout lâcher sauf catégorie
+        matches = scoreAndFilter(true, true, true);
         relaxed = matches.length > 0;
       }
 
@@ -266,6 +269,60 @@ export default function AIAssistantPage() {
       console.error('Erreur recherche assistant', e);
       setNoMatch(true);
       setResults([]);
+    }
+  };
+
+  // Recherche libre : declenchee par la zone de texte, independante du parcours guide
+  const handleFreeQuestion = async () => {
+    const question = freeQuestion.trim();
+    if (!question) return;
+
+    pushUser(question);
+    setFreeQuestion('');
+    setFreeSearching(true);
+
+    try {
+      const allServices = await base44.entities.Service.list();
+      const searchResults = fuzzySearch(
+        question,
+        allServices,
+        ['title', 'description', 'city', 'location', 'category'],
+        45
+      );
+
+      if (searchResults && searchResults.length > 0) {
+        const top = searchResults.slice(0, 5);
+        pushBot(
+          <div>
+            <p className="text-sm mb-3">Voici ce que j'ai trouvé pour "{question}" :</p>
+            <div className="space-y-3">
+              {top.map(service => (
+                <ServiceResultCard key={service.id} service={service} navigate={navigate} />
+              ))}
+            </div>
+          </div>
+        );
+      } else {
+        pushBot(
+          <div>
+            <p className="text-sm mb-3">
+              Je n'ai trouvé aucun prestataire correspondant à "{question}". Essayez avec d'autres mots-clés, ou publiez une demande pour que les prestataires vous contactent directement.
+            </p>
+            <Button
+              onClick={() => navigate(createPageUrl('PostRequest'))}
+              size="sm"
+              className="bg-[#FF6B35] hover:bg-[#e05a2b] text-white"
+            >
+              Publier une Demande
+            </Button>
+          </div>
+        );
+      }
+    } catch (e) {
+      console.error('Erreur recherche libre', e);
+      pushBot(<p className="text-sm text-red-500">Une erreur est survenue pendant la recherche. Réessayez.</p>);
+    } finally {
+      setFreeSearching(false);
     }
   };
 
@@ -290,7 +347,7 @@ export default function AIAssistantPage() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-[#2C2C2C] font-['Poppins']">Assistant EventCrafter</h1>
-            <p className="text-xs text-stone-500">Trouvez le bon prestataire en quelques questions</p>
+            <p className="text-xs text-stone-500">Trouvez le bon prestataire en quelques questions, ou posez directement votre question</p>
           </div>
         </div>
       </div>
@@ -302,7 +359,6 @@ export default function AIAssistantPage() {
             h.from === 'bot' ? <BotBubble key={idx}>{h.node}</BotBubble> : <UserBubble key={idx}>{h.node}</UserBubble>
           ))}
 
-          {/* Options selon l'étape en cours */}
           {step === 'event_type' && (
             <BotBubble>
               <OptionButtons options={EVENT_TYPES} onSelect={handleEventType} />
@@ -387,13 +443,43 @@ export default function AIAssistantPage() {
               )}
             </>
           )}
+
+          {freeSearching && (
+            <div className="flex items-center gap-2 text-stone-500 text-sm px-2 py-4">
+              <Loader2 className="w-4 h-4 animate-spin" /> Recherche en cours...
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="border-t border-stone-200 bg-white px-4 py-3 text-center pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-        <p className="text-xs text-stone-400">
-          Les prix affichés sont des prix minimum — un devis précis sera établi après contact avec le prestataire.
-        </p>
+      {/* Zone de texte libre - toujours visible, independante du parcours guide */}
+      <div className="border-t border-stone-200 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center gap-2 mb-2">
+            <MessageCircle className="w-3.5 h-3.5 text-stone-400" />
+            <span className="text-xs text-stone-400">Ou posez directement votre question</span>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={freeQuestion}
+              onChange={(e) => setFreeQuestion(e.target.value)}
+              placeholder="ex. traiteur pas cher a Douala pour mariage..."
+              onKeyDown={(e) => { if (e.key === 'Enter' && !freeSearching) handleFreeQuestion(); }}
+              className="flex-1"
+              disabled={freeSearching}
+            />
+            <Button
+              onClick={handleFreeQuestion}
+              disabled={freeSearching || !freeQuestion.trim()}
+              className="bg-[#FF6B35] hover:bg-[#e05a2b]"
+            >
+              {freeSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </Button>
+          </div>
+          <p className="text-xs text-stone-400 mt-2 text-center">
+            Les prix affichés sont des prix minimum — un devis précis sera établi après contact avec le prestataire.
+          </p>
+        </div>
       </div>
     </div>
   );
