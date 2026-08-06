@@ -64,8 +64,9 @@ export default function Home() {
         setServiceTypes(types.filter(t => !t.status || t.status === 'active'));
         setFunctions(funcs.filter(f => f.status === 'active'));
 
-        if (feedbacks.length > 0) {
-          const publicFeedbacks = feedbacks.slice(0, 3);
+        const approvedFeedbacks = feedbacks.filter(f => f.is_public === true && f.moderation_status === 'approved');
+        if (approvedFeedbacks.length > 0) {
+          const publicFeedbacks = approvedFeedbacks.slice(0, 3);
           const providerIds = publicFeedbacks.filter(f => f.user_role === 'provider').map(f => f.user_id);
           const clientIds = publicFeedbacks.filter(f => f.user_role !== 'provider').map(f => f.user_id);
 

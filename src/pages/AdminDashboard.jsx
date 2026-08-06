@@ -31,6 +31,7 @@ import LeadManagement from "@/components/admin/LeadManagement";
 import ContractMonitoring from "@/components/admin/ContractMonitoring";
 import DisputeManagement from "@/components/admin/DisputeManagement";
 import ServiceModeration from "@/components/admin/ServiceModeration";
+import PlatformReviewModeration from "@/components/admin/PlatformReviewModeration";
 
 export default function AdminDashboard() {
     const [user, setUser] = useState(null);
@@ -265,6 +266,9 @@ export default function AdminDashboard() {
                                 </TabsContent>
                                 <TabsContent value="reviews" className="mt-0">
                                     <ReviewModeration />
+                                </TabsContent>
+                                <TabsContent value="platform_reviews" className="mt-0">
+                                    <PlatformReviewModeration />
                                 </TabsContent>
                                 <TabsContent value="services" className="mt-0">
                                     <ServiceModeration />
