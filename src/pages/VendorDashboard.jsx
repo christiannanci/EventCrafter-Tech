@@ -11,8 +11,10 @@ import {
   AlertCircle,
   Crown,
   Eye,
+  EyeOff,
   TrendingUp,
   ShieldCheck,
+  ShieldAlert,
   Store,
   FileSignature,
   Pencil,
@@ -131,6 +133,7 @@ export default function VendorDashboard() {
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [verifMessage, setVerifMessage] = useState("");
   const [sendingVerif, setSendingVerif] = useState(false);
+  const [togglingVisibility, setTogglingVisibility] = useState(null);
 
   const getVerifStatusInfo = (status) => {
     const info = {
@@ -512,6 +515,27 @@ export default function VendorDashboard() {
           variant: "destructive" 
         });
       }
+    }
+  };
+
+  // Masquer / afficher une offre (controle vendeur, independant de la suspension admin)
+  const toggleServiceVisibility = async (service) => {
+    setTogglingVisibility(service.id);
+    try {
+      const newHiddenState = !service.is_hidden;
+      await base44.entities.Service.update(service.id, { is_hidden: newHiddenState });
+      toast({
+        title: newHiddenState ? "Offre masquée" : "Offre affichée",
+        description: newHiddenState
+          ? "Cette offre n'apparaît plus dans le marché."
+          : "Cette offre est de nouveau visible sur le marché."
+      });
+      refetch();
+    } catch (error) {
+      console.error("Toggle visibility error", error);
+      toast({ title: "Erreur", description: "Impossible de modifier la visibilité.", variant: "destructive" });
+    } finally {
+      setTogglingVisibility(null);
     }
   };
 
@@ -1058,7 +1082,7 @@ export default function VendorDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {myServices.length > 0 ? myServices.map(service => (
-              <Card key={service.id} className="group relative">
+              <Card key={service.id} className={`group relative ${service.is_suspended ? 'border-2 border-amber-400' : ''} ${service.is_hidden ? 'opacity-60' : ''}`}>
                 <div className="aspect-video bg-stone-100 relative overflow-hidden rounded-t-lg">
                   {service.image_url && (service.image_url.endsWith('.mp4') || service.image_url.endsWith('.webm') || service.image_url.includes('video')) ? (
                     <video src={service.image_url} className="object-cover w-full h-full opacity-90 group-hover:opacity-100 transition-opacity" muted loop playsInline />
@@ -1082,17 +1106,42 @@ export default function VendorDashboard() {
                   <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs text-white flex items-center gap-1">
                     <Eye className="w-3 h-3" /> {service.views || 0}
                   </div>
+                  {service.is_hidden && (
+                    <div className="absolute top-2 left-2 bg-stone-800/90 backdrop-blur px-2 py-1 rounded text-xs text-white flex items-center gap-1">
+                      <EyeOff className="w-3 h-3" /> Masquée
+                    </div>
+                  )}
                 </div>
                 <CardHeader>
-                  <CardTitle className="flex justify-between items-start">
+                  <CardTitle className="flex justify-between items-start gap-2">
                     <span className="truncate">{service.title}</span>
+                    {service.is_suspended && (
+                      <Badge className="bg-amber-500 text-white flex-shrink-0 text-[10px]">
+                        <ShieldAlert className="w-3 h-3 mr-1" /> Suspendue
+                      </Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {service.is_suspended && service.suspension_note && (
+                    <div className="mb-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
+                      <strong>Motif de suspension :</strong> {service.suspension_note}
+                    </div>
+                  )}
                   <p className="text-stone-500 text-sm line-clamp-2 mb-4">{service.description}</p>
                   <div className="flex justify-between items-center mt-4">
                     <Badge variant="outline">{service.category}</Badge>
                     <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={service.is_hidden ? "text-stone-400 hover:text-stone-600 hover:bg-stone-100" : "text-stone-500 hover:text-stone-700 hover:bg-stone-100"}
+                        onClick={() => toggleServiceVisibility(service)}
+                        disabled={togglingVisibility === service.id || service.is_suspended}
+                        title={service.is_suspended ? "Suspendue par l'administration" : (service.is_hidden ? "Afficher l'offre" : "Masquer l'offre")}
+                      >
+                        {service.is_hidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
                       <Button variant="ghost" size="icon" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => openEditService(service)}>
                         <Pencil className="w-4 h-4" />
                       </Button>
