@@ -985,13 +985,13 @@ export default function VendorDashboard() {
                    <div className="flex-1">
                      <h3 className="font-semibold text-stone-900 mb-2 flex items-center gap-2">
                        <TrendingUp className="w-4 h-4 text-blue-600" />
-                       Credits Demandes Prospects
+                       {t('vendor.creditsTitle')}
                      </h3>
                      <div className="space-y-2">
                        <div className="flex items-center justify-between text-sm">
-                         <span className="text-stone-600">Ce mois</span>
+                         <span className="text-stone-600">{t('vendor.thisMonth')}</span>
                          <span className={`font-bold ${notificationCount >= 10 ? 'text-red-600' : 'text-stone-900'}`}>
-                           {notificationCount}/10 notifications recues
+                           {notificationCount}/10 {t('vendor.notificationsReceived')}
                          </span>
                        </div>
                        <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
@@ -1006,7 +1006,7 @@ export default function VendorDashboard() {
                        </div>
                        {notificationCount < 10 && (
                          <p className="text-xs text-stone-500">
-                           Encore {10 - notificationCount} demande{10 - notificationCount > 1 ? 's' : ''} disponible{10 - notificationCount > 1 ? 's' : ''} ce mois
+                           {10 - notificationCount} {t('vendor.moreAvailableThisMonth')}
                          </p>
                        )}
                      </div>
@@ -1058,10 +1058,10 @@ export default function VendorDashboard() {
                  <div>
                    <h3 className="text-lg font-bold flex items-center gap-2">
                      <CheckCircle2 className="w-5 h-5" /> 
-                     Plan Free: {notificationCount}/10 notifications utilisées ce mois
+                     {t('vendor.freePlanUsage').replace('{count}', notificationCount)}
                    </h3>
                    <p className="text-blue-100 mt-1">
-                     Passez à Premium ou Gold pour des notifications illimitées et plus d'avantages.
+                     {t('vendor.freePlanCTA')}
                    </p>
                  </div>
                  <Button 
@@ -1076,8 +1076,8 @@ export default function VendorDashboard() {
            )}
 
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <StatCard icon={Eye} label="Vues Totales" value={analytics.views} className="text-rose-400" />
-              <StatCard icon={TrendingUp} label="Prospects Totaux" value={analytics.leads} className="text-green-400" />
+              <StatCard icon={Eye} label={t('vendor.totalViews')} value={analytics.views} className="text-rose-400" />
+              <StatCard icon={TrendingUp} label={t('vendor.totalLeads')} value={analytics.leads} className="text-green-400" />
            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
