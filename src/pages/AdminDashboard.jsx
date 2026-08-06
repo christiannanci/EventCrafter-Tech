@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Shield, Briefcase, Gavel, Wrench, Users, LogOut, DollarSign, Eye, AlertTriangle, Menu, ChevronDown } from "lucide-react";
+import { Shield, Briefcase, Gavel, Wrench, Users, LogOut, DollarSign, Eye, AlertTriangle, Menu, ChevronDown, ShieldOff } from "lucide-react";
 
 import UserManagement from "@/components/admin/UserManagement";
 import LegalDashboard from "@/components/admin/LegalDashboard";
@@ -30,6 +30,7 @@ import RankingDashboard from "@/components/admin/RankingDashboard";
 import LeadManagement from "@/components/admin/LeadManagement";
 import ContractMonitoring from "@/components/admin/ContractMonitoring";
 import DisputeManagement from "@/components/admin/DisputeManagement";
+import ServiceModeration from "@/components/admin/ServiceModeration";
 
 export default function AdminDashboard() {
     const [user, setUser] = useState(null);
@@ -125,6 +126,7 @@ export default function AdminDashboard() {
         { value: "payment_proofs", label: "Preuves Paiement", icon: Shield, show: isSuperAdmin },
         { value: "payouts", label: "Payouts", icon: DollarSign, show: isSuperAdmin },
         { value: "reviews", label: "Modération Avis", icon: Shield, show: isSuperAdmin },
+        { value: "services", label: "Modération Services", icon: ShieldOff, show: isSuperAdmin },
         { value: "ranking", label: "Système Ranking", icon: Shield, show: isSuperAdmin },
         { value: "disputes", label: "Litiges en Cours", icon: AlertTriangle, show: hasAccess('legal') },
         { value: "contracts", label: "Tour de Contrôle", icon: DollarSign, show: isSuperAdmin },
@@ -263,6 +265,9 @@ export default function AdminDashboard() {
                                 </TabsContent>
                                 <TabsContent value="reviews" className="mt-0">
                                     <ReviewModeration />
+                                </TabsContent>
+                                <TabsContent value="services" className="mt-0">
+                                    <ServiceModeration />
                                 </TabsContent>
                                 <TabsContent value="ranking" className="mt-0">
                                     <RankingDashboard />
