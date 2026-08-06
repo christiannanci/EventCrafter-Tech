@@ -1074,6 +1074,29 @@ export const translations = {
       cancel: "Cancel",
       deletingInProgress: "Deleting...",
       deletePermanently: "Delete Permanently"
+    },
+    membership: {
+      chooseYourPlan: "Choose Your Membership Plan",
+      perMonth: "/ monthly",
+      perYear: "/ yearly",
+      processing: "Processing...",
+      selectPlan: "Select Plan",
+      createError: "Unable to create the subscription"
+    },
+    planFeatures: {
+      "Listing standard sur le marketplace": "Standard marketplace listing",
+      "2 leads/semaine (contacts floutÃ©s)": "2 leads/week (blurred contacts)",
+      "RÃ©ception des demandes de rÃ©servation": "Receive booking requests",
+      "Profil basique": "Basic profile",
+      "AccÃ¨s illimitÃ© et instantanÃ© aux leads (pas de dÃ©lai ni floutage)": "Unlimited and instant access to leads (no delay or blurring)",
+      "Badge Premium visible sur le profil et les services": "Premium badge visible on profile and services",
+      "Boost de visibilitÃ© dans le classement de recherche": "Visibility boost in search ranking",
+      "Photos illimitÃ©es sur vos services": "Unlimited photos on your services",
+      "PrioritÃ© modÃ©rÃ©e dans les rÃ©sultats": "Moderate priority in results",
+      "Leads illimitÃ©s + accÃ¨s prioritaire aux demandes Ã  haute valeur": "Unlimited leads + priority access to high-value requests",
+      "Badge Gold + prioritÃ© maximale dans le classement": "Gold badge + maximum priority in ranking",
+      "Top des rÃ©sultats de recherche": "Top of search results",
+      "Garantie d'IntÃ©gritÃ© Spirituelle (audit de crÃ©dibilitÃ© par l'admin)": "Spiritual Integrity Guarantee (credibility audit by admin)"
     }
   },
   fr: {
@@ -2167,6 +2190,29 @@ export const translations = {
       cancel: "Annuler",
       deletingInProgress: "Suppression...",
       deletePermanently: "Supprimer definitivement"
+    },
+    membership: {
+      chooseYourPlan: "Choisissez Votre Plan d'Abonnement",
+      perMonth: "/ mensuel",
+      perYear: "/ annuel",
+      processing: "Traitement...",
+      selectPlan: "Choisir ce Plan",
+      createError: "Impossible de creer l'abonnement"
+    },
+    planFeatures: {
+      "Listing standard sur le marketplace": "Listing standard sur le marketplace",
+      "2 leads/semaine (contacts floutÃ©s)": "2 leads/semaine (contacts floutes)",
+      "RÃ©ception des demandes de rÃ©servation": "Reception des demandes de reservation",
+      "Profil basique": "Profil basique",
+      "AccÃ¨s illimitÃ© et instantanÃ© aux leads (pas de dÃ©lai ni floutage)": "Acces illimite et instantane aux leads (pas de delai ni floutage)",
+      "Badge Premium visible sur le profil et les services": "Badge Premium visible sur le profil et les services",
+      "Boost de visibilitÃ© dans le classement de recherche": "Boost de visibilite dans le classement de recherche",
+      "Photos illimitÃ©es sur vos services": "Photos illimitees sur vos services",
+      "PrioritÃ© modÃ©rÃ©e dans les rÃ©sultats": "Priorite moderee dans les resultats",
+      "Leads illimitÃ©s + accÃ¨s prioritaire aux demandes Ã  haute valeur": "Leads illimites + acces prioritaire aux demandes a haute valeur",
+      "Badge Gold + prioritÃ© maximale dans le classement": "Badge Gold + priorite maximale dans le classement",
+      "Top des rÃ©sultats de recherche": "Top des resultats de recherche",
+      "Garantie d'IntÃ©gritÃ© Spirituelle (audit de crÃ©dibilitÃ© par l'admin)": "Garantie d'Integrite Spirituelle (audit de credibilite par l'admin)"
     }
   },
   pcm: {

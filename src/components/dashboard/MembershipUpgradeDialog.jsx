@@ -9,9 +9,11 @@ import { createPageUrl } from '@/utils';
 import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/apiClient";
 import { Crown, Check } from "lucide-react";
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function MembershipUpgradeDialog({ open, onOpenChange, currentUser, onSuccess }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -118,12 +120,23 @@ export default function MembershipUpgradeDialog({ open, onOpenChange, currentUse
       
     } catch (error) {
       console.error('❌ Erreur création abonnement:', error);
-      toast({ title: "Erreur", description: error.message || "Impossible de créer l'abonnement", variant: "destructive" });
+      toast({ title: t('vendor.genericError'), description: error.message || t('membership.createError'), variant: "destructive" });
       setLoading(false);
     }
   };
 
+  // Traduit un texte de fonctionnalité de plan connu (contenu curé, pas du texte utilisateur)
+  const trFeature = (feature) => {
+    if (!feature) return feature;
+    const translated = t(`planFeatures.${feature}`);
+    return translated === `planFeatures.${feature}` ? feature : translated;
+  };
 
+  const billingCycleLabel = (cycle) => {
+    if (cycle === 'monthly') return t('membership.perMonth');
+    if (cycle === 'yearly') return t('membership.perYear');
+    return `/ ${cycle}`;
+  };
 
   const planColors = {
     free: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', badge: 'bg-green-600' },
@@ -137,7 +150,7 @@ export default function MembershipUpgradeDialog({ open, onOpenChange, currentUse
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Crown className="w-5 h-5 text-amber-500" />
-            Choose Your Membership Plan
+            {t('membership.chooseYourPlan')}
           </DialogTitle>
         </DialogHeader>
 
@@ -155,7 +168,7 @@ export default function MembershipUpgradeDialog({ open, onOpenChange, currentUse
                   </Badge>
                   <div className="mt-4">
                     <div className="text-3xl font-bold">{plan.price?.toLocaleString()} {plan.currency}</div>
-                    <div className="text-sm text-stone-500">/ {plan.billing_cycle}</div>
+                    <div className="text-sm text-stone-500">{billingCycleLabel(plan.billing_cycle)}</div>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-6">
@@ -163,7 +176,7 @@ export default function MembershipUpgradeDialog({ open, onOpenChange, currentUse
                     {(plan.features || []).map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
+                        <span className="text-sm">{trFeature(feature)}</span>
                       </li>
                     ))}
                   </ul>
@@ -172,7 +185,7 @@ export default function MembershipUpgradeDialog({ open, onOpenChange, currentUse
                     className={`w-full mt-6 ${colors.badge} hover:opacity-90`}
                     disabled={loading}
                   >
-                    {loading ? 'Processing...' : 'Select Plan'}
+                    {loading ? t('membership.processing') : t('membership.selectPlan')}
                   </Button>
                 </CardContent>
               </Card>
