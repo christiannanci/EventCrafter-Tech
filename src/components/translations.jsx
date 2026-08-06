@@ -1053,6 +1053,12 @@ export const translations = {
       bookingLabel: "Booking",
       statusLabel: "Status",
       noSlotsOrBookings: "No slot or booking for this day"
+    },
+    vendorBankAccount: {
+      title: "Professional Payment Accounts",
+      subtitle: "Manage your professional bank accounts and mobile money wallets for payments.",
+      accountLabelPlaceholder: "ex. Professional Savings",
+      noAccountsYet: "No professional payment method added yet."
     }
   },
   fr: {
@@ -2125,6 +2131,12 @@ export const translations = {
       bookingLabel: "Reservation",
       statusLabel: "Statut",
       noSlotsOrBookings: "Aucun creneau ni reservation pour ce jour"
+    },
+    vendorBankAccount: {
+      title: "Comptes de Paiement Professionnels",
+      subtitle: "Gerez vos comptes bancaires professionnels et portefeuilles mobile money pour les paiements.",
+      accountLabelPlaceholder: "ex. Epargne Professionnelle",
+      noAccountsYet: "Aucun moyen de paiement professionnel ajoute pour le moment."
     }
   },
   pcm: {
