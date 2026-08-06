@@ -8,10 +8,12 @@ import { UploadFile } from "@/api/integrations";
 import { Wallet, Smartphone, CheckCircle2, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { NotificationService } from '@/components/NotificationService';
+import { useLanguage } from '@/components/LanguageContext';
 
 const PRESET_AMOUNTS = [1000, 2000, 5000, 10000];
 
 export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuccess }) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState(2000);
   const [customAmount, setCustomAmount] = useState("");
@@ -30,9 +32,9 @@ export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuc
     try {
       const { file_url } = await UploadFile({ file });
       setProofImage(file_url);
-      toast({ title: "Preuve téléchargée" });
+      toast({ title: t('walletRecharge.proofUploaded') });
     } catch (error) {
-      toast({ title: "Échec du téléchargement", variant: "destructive" });
+      toast({ title: t('walletRecharge.uploadFailed'), variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -40,11 +42,11 @@ export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuc
 
   const handleSubmit = async () => {
     if (!finalAmount || finalAmount < 500) {
-      toast({ title: "Montant invalide", description: "Le montant minimum est de 500 FCFA.", variant: "destructive" });
+      toast({ title: t('walletRecharge.invalidAmountTitle'), description: t('walletRecharge.invalidAmountDesc'), variant: "destructive" });
       return;
     }
     if (!proofImage) {
-      toast({ title: "Preuve requise", description: "Veuillez télécharger une preuve de paiement.", variant: "destructive" });
+      toast({ title: t('walletRecharge.proofRequiredTitle'), description: t('walletRecharge.proofRequiredDesc'), variant: "destructive" });
       return;
     }
 
@@ -63,8 +65,8 @@ export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuc
       });
 
       await NotificationService.sendToAdmins({
-        title: "💰 Recharge portefeuille en attente",
-        message: `${vendorProfile?.business_name || currentUser.email} demande une recharge de ${finalAmount.toLocaleString()} FCFA (${proofCode}).`,
+        title: `💰 ${t('walletRecharge.pendingRechargeNotifTitle')}`,
+        message: `${vendorProfile?.business_name || currentUser.email} ${t('walletRecharge.pendingRechargeNotifMessage')} ${finalAmount.toLocaleString()} FCFA (${proofCode}).`,
         type: "payment",
         link: "/AdminDashboard?tab=payment_proofs"
       });
@@ -79,7 +81,7 @@ export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuc
       }, 2500);
     } catch (error) {
       console.error(error);
-      toast({ title: "Erreur", description: "Impossible d'envoyer la demande de recharge.", variant: "destructive" });
+      toast({ title: t('vendor.genericError'), description: t('walletRecharge.submitError'), variant: "destructive" });
     } finally {
       setSending(false);
     }
@@ -91,17 +93,17 @@ export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuc
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Button onClick={() => setIsOpen(true)} className="bg-green-600 hover:bg-green-700">
         <Wallet className="w-4 h-4 mr-2" />
-        Recharger mon portefeuille
+        {t('walletRecharge.rechargeButton')}
       </Button>
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wallet className="w-5 h-5 text-green-600" />
-            Recharger mon portefeuille
+            {t('walletRecharge.rechargeButton')}
           </DialogTitle>
           <DialogDescription>
-            Rechargez votre solde via Orange Money pour acheter des crédits, boosts ou badges.
+            {t('walletRecharge.dialogSubtitle')}
           </DialogDescription>
         </DialogHeader>
 
@@ -110,15 +112,15 @@ export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuc
             <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-bold text-stone-900">Demande envoyée</h3>
+            <h3 className="text-lg font-bold text-stone-900">{t('walletRecharge.requestSentTitle')}</h3>
             <p className="text-stone-500 mt-2 text-sm">
-              Un administrateur validera votre recharge sous 24h.
+              {t('walletRecharge.requestSentDesc')}
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Montant à recharger (FCFA)</Label>
+              <Label>{t('walletRecharge.amountLabel')}</Label>
               <div className="grid grid-cols-4 gap-2">
                 {PRESET_AMOUNTS.map((amt) => (
                   <Button
@@ -134,7 +136,7 @@ export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuc
               </div>
               <Input
                 type="number"
-                placeholder="Ou montant personnalisé"
+                placeholder={t('walletRecharge.customAmountPlaceholder')}
                 value={customAmount}
                 onChange={(e) => setCustomAmount(e.target.value)}
                 min={500}
@@ -144,7 +146,7 @@ export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuc
             <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-orange-200 rounded-lg p-4 space-y-3">
               <div className="flex items-center gap-2 text-orange-700 font-semibold">
                 <Smartphone className="w-4 h-4" />
-                Code de paiement USSD Orange Money
+                {t('walletRecharge.ussdCodeLabel')}
               </div>
               <div className="bg-white rounded-lg p-3 border-2 border-orange-300">
                 <code className="text-xl font-bold text-orange-600 block select-all">
@@ -152,17 +154,17 @@ export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuc
                 </code>
               </div>
               <p className="text-xs text-stone-600">
-                Composez ce code, confirmez le paiement, puis téléchargez la preuve ci-dessous.
+                {t('walletRecharge.ussdInstructions')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label>Preuve de paiement</Label>
+              <Label>{t('walletRecharge.proofLabel')}</Label>
               {proofImage ? (
                 <div className="text-center space-y-2">
                   <img src={proofImage} alt="Preuve" className="max-h-40 mx-auto rounded-lg border" />
                   <Button type="button" size="sm" variant="outline" onClick={() => setProofImage(null)}>
-                    Changer l'image
+                    {t('walletRecharge.changeImage')}
                   </Button>
                 </div>
               ) : (
@@ -171,7 +173,7 @@ export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuc
                   {uploading ? (
                     <Loader2 className="w-6 h-6 mx-auto animate-spin text-green-500" />
                   ) : (
-                    <span className="text-sm text-stone-500">Cliquez pour télécharger une capture d'écran</span>
+                    <span className="text-sm text-stone-500">{t('walletRecharge.uploadPrompt')}</span>
                   )}
                 </label>
               )}
@@ -182,7 +184,7 @@ export default function WalletRechargeDialog({ vendorProfile, currentUser, onSuc
               disabled={sending}
               onClick={handleSubmit}
             >
-              {sending ? "Envoi en cours..." : `Confirmer la recharge de ${finalAmount.toLocaleString()} FCFA`}
+              {sending ? t('walletRecharge.sendingInProgress') : `${t('walletRecharge.confirmRechargePrefix')} ${finalAmount.toLocaleString()} FCFA`}
             </Button>
           </div>
         )}

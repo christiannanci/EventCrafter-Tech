@@ -1001,6 +1001,30 @@ export const translations = {
       moreAvailable: "more request",
       moreAvailablePlural: "available",
       limitReachedShort: "Limit reached. Upgrade to Premium for unlimited requests."
+    },
+    walletRecharge: {
+      proofUploaded: "Proof uploaded",
+      uploadFailed: "Upload failed",
+      invalidAmountTitle: "Invalid amount",
+      invalidAmountDesc: "The minimum amount is 500 FCFA.",
+      proofRequiredTitle: "Proof required",
+      proofRequiredDesc: "Please upload a proof of payment.",
+      pendingRechargeNotifTitle: "Wallet recharge pending",
+      pendingRechargeNotifMessage: "is requesting a recharge of",
+      submitError: "Unable to send the recharge request.",
+      rechargeButton: "Top Up My Wallet",
+      dialogSubtitle: "Top up your balance via Orange Money to buy credits, boosts or badges.",
+      requestSentTitle: "Request sent",
+      requestSentDesc: "An administrator will validate your recharge within 24h.",
+      amountLabel: "Amount to top up (FCFA)",
+      customAmountPlaceholder: "Or custom amount",
+      ussdCodeLabel: "Orange Money USSD payment code",
+      ussdInstructions: "Dial this code, confirm the payment, then upload the proof below.",
+      proofLabel: "Proof of Payment",
+      changeImage: "Change image",
+      uploadPrompt: "Click to upload a screenshot",
+      sendingInProgress: "Sending...",
+      confirmRechargePrefix: "Confirm recharge of"
     }
   },
   fr: {
@@ -2021,6 +2045,30 @@ export const translations = {
       moreAvailable: "Plus que",
       moreAvailablePlural: "disponible(s)",
       limitReachedShort: "Limite atteinte. Passez a Premium pour des demandes illimitees."
+    },
+    walletRecharge: {
+      proofUploaded: "Preuve telechargee",
+      uploadFailed: "Echec du telechargement",
+      invalidAmountTitle: "Montant invalide",
+      invalidAmountDesc: "Le montant minimum est de 500 FCFA.",
+      proofRequiredTitle: "Preuve requise",
+      proofRequiredDesc: "Veuillez telecharger une preuve de paiement.",
+      pendingRechargeNotifTitle: "Recharge portefeuille en attente",
+      pendingRechargeNotifMessage: "demande une recharge de",
+      submitError: "Impossible d'envoyer la demande de recharge.",
+      rechargeButton: "Recharger mon portefeuille",
+      dialogSubtitle: "Rechargez votre solde via Orange Money pour acheter des credits, boosts ou badges.",
+      requestSentTitle: "Demande envoyee",
+      requestSentDesc: "Un administrateur validera votre recharge sous 24h.",
+      amountLabel: "Montant a recharger (FCFA)",
+      customAmountPlaceholder: "Ou montant personnalise",
+      ussdCodeLabel: "Code de paiement USSD Orange Money",
+      ussdInstructions: "Composez ce code, confirmez le paiement, puis telechargez la preuve ci-dessous.",
+      proofLabel: "Preuve de paiement",
+      changeImage: "Changer l'image",
+      uploadPrompt: "Cliquez pour telecharger une capture d'ecran",
+      sendingInProgress: "Envoi en cours...",
+      confirmRechargePrefix: "Confirmer la recharge de"
     }
   },
   pcm: {
