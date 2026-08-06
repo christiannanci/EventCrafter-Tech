@@ -20,7 +20,6 @@ export default function UserManagement() {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            // Fetch all users - typically paginated, but for now list all or top 50
             const data = await base44.entities.User.list();
             setUsers(data);
         } catch (error) {
@@ -32,7 +31,6 @@ export default function UserManagement() {
 
     const handleRoleUpdate = async (userId, newRole) => {
         try {
-            // Determine system role and staff role based on selection
             let systemRole = 'user';
             let staffRole = 'none';
 
@@ -50,8 +48,6 @@ export default function UserManagement() {
                 staffRole = 'tech';
             }
 
-            // Mise a jour directe via Supabase (la policy is_admin() autorise
-            // un admin a modifier le role/staff_role de n'importe quel utilisateur)
             const { error: updateError } = await supabase
                 .from('app_user')
                 .update({ role: systemRole, staff_role: staffRole })
@@ -60,10 +56,10 @@ export default function UserManagement() {
             if (updateError) throw updateError;
 
             setUsers(users.map(u => u.id === userId ? { ...u, role: systemRole, staff_role: staffRole } : u));
-            toast.success("RÃ´le mis Ã  jour avec succÃ¨s");
+            toast.success("Role mis a jour avec succes");
         } catch (error) {
             console.error("Failed to update role", error);
-            toast.error("Erreur lors de la mise Ã  jour du rÃ´le");
+            toast.error("Erreur lors de la mise a jour du role");
         }
     };
 
@@ -85,11 +81,11 @@ export default function UserManagement() {
 
     const getRoleLabel = (value) => {
         const labels = {
-            admin_full: 'ðŸ‘‘ Admin Complet',
-            legal: 'âš–ï¸ Juriste',
-            sales: 'ðŸ’¼ Commercial',
-            tech: 'ðŸ”§ Technicien',
-            none: 'ðŸ‘¤ Aucun rÃ´le'
+            admin_full: '\uD83D\uDC51 Admin Complet',
+            legal: '\u2696\uFE0F Juriste',
+            sales: '\uD83D\uDCBC Commercial',
+            tech: '\uD83D\uDD27 Technicien',
+            none: '\uD83D\uDC64 Aucun role'
         };
         return labels[value] || labels.none;
     };
@@ -101,9 +97,9 @@ export default function UserManagement() {
                     <div>
                         <CardTitle className="flex items-center gap-2">
                             <Users className="w-5 h-5" />
-                            Gestion des RÃ´les Staff
+                            Gestion des Roles Staff
                         </CardTitle>
-                        <CardDescription>GÃ©rez les membres de l'Ã©quipe back office et leurs responsabilitÃ©s.</CardDescription>
+                        <CardDescription>Gerez les membres de l'equipe back office et leurs responsabilites.</CardDescription>
                     </div>
                     <StaffInviteDialog onSuccess={fetchUsers} />
                 </div>
@@ -115,7 +111,7 @@ export default function UserManagement() {
                             <TableRow>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Email</TableHead>
-                                <TableHead>RÃ´le Back Office</TableHead>
+                                <TableHead>Role Back Office</TableHead>
                                 <TableHead>Action</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -140,11 +136,11 @@ export default function UserManagement() {
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="none">ðŸ‘¤ Aucun rÃ´le</SelectItem>
-                                                    <SelectItem value="admin_full">ðŸ‘‘ Admin Complet</SelectItem>
-                                                    <SelectItem value="legal">âš–ï¸ Juriste</SelectItem>
-                                                    <SelectItem value="sales">ðŸ’¼ Commercial</SelectItem>
-                                                    <SelectItem value="tech">ðŸ”§ Technicien</SelectItem>
+                                                    <SelectItem value="none">{'\uD83D\uDC64'} Aucun role</SelectItem>
+                                                    <SelectItem value="admin_full">{'\uD83D\uDC51'} Admin Complet</SelectItem>
+                                                    <SelectItem value="legal">{'\u2696\uFE0F'} Juriste</SelectItem>
+                                                    <SelectItem value="sales">{'\uD83D\uDCBC'} Commercial</SelectItem>
+                                                    <SelectItem value="tech">{'\uD83D\uDD27'} Technicien</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </TableCell>
