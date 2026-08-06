@@ -672,30 +672,30 @@ export default function VendorDashboard() {
             </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh]">
             <DialogHeader>
-              <DialogTitle>{editingService ? "Modifier le Service" : "Creer une Offre de Service"}</DialogTitle>
+              <DialogTitle>{editingService ? t('vendor.editService') : t('vendor.createServiceTitle')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4 overflow-y-auto max-h-[70vh] px-1">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-stone-600">Titre du Service</label>
-                <Input placeholder="ex. Organisation de Mariage de Luxe" value={newService.title} onChange={e => setNewService({...newService, title: e.target.value})} />
+                <label className="text-xs font-medium text-stone-600">{t('vendor.serviceTitleLabel')}</label>
+                <Input placeholder={t('vendor.serviceTitlePlaceholder')} value={newService.title} onChange={e => setNewService({...newService, title: e.target.value})} />
               </div>
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Categorie</label>
+                  <label className="text-xs font-medium text-stone-600">{t('vendor.categoryLabel')}</label>
                   <Select value={newService.category} onValueChange={val => {
                     const selectedType = serviceTypes.find(t => t.name === val);
                     setNewService({...newService, category: val, service_type_code: selectedType ? selectedType.code_service : ""});
                     if (selectedType) setAvailableFunctions(allFunctions.filter(f => f.service_type_code === selectedType.code_service));
                     else setAvailableFunctions([]);
                   }}>
-                    <SelectTrigger><SelectValue placeholder="Choisir categorie" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t('vendor.chooseCategoryPlaceholder')} /></SelectTrigger>
                     <SelectContent>
                       {serviceTypes.length > 0 ? serviceTypes.map(t => (<SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>)) : (<SelectItem value="Event Planner">Event Planner</SelectItem>)}
                     </SelectContent>
                   </Select>
                   {availableFunctions.length > 0 && (
                     <div className="mt-2 space-y-2 border rounded-md p-2 max-h-40 overflow-y-auto">
-                      <label className="text-xs font-medium text-stone-500 block mb-1">Specialites</label>
+                      <label className="text-xs font-medium text-stone-500 block mb-1">{t('vendor.specialties')}</label>
                       {availableFunctions.map(func => (
                         <div key={func.id} className="flex items-center space-x-2">
                           <input type="checkbox" id={`func-${func.code}`} checked={newService.function_codes?.includes(func.code)} onChange={(e) => { const checked = e.target.checked; setNewService(prev => { const current = prev.function_codes || []; if (checked) return {...prev, function_codes: [...current, func.code]}; return {...prev, function_codes: current.filter(c => c !== func.code)}; }); }} className="h-4 w-4 rounded border-gray-300 text-rose-600" />
@@ -705,11 +705,11 @@ export default function VendorDashboard() {
                     </div>
                   )}
                   <div className="flex justify-end mt-1">
-                    <SuggestServiceTypeDialog onSubmitted={() => toast({ title: "Submitted" })} />
+                    <SuggestServiceTypeDialog onSubmitted={() => toast({ title: t('vendor.submitted') })} />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Types d'evenements Supportes</label>
+                  <label className="text-xs font-medium text-stone-600">{t('vendor.supportedEventTypes')}</label>
                   <div className="grid grid-cols-2 gap-2 border rounded-md p-3 max-h-48 overflow-y-auto">
                     {["Wedding","Birthday","Corporate","Conference","Baby Shower","Graduation","Religious","Funeral","Concert","Other"].map(eventType => (
                       <div key={eventType} className="flex items-center space-x-2">
@@ -720,13 +720,13 @@ export default function VendorDashboard() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Prix Minimum (FCFA)</label>
+                  <label className="text-xs font-medium text-stone-600">{t('vendor.minPriceLabel')}</label>
                   <Input type="number" placeholder="50000" value={newService.price_min} onChange={e => setNewService({...newService, price_min: e.target.value})} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Zone de Disponibilite</label>
+                  <label className="text-xs font-medium text-stone-600">{t('vendor.availabilityZone')}</label>
                   <Select value={newService.availability_level} onValueChange={val => setNewService({...newService, availability_level: val})}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -741,50 +741,50 @@ export default function VendorDashboard() {
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Code Zone</label>
+                  <label className="text-xs font-medium text-stone-600">{t('vendor.zoneCode')}</label>
                   <Input placeholder="ex. LT, DLA, CM" value={newService.availability_code} onChange={e => setNewService({...newService, availability_code: e.target.value})} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Input placeholder="Ville" value={newService.city} onChange={e => setNewService({...newService, city: e.target.value})} />
-                <Input placeholder="Region" value={newService.region} onChange={e => setNewService({...newService, region: e.target.value})} />
+                <Input placeholder={t('location.city')} value={newService.city} onChange={e => setNewService({...newService, city: e.target.value})} />
+                <Input placeholder={t('location.region')} value={newService.region} onChange={e => setNewService({...newService, region: e.target.value})} />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Input placeholder="Quartier" value={newService.neighborhood_code} onChange={e => setNewService({...newService, neighborhood_code: e.target.value})} />
-                <Input placeholder="Adresse precise" value={newService.address_details} onChange={e => setNewService({...newService, address_details: e.target.value})} />
+                <Input placeholder={t('location.neighborhood')} value={newService.neighborhood_code} onChange={e => setNewService({...newService, neighborhood_code: e.target.value})} />
+                <Input placeholder={t('vendor.preciseAddress')} value={newService.address_details} onChange={e => setNewService({...newService, address_details: e.target.value})} />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-stone-600">Image de Couverture</label>
+                <label className="text-sm font-medium text-stone-600">{t('vendor.coverImage')}</label>
                 <input type="file" id="media-upload" accept="image/*" onChange={handleMediaUpload} className="hidden" />
                 <Button type="button" variant="outline" className="w-full" onClick={() => document.getElementById('media-upload').click()} disabled={uploadingMedia}>
-                  {uploadingMedia ? "Telechargement..." : newService.image_url ? "Changer l'image" : "Telecharger une image"}
+                  {uploadingMedia ? t('vendor.uploadingShort') : newService.image_url ? t('vendor.changeImage') : t('vendor.uploadImage')}
                 </Button>
-                {newService.image_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Image telechargee</div>}
+                {newService.image_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {t('vendor.imageUploaded')}</div>}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-stone-600">Video de Presentation</label>
+                <label className="text-sm font-medium text-stone-600">{t('vendor.presentationVideo')}</label>
                 <input type="file" id="video-upload" accept="video/*" onChange={handleVideoUpload} className="hidden" />
                 <Button type="button" variant="outline" className="w-full" onClick={() => document.getElementById('video-upload').click()} disabled={uploadingVideo}>
-                  {uploadingVideo ? "Telechargement..." : newService.video_url ? "Changer la video" : "Telecharger une video"}
+                  {uploadingVideo ? t('vendor.uploadingShort') : newService.video_url ? t('vendor.changeVideo') : t('vendor.uploadVideo')}
                 </Button>
-                {newService.video_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Video telecharge</div>}
+                {newService.video_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {t('vendor.videoUploaded')}</div>}
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">Description Generale</label>
-                  <Textarea placeholder="Presentez votre service..." className="h-24" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')}</label>
+                  <Textarea placeholder={t('vendor.presentServicePlaceholder')} className="h-24" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">Details & Prestations Incluses</label>
-                  <Textarea placeholder="Detaillez ce qui est inclus..." className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} />
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.detailsIncluded')}</label>
+                  <Textarea placeholder={t('vendor.detailPlaceholder')} className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">Conditions & Prerequis</label>
-                  <Textarea placeholder="Conditions importantes..." className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} />
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')}</label>
+                  <Textarea placeholder={t('vendor.termsPlaceholder')} className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} />
                 </div>
               </div>
               <Button onClick={handleCreateService} className="w-full bg-rose-600">
-                {editingService ? "Enregistrer les modifications" : "Creer l'Offre"}
+                {editingService ? t('vendor.saveModifications') : t('vendor.createOfferButton')}
               </Button>
             </div>
           </DialogContent>
