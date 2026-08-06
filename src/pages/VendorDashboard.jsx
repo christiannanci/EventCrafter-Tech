@@ -604,7 +604,7 @@ export default function VendorDashboard() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-6">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl sm:text-3xl font-bold text-stone-900">Tableau de Bord Fournisseur</h1>
+            <h1 className="text-xl sm:text-3xl font-bold text-stone-900">{t('vendorHeader.dashboardTitle')}</h1>
             <Badge 
               className={`cursor-pointer hover:opacity-80 transition-opacity shrink-0 ${
                 membershipStatus === 'premium' ? 'bg-rose-600 text-white' :
@@ -617,13 +617,13 @@ export default function VendorDashboard() {
               {membershipStatus.charAt(0).toUpperCase() + membershipStatus.slice(1)}
             </Badge>
           </div>
-          <p className="text-stone-500 text-sm">Bienvenue, {user.first_name || user.email}</p>
+          <p className="text-stone-500 text-sm">{t('vendorHeader.welcomePrefix')} {user.first_name || user.email}</p>
           
           {membershipStatus === 'free' && (
             <div className="mt-4 max-w-md">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-stone-600">
-                  Demandes prospects ce mois
+                  {t('vendorHeader.requestsThisMonth')}
                 </span>
                 <span className={`text-sm font-bold ${notificationCount >= 10 ? 'text-red-600' : 'text-green-600'}`}>
                   {notificationCount}/10
@@ -646,7 +646,7 @@ export default function VendorDashboard() {
               )}
               {notificationCount >= 10 && (
                 <p className="text-xs text-red-600 mt-1">
-                  Limite atteinte. Passez a Premium pour des demandes illimites.
+                  {t('vendorHeader.limitReachedShort')}
                 </p>
               )}
             </div>

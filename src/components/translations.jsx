@@ -993,6 +993,14 @@ export const translations = {
       saveAccountButton: "Save Account",
       primaryBadge: "Primary",
       noAccountsYet: "No payment method added yet."
+    },
+    vendorHeader: {
+      dashboardTitle: "Vendor Dashboard",
+      welcomePrefix: "Welcome,",
+      requestsThisMonth: "Client requests this month",
+      moreAvailable: "more request",
+      moreAvailablePlural: "available",
+      limitReachedShort: "Limit reached. Upgrade to Premium for unlimited requests."
     }
   },
   fr: {
@@ -2005,6 +2013,14 @@ export const translations = {
       saveAccountButton: "Enregistrer le Compte",
       primaryBadge: "Principal",
       noAccountsYet: "Aucun moyen de paiement ajoute pour le moment."
+    },
+    vendorHeader: {
+      dashboardTitle: "Tableau de Bord Fournisseur",
+      welcomePrefix: "Bienvenue,",
+      requestsThisMonth: "Demandes prospects ce mois",
+      moreAvailable: "Plus que",
+      moreAvailablePlural: "disponible(s)",
+      limitReachedShort: "Limite atteinte. Passez a Premium pour des demandes illimitees."
     }
   },
   pcm: {
