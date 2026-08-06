@@ -256,7 +256,27 @@ function LayoutContent({ children }) {
                   </DropdownMenu>
                 </div>
               ) : (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <CurrencySelector />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="text-stone-600">
+                        <Globe className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {languages.map((lang) => (
+                        <DropdownMenuItem
+                          key={lang.code}
+                          onClick={() => setLanguage(lang.code)}
+                          className={language === lang.code ? "bg-[#FFF0E8] text-[#FF6B35] font-medium" : ""}
+                        >
+                          <Globe className="w-4 h-4 mr-2" />
+                          {lang.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <CartIconNav />
                   <Button variant="ghost" onClick={() => window.location.href = "/Login"} className="text-[#2C2C2C] hover:text-[#FF6B35]">
                     {t("nav.signIn")}
