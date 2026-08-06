@@ -21,7 +21,7 @@ export default function LocationSelector({ className, onSearch, minimal }) {
     const [cities, setCities] = useState([]);
     const [neighborhoods, setNeighborhoods] = useState([]);
 
-    const [selectedCountry, setSelectedCountry] = useState("");
+    const [selectedCountry, setSelectedCountry] = useState("Cameroun");
     const [selectedRegion, setSelectedRegion] = useState("");
     const [selectedCity, setSelectedCity] = useState("");
     const [selectedNeighborhood, setSelectedNeighborhood] = useState("");
@@ -151,14 +151,9 @@ export default function LocationSelector({ className, onSearch, minimal }) {
             <div className="flex flex-col md:flex-row gap-2">
 
                 {!minimal && (
-                    <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                        <SelectTrigger className="w-full md:w-[140px] bg-white border-0 shadow-sm h-12">
-                            <SelectValue placeholder={t('location.country')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {countries.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
+                    <div className="w-full md:w-[140px] bg-stone-100 border-0 shadow-sm h-12 rounded-md flex items-center px-3 text-sm text-stone-600 select-none">
+                        Cameroun
+                    </div>
                 )}
 
                 <Select value={selectedRegion} onValueChange={setSelectedRegion} disabled={!selectedCountry && regions.length > 0}>
