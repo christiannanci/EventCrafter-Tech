@@ -107,7 +107,9 @@ export default function VendorDashboard() {
 
   const [newService, setNewService] = useState({
     title: "",
+    title_en: "",
     description: "",
+    description_en: "",
     category: "",
     service_type_code: "",
     function_codes: [],
@@ -423,7 +425,9 @@ export default function VendorDashboard() {
     setEditingService(service);
     setNewService({
       title: service.title || "",
+      title_en: service.title_en || "",
       description: service.description || "",
+      description_en: service.description_en || "",
       category: service.category || "",
       service_type_code: service.service_type_code || "",
       function_codes: service.function_codes || [],
@@ -676,8 +680,12 @@ export default function VendorDashboard() {
             </DialogHeader>
             <div className="space-y-4 py-4 overflow-y-auto max-h-[70vh] px-1">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-stone-600">{t('vendor.serviceTitleLabel')}</label>
+                <label className="text-xs font-medium text-stone-600">{t('vendor.serviceTitleLabel')} (Francais)</label>
                 <Input placeholder={t('vendor.serviceTitlePlaceholder')} value={newService.title} onChange={e => setNewService({...newService, title: e.target.value})} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-stone-600">{t('vendor.serviceTitleLabel')} (English - optional)</label>
+                <Input placeholder="ex. Luxury Wedding Planning" value={newService.title_en} onChange={e => setNewService({...newService, title_en: e.target.value})} />
               </div>
               <div className="space-y-4">
                 <div className="space-y-1">
@@ -771,8 +779,12 @@ export default function VendorDashboard() {
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')}</label>
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')} (Francais)</label>
                   <Textarea placeholder={t('vendor.presentServicePlaceholder')} className="h-24" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')} (English - optional)</label>
+                  <Textarea placeholder="Present your service in English..." className="h-24" value={newService.description_en} onChange={e => setNewService({...newService, description_en: e.target.value})} />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.detailsIncluded')}</label>

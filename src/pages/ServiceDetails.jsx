@@ -36,6 +36,11 @@ export default function ServiceDetails() {
   const [service, setService] = useState(null);
   const { t } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { language: currentLang } = useLanguage();
+
+  const displayTitle = (currentLang === 'en' && service?.title_en) ? service.title_en : service?.title;
+  const displayDescription = (currentLang === 'en' && service?.description_en) ? service.description_en : service?.description;
+  const displayDescriptionDetails = (currentLang === 'en' && service?.description_details_en) ? service.description_details_en : service?.description_details;
   const [planner, setPlanner] = useState(null);
   const [bookingDate, setBookingDate] = useState(null);
   const [bookingNotes, setBookingNotes] = useState("");
@@ -207,7 +212,7 @@ export default function ServiceDetails() {
              <Badge className="bg-rose-600 hover:bg-rose-700 text-white mb-4 border-0">
                {service.category}
              </Badge>
-             <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">{service.title}</h1>
+             <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">{displayTitle}</h1>
              <div className="flex items-center text-stone-200 text-lg">
                <MapPin className="w-5 h-5 mr-2" /> {service.location}
              </div>
@@ -243,7 +248,7 @@ export default function ServiceDetails() {
                     <div>
                         <h3 className="text-lg font-semibold text-stone-800 mb-2">{t('serviceDetails.overview')}</h3>
                         <div className="prose prose-stone max-w-none text-stone-600 leading-relaxed whitespace-pre-line">
-                            {service.description}
+                            {displayDescription}
                         </div>
                     </div>
                   )}
@@ -252,7 +257,7 @@ export default function ServiceDetails() {
                     <div>
                         <h3 className="text-lg font-semibold text-stone-800 mb-2">{t('serviceDetails.methodologyTitle')}</h3>
                         <div className="prose prose-stone max-w-none text-stone-600 leading-relaxed whitespace-pre-line">
-                            {service.description_details}
+                            {displayDescriptionDetails}
                         </div>
                     </div>
                   )}

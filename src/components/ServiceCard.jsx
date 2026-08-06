@@ -12,7 +12,10 @@ import { base44 } from "@/api/apiClient";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function ServiceCard({ service, eventId, isTopRated, position }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  const displayTitle = (language === 'en' && service?.title_en) ? service.title_en : service?.title;
+  const displayDescription = (language === 'en' && service?.description_en) ? service.description_en : service?.description;
   const { formatPrice } = useCurrency();
   const [isInCart, setIsInCart] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -240,7 +243,7 @@ export default function ServiceCard({ service, eventId, isTopRated, position }) 
           <div className="flex justify-between items-start mb-2">
             <div>
               <h3 className="font-semibold text-lg text-stone-900 group-hover:text-rose-600 transition-colors line-clamp-1">
-                {service?.title || 'Service'}
+                {displayTitle || 'Service'}
               </h3>
               <div className="flex items-center text-stone-500 text-sm mt-1">
                 <MapPin className="w-3.5 h-3.5 mr-1" />
@@ -250,7 +253,7 @@ export default function ServiceCard({ service, eventId, isTopRated, position }) 
           </div>
 
           <p className="text-stone-500 text-sm line-clamp-2 mb-4">
-            {service?.description || ''}
+            {displayDescription || ''}
           </p>
 
           <div className="flex items-center gap-2 mb-2">
