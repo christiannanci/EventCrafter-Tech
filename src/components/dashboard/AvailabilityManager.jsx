@@ -9,9 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Clock, Calendar as CalendarIcon, Ban, CheckCircle2 } from "lucide-react";
 import { format, addHours, startOfDay, isSameDay, parseISO } from "date-fns";
+import { fr as frLocale, enUS as enLocale } from "date-fns/locale";
 import { useToast } from "@/components/ui/use-toast";
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function AvailabilityManager({ user }) {
+    const { t, language } = useLanguage();
+    const dateLocale = language === 'fr' ? frLocale : enLocale;
+
     const [date, setDate] = useState(new Date());
     const [slots, setSlots] = useState([]);
     const [bookings, setBookings] = useState([]);
@@ -62,25 +67,28 @@ export default function AvailabilityManager({ user }) {
                 recurrence: recurrence
             });
 
-            toast({ title: "Créneau Créé", description: `Créneau ${slotType === 'available' ? 'disponible' : 'bloqué'} ajouté.` });
+            toast({
+                title: t('availability.slotCreatedTitle'),
+                description: `${slotType === 'available' ? t('availability.slotCreatedDescAvailable') : t('availability.slotCreatedDescBlocked')}`
+            });
             setIsDialogOpen(false);
             fetchData();
         } catch (error) {
-            toast({ title: "Erreur", description: "Impossible de créer le créneau", variant: "destructive" });
+            toast({ title: t('vendor.genericError'), description: t('availability.createError'), variant: "destructive" });
         }
     };
 
     const handleDeleteSlot = async (id) => {
-        if(confirm("Supprimer ce créneau ?")) {
+        if(confirm(t('availability.confirmDeleteSlot'))) {
             await base44.entities.AvailabilitySlot.delete(id);
             fetchData();
         }
     };
 
-    const getSlotTypeLabel = (type) => type === 'blocked' ? 'Bloqué' : 'Disponible';
+    const getSlotTypeLabel = (type) => type === 'blocked' ? t('availability.blocked') : t('availability.available');
 
     const getRecurrenceLabel = (rec) => {
-        const labels = { none: 'Une fois', daily: 'Quotidien', weekly: 'Hebdomadaire' };
+        const labels = { none: t('availability.once'), daily: t('availability.daily'), weekly: t('availability.weekly') };
         return labels[rec] || rec;
     };
 
@@ -92,7 +100,7 @@ export default function AvailabilityManager({ user }) {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             <Card className="md:col-span-5 lg:col-span-4">
                 <CardHeader>
-                    <CardTitle>Calendrier</CardTitle>
+                    <CardTitle>{t('availability.calendarTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Calendar
@@ -100,6 +108,7 @@ export default function AvailabilityManager({ user }) {
                         selected={date}
                         onSelect={d => d && setDate(d)}
                         className="rounded-md border shadow-sm mx-auto"
+                        locale={dateLocale}
                         modifiers={{
                             hasSlots: (d) => slots.some(s => isSameDay(parseISO(s.start_time), d)),
                             hasBooking: (d) => bookings.some(b => isSameDay(parseISO(b.event_date), d)),
@@ -110,8 +119,8 @@ export default function AvailabilityManager({ user }) {
                         }}
                     />
                     <div className="mt-4 text-xs text-stone-500 space-y-2">
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 bg-green-500 rounded-full"/> Créneaux Disponibles</div>
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"/> Événements Réservés</div>
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 bg-green-500 rounded-full"/> {t('availability.availableSlots')}</div>
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"/> {t('availability.bookedEvents')}</div>
                     </div>
                 </CardContent>
             </Card>
@@ -120,49 +129,49 @@ export default function AvailabilityManager({ user }) {
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                         <Clock className="w-5 h-5 text-stone-500" />
-                        Planning du {format(date, 'd MMM yyyy')}
+                        {t('availability.scheduleFor')} {format(date, 'd MMM yyyy', { locale: dateLocale })}
                     </CardTitle>
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button size="sm" className="bg-rose-600 hover:bg-rose-700">
-                                <Plus className="w-4 h-4 mr-2" /> Ajouter un Créneau
+                                <Plus className="w-4 h-4 mr-2" /> {t('availability.addSlotButton')}
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Ajouter une Disponibilité / Bloquer un Créneau</DialogTitle>
+                                <DialogTitle>{t('availability.addSlotDialogTitle')}</DialogTitle>
                             </DialogHeader>
                             <div className="space-y-4 py-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium">Type</label>
+                                        <label className="text-sm font-medium">{t('availability.typeLabel')}</label>
                                         <Select value={slotType} onValueChange={setSlotType}>
                                             <SelectTrigger>
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="available">Créneau Disponible</SelectItem>
-                                                <SelectItem value="blocked">Créneau Bloqué</SelectItem>
+                                                <SelectItem value="available">{t('availability.availableSlot')}</SelectItem>
+                                                <SelectItem value="blocked">{t('availability.blockedSlot')}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium">Récurrence</label>
+                                        <label className="text-sm font-medium">{t('availability.recurrenceLabel')}</label>
                                         <Select value={recurrence} onValueChange={setRecurrence}>
                                             <SelectTrigger>
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="none">Une fois</SelectItem>
-                                                <SelectItem value="daily">Quotidien</SelectItem>
-                                                <SelectItem value="weekly">Hebdomadaire</SelectItem>
+                                                <SelectItem value="none">{t('availability.once')}</SelectItem>
+                                                <SelectItem value="daily">{t('availability.daily')}</SelectItem>
+                                                <SelectItem value="weekly">{t('availability.weekly')}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium">Heure de Début</label>
+                                        <label className="text-sm font-medium">{t('availability.startTimeLabel')}</label>
                                         <Input 
                                             type="time" 
                                             value={startTime} 
@@ -170,7 +179,7 @@ export default function AvailabilityManager({ user }) {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium">Durée (Heures)</label>
+                                        <label className="text-sm font-medium">{t('availability.durationLabel')}</label>
                                         <Input 
                                             type="number" 
                                             step="0.5" 
@@ -180,7 +189,7 @@ export default function AvailabilityManager({ user }) {
                                     </div>
                                 </div>
                                 <Button className="w-full bg-rose-600" onClick={handleCreateSlot}>
-                                    Enregistrer le Créneau
+                                    {t('availability.saveSlotButton')}
                                 </Button>
                             </div>
                         </DialogContent>
@@ -196,8 +205,8 @@ export default function AvailabilityManager({ user }) {
                                         <CalendarIcon className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-blue-900">Réservation : {booking.title || booking.client_name}</p>
-                                        <p className="text-xs text-blue-700">Statut : {booking.status}</p>
+                                        <p className="font-semibold text-blue-900">{t('availability.bookingLabel')} : {booking.title || booking.client_name}</p>
+                                        <p className="text-xs text-blue-700">{t('availability.statusLabel')} : {booking.status}</p>
                                     </div>
                                 </div>
                             </div>
@@ -229,7 +238,7 @@ export default function AvailabilityManager({ user }) {
                             dayBookings.length === 0 && (
                                 <div className="text-center py-10 text-stone-400">
                                     <Clock className="w-10 h-10 mx-auto mb-2 opacity-20" />
-                                    <p>Aucun créneau ni réservation pour ce jour</p>
+                                    <p>{t('availability.noSlotsOrBookings')}</p>
                                 </div>
                             )
                         )}
