@@ -1069,7 +1069,7 @@ export default function VendorDashboard() {
                    onClick={() => setIsMembershipDialogOpen(true)}
                  >
                    <Crown className="w-4 h-4 mr-2" />
-                   Voir les Plans
+                   {t('vendor.viewPlans')}
                  </Button>
                </div>
              </div>
