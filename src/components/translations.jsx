@@ -1059,6 +1059,21 @@ export const translations = {
       subtitle: "Manage your professional bank accounts and mobile money wallets for payments.",
       accountLabelPlaceholder: "ex. Professional Savings",
       noAccountsYet: "No professional payment method added yet."
+    },
+    deleteAccount: {
+      confirmWord: "DELETE",
+      dangerZone: "Danger Zone",
+      dangerZoneDesc: "Deleting your account is irreversible. All your data will be permanently erased.",
+      deleteButton: "Delete My Account",
+      confirmTitle: "Permanently delete your account?",
+      confirmDescPrefix: "This action is",
+      irreversible: "irreversible",
+      confirmDescSuffix: "All your data, bookings and services will be deleted.",
+      typeToConfirmPrefix: "Type",
+      typeToConfirmSuffix: "to confirm.",
+      cancel: "Cancel",
+      deletingInProgress: "Deleting...",
+      deletePermanently: "Delete Permanently"
     }
   },
   fr: {
@@ -2137,6 +2152,21 @@ export const translations = {
       subtitle: "Gerez vos comptes bancaires professionnels et portefeuilles mobile money pour les paiements.",
       accountLabelPlaceholder: "ex. Epargne Professionnelle",
       noAccountsYet: "Aucun moyen de paiement professionnel ajoute pour le moment."
+    },
+    deleteAccount: {
+      confirmWord: "SUPPRIMER",
+      dangerZone: "Zone Dangereuse",
+      dangerZoneDesc: "La suppression de votre compte est irreversible. Toutes vos donnees seront definitivement effacees.",
+      deleteButton: "Supprimer mon compte",
+      confirmTitle: "Supprimer votre compte definitivement ?",
+      confirmDescPrefix: "Cette action est",
+      irreversible: "irreversible",
+      confirmDescSuffix: "Toutes vos donnees, reservations et services seront supprimes.",
+      typeToConfirmPrefix: "Tapez",
+      typeToConfirmSuffix: "pour confirmer.",
+      cancel: "Annuler",
+      deletingInProgress: "Suppression...",
+      deletePermanently: "Supprimer definitivement"
     }
   },
   pcm: {
