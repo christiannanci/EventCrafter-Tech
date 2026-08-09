@@ -125,6 +125,7 @@ export default function VendorDashboard() {
     image_url: "",
     description_details: "",
     description_terms: "",
+    description_terms_en: "",
     cultural_zones: [],
     cultural_compliance_details: "",
     spoken_languages: [],
@@ -403,6 +404,7 @@ export default function VendorDashboard() {
       setEditingService(null);
       setNewService({ 
           title: "", description: "", description_details: "", description_terms: "",
+    description_terms_en: "",
           category: "", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "", 
           availability_level: "ville", availability_code: "",
           location: "", city: "", region: "", neighborhood_code: "", 
@@ -443,6 +445,7 @@ export default function VendorDashboard() {
       image_url: service.image_url || "",
       description_details: service.description_details || "",
       description_terms: service.description_terms || "",
+      description_terms_en: service.description_terms_en || "",
       cultural_zones: service.cultural_zones || [],
       cultural_compliance_details: service.cultural_compliance_details || "",
       spoken_languages: service.spoken_languages || [],
@@ -791,8 +794,12 @@ export default function VendorDashboard() {
                   <Textarea placeholder={t('vendor.detailPlaceholder')} className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')}</label>
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')} (Francais)</label>
                   <Textarea placeholder={t('vendor.termsPlaceholder')} className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')} (English - optional)</label>
+                  <Textarea placeholder="Important terms in English..." className="h-24" value={newService.description_terms_en} onChange={e => setNewService({...newService, description_terms_en: e.target.value})} />
                 </div>
               </div>
               <Button onClick={handleCreateService} className="w-full bg-rose-600">

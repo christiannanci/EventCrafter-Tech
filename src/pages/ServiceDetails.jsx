@@ -42,6 +42,7 @@ export default function ServiceDetails() {
   const displayTitle = (currentLang === 'en' && service?.title_en) ? service.title_en : service?.title;
   const displayDescription = (currentLang === 'en' && service?.description_en) ? service.description_en : service?.description;
   const displayDescriptionDetails = (currentLang === 'en' && service?.description_details_en) ? service.description_details_en : service?.description_details;
+  const displayDescriptionTerms = (currentLang === 'en' && service?.description_terms_en) ? service.description_terms_en : service?.description_terms;
   const [planner, setPlanner] = useState(null);
   const [bookingDate, setBookingDate] = useState(null);
   const [bookingNotes, setBookingNotes] = useState("");
@@ -279,7 +280,7 @@ export default function ServiceDetails() {
                     <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
                         <h3 className="text-lg font-semibold text-amber-900 mb-2">{t('serviceDetails.termsRequirements')}</h3>
                         <div className="prose prose-sm max-w-none text-amber-900/80 leading-relaxed whitespace-pre-line">
-                            {service.description_terms}
+                            {displayDescriptionTerms}
                         </div>
                     </div>
                   )}
