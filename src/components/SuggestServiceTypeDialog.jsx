@@ -39,6 +39,17 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
         }
     };
 
+    const generateId = () => {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
+
     const handleSubmit = async () => {
         if (!formData.name || !formData.abbreviation || !formData.description) {
             toast({ title: "Erreur", description: "Veuillez remplir tous les champs requis", variant: "destructive" });
@@ -51,6 +62,7 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
             const typeCode = "CAT_USER_REQ";
 
             await base44.entities.ServiceType.create({
+                id: generateId(),
                 ...formData,
                 code_service: code,
                 code_typeservice: typeCode,
@@ -67,7 +79,7 @@ export default function SuggestServiceTypeDialog({ onSubmitted }) {
 
         } catch (error) {
             console.error("Submission failed", error);
-            toast({ title: "Erreur", description: "Échec de la soumission de la demande.", variant: "destructive" });
+            toast({ title: "Erreur", description: error?.message || "Échec de la soumission de la demande.", variant: "destructive" });
         } finally {
             setLoading(false);
         }
