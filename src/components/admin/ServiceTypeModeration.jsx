@@ -4,6 +4,8 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tag, CheckCircle2, XCircle, Image as ImageIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 
@@ -13,6 +15,7 @@ export default function ServiceTypeModeration() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("pending");
   const [processing, setProcessing] = useState(null);
+  const [englishNames, setEnglishNames] = useState({});
 
   useEffect(() => {
     loadData();
@@ -32,9 +35,14 @@ export default function ServiceTypeModeration() {
   };
 
   const handleApprove = async (type) => {
+    const nameEn = (englishNames[type.id] ?? type.name_en ?? '').trim();
+    if (!nameEn) {
+      toast({ title: "Nom anglais requis", description: "Veuillez saisir le nom en anglais avant d'approuver cette categorie.", variant: "destructive" });
+      return;
+    }
     setProcessing(type.id);
     try {
-      await base44.entities.ServiceType.update(type.id, { status: 'active' });
+      await base44.entities.ServiceType.update(type.id, { status: 'active', name_en: nameEn });
       toast({ title: "Categorie approuvee", description: `"${type.name}" est maintenant disponible pour tous les vendeurs.` });
       loadData();
     } catch (error) {
@@ -139,6 +147,17 @@ export default function ServiceTypeModeration() {
                 </div>
                 {type.description && (
                   <p className="text-sm text-stone-600 bg-stone-50 p-3 rounded mb-3">{type.description}</p>
+                )}
+                {type.status === 'pending' && (
+                  <div className="space-y-2 mb-3">
+                    <Label className="text-xs">Nom en anglais (requis pour approuver)</Label>
+                    <Input
+                      placeholder="ex. Beauty, Entertainment..."
+                      value={englishNames[type.id] ?? type.name_en ?? ''}
+                      onChange={(e) => setEnglishNames(prev => ({ ...prev, [type.id]: e.target.value }))}
+                      className="max-w-xs"
+                    />
+                  </div>
                 )}
                 {type.status === 'pending' && (
                   <div className="flex gap-2">
