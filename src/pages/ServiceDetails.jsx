@@ -34,6 +34,7 @@ import { useCurrency } from '@/components/CurrencyContext';
 
 export default function ServiceDetails() {
   const [service, setService] = useState(null);
+  const [serviceUnavailable, setServiceUnavailable] = useState(false);
   const { t } = useLanguage();
   const { formatPrice } = useCurrency();
   const { language: currentLang } = useLanguage();
@@ -62,6 +63,12 @@ export default function ServiceDetails() {
 
       const data = await base44.entities.Service.list();
       const found = data.find(s => s.id === serviceId);
+      // Bloque l'acces direct par lien a une offre masquee ou suspendue
+      if (found && (found.is_hidden || found.is_suspended)) {
+        setService(null);
+        setServiceUnavailable(true);
+        return;
+      }
       setService(found);
 
       if (found) {
@@ -180,6 +187,12 @@ export default function ServiceDetails() {
     }
   };
 
+  if (serviceUnavailable) return (
+    <div className="p-20 text-center">
+      <h2 className="text-2xl font-bold text-stone-900 mb-3">Service indisponible</h2>
+      <p className="text-stone-500">Cette offre n'est plus disponible pour le moment.</p>
+    </div>
+  );
   if (!service) return <div className="p-20 text-center animate-pulse">{t('serviceDetails.loadingDetails')}</div>;
 
   return (
