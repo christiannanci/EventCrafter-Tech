@@ -11,7 +11,8 @@ import {
   X,
   LayoutDashboard,
   Globe,
-  Shield
+  Shield,
+  MessageSquare
 } from "lucide-react";
 import { base44 } from "@/api/apiClient";
 import { LanguageProvider, useLanguage } from '@/components/LanguageContext';
@@ -37,6 +38,7 @@ import CartIconNav from '@/components/CartIconNav';
 import CurrencySelector from '@/components/CurrencySelector';
 import ScrollToTop from '@/components/ScrollToTop';
 import PlatformRatingButton from '@/components/PlatformRatingButton';
+import PlatformRatingDialog from '@/components/PlatformRatingDialog';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import FloatingAIAssistant from '@/components/FloatingAIAssistant';
@@ -45,6 +47,7 @@ import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 
 function LayoutContent({ children }) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [ratingDialogOpen, setRatingDialogOpen] = React.useState(false);
   const [user, setUser] = React.useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -379,6 +382,13 @@ function LayoutContent({ children }) {
                     </Link>
                   )}
                   <button
+                    onClick={() => { setIsMenuOpen(false); setRatingDialogOpen(true); }}
+                    className="flex items-center gap-2 w-full text-left px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    {t('rating.dialogTitle')}
+                  </button>
+                  <button
                     onClick={handleLogout}
                     className="block w-full text-left px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
                   >
@@ -398,6 +408,7 @@ function LayoutContent({ children }) {
             </div>
           </div>
         )}
+      {user && <PlatformRatingDialog open={ratingDialogOpen} onOpenChange={setRatingDialogOpen} user={user} />}
       </nav>
 
       {/* Main Content */}
