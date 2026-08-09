@@ -206,11 +206,10 @@ export default function AIAssistantPage() {
 
   const runSearch = async (criteria) => {
     try {
-      const [rawServices, allVendors] = await Promise.all([
+      const [allServices, allVendors] = await Promise.all([
         base44.entities.Service.list(),
         base44.entities.VendorProfile.list()
       ]);
-      const allServices = rawServices.filter(s => !s.is_hidden && !s.is_suspended);
 
       const scoreAndFilter = (relaxCity, relaxBudget, relaxCultural) => {
         return allServices
@@ -283,8 +282,7 @@ export default function AIAssistantPage() {
     setFreeSearching(true);
 
     try {
-      const rawServices = await base44.entities.Service.list();
-      const allServices = rawServices.filter(s => !s.is_hidden && !s.is_suspended);
+      const allServices = await base44.entities.Service.list();
       const searchResults = fuzzySearch(
         question,
         allServices,
