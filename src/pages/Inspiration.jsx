@@ -8,7 +8,12 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { useLanguage } from '@/components/LanguageContext';
 
 export default function Inspiration() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  const trArticle = (article, field) => {
+    const enField = article?.[`${field}_en`];
+    return (language === 'en' && enField) ? enField : article?.[field];
+  };
   const [articles, setArticles] = useState([]);
   const [filter, setFilter] = useState("All");
 
@@ -82,7 +87,7 @@ export default function Inspiration() {
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img
                       src={article.image_url || "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
-                      alt={article.title}
+                      alt={trArticle(article, 'title')}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -102,10 +107,10 @@ export default function Inspiration() {
                       <div className="text-xs font-bold text-rose-500 uppercase tracking-wide mb-2">{article.region}</div>
                     )}
                     <h3 className="text-xl font-bold text-stone-900 mb-3 group-hover:text-rose-600 transition-colors">
-                      {article.title}
+                      {trArticle(article, 'title')}
                     </h3>
                     <p className="text-stone-500 mb-6 line-clamp-3 flex-grow">
-                      {article.summary}
+                      {trArticle(article, 'summary')}
                     </p>
 
                     <div className="flex items-center text-rose-600 text-sm font-medium group-hover:gap-2 transition-all">
@@ -117,7 +122,7 @@ export default function Inspiration() {
               </DialogTrigger>
               <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold mb-2">{article.title}</DialogTitle>
+                  <DialogTitle className="text-2xl font-bold mb-2">{trArticle(article, 'title')}</DialogTitle>
                   {article.region && (
                     <Badge variant="outline" className="w-fit">{article.region}</Badge>
                   )}
@@ -125,11 +130,11 @@ export default function Inspiration() {
                 <div className="mt-4">
                   <img
                     src={article.image_url || "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
-                    alt={article.title}
+                    alt={trArticle(article, 'title')}
                     className="w-full h-64 md:h-96 object-cover rounded-xl mb-6"
                   />
                   <div className="prose prose-stone max-w-none">
-                    {article.content.split('\n').map((p, i) => (
+                    {(trArticle(article, 'content') || '').split('\n').map((p, i) => (
                       <p key={i} className="mb-4 text-stone-700 leading-relaxed">{p}</p>
                     ))}
                   </div>
