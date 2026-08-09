@@ -60,7 +60,8 @@ export default function Home() {
           Fonction.list(),
           PlatformFeedback.list()
         ]);
-        setFeaturedServices(servicesData.slice(0, 6));
+        const visibleServices = servicesData.filter(s => !s.is_hidden && !s.is_suspended);
+        setFeaturedServices(visibleServices.slice(0, 6));
         setServiceTypes(types.filter(t => !t.status || t.status === 'active'));
         setFunctions(funcs.filter(f => f.status === 'active'));
 
