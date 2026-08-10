@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle2, XCircle, Clock, Image as ImageIcon, Loader2, Bell, RotateCcw, Store, User as UserIcon } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Image as ImageIcon, Loader2, Bell, RotateCcw, Store, User as UserIcon, Crown } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function PaymentProofValidation() {
@@ -20,6 +20,7 @@ export default function PaymentProofValidation() {
   const [processing, setProcessing] = useState(false);
   const [notifyingUser, setNotifyingUser] = useState(false);
   const [reexamining, setReexamining] = useState(false);
+  const [settingPlan, setSettingPlan] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -53,6 +54,19 @@ export default function PaymentProofValidation() {
   };
 
   // Nom du compte vendeur concerné par ce paiement (via la reservation, ou via le vendeur lui-meme pour une recharge/abonnement)
+  const getVendorProfile = (proof) => {
+    if (proof.payment_method === 'wallet_recharge_orange' || proof.membership_id) {
+      return vendorProfiles.find(v => v.user_id === proof.user_id) || null;
+    }
+    if (proof.booking_id) {
+      const booking = bookings.find(b => b.id === proof.booking_id);
+      if (booking) {
+        return vendorProfiles.find(v => v.user_id === booking.planner_id) || null;
+      }
+    }
+    return null;
+  };
+
   const getVendorName = (proof) => {
     // Cas 1 : recharge de portefeuille ou abonnement -> le vendeur EST le soumetteur
     if (proof.payment_method === 'wallet_recharge_orange' || proof.membership_id) {
@@ -321,6 +335,43 @@ L'équipe EventCrafter`
       });
     } finally {
       setNotifyingUser(false);
+    }
+  };
+
+  const handleSetVendorPlan = async (proof, newPlan) => {
+    const vendorProfile = getVendorProfile(proof);
+    if (!vendorProfile) {
+      toast({ title: "Erreur", description: "Aucun profil vendeur trouve pour ce paiement.", variant: "destructive" });
+      return;
+    }
+    setSettingPlan(true);
+    try {
+      await base44.entities.VendorProfile.update(vendorProfile.id, {
+        plan: newPlan,
+        subscription_status: 'active'
+      });
+
+      await base44.entities.Notification.create({
+        user_id: vendorProfile.user_id,
+        title: "Statut d'abonnement mis a jour",
+        message: `Votre statut a ete mis a jour vers ${newPlan.toUpperCase()} par l'administration.`,
+        type: "payment",
+        link: "/VendorDashboard",
+        is_read: false
+      });
+
+      toast({
+        title: "Statut mis a jour",
+        description: `Le compte est maintenant en statut ${newPlan.toUpperCase()}.`,
+        duration: 4000
+      });
+
+      fetchProofs();
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Erreur", description: "Impossible de mettre a jour le statut du vendeur.", variant: "destructive" });
+    } finally {
+      setSettingPlan(false);
     }
   };
 
