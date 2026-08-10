@@ -6,11 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle2, XCircle, Clock, Image as ImageIcon, Loader2, Bell, RotateCcw } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Image as ImageIcon, Loader2, Bell, RotateCcw, Store, User as UserIcon } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function PaymentProofValidation() {
   const [proofs, setProofs] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [vendorProfiles, setVendorProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProof, setSelectedProof] = useState(null);
   const [adminNotes, setAdminNotes] = useState("");
@@ -26,13 +29,45 @@ export default function PaymentProofValidation() {
   const fetchProofs = async () => {
     setLoading(true);
     try {
-      const allProofs = await base44.entities.PaymentProof.list('-created_date');
+      const [allProofs, allUsers, allBookings, allVendorProfiles] = await Promise.all([
+        base44.entities.PaymentProof.list('-created_date'),
+        base44.entities.User.list(),
+        base44.entities.Booking.list(),
+        base44.entities.VendorProfile.list()
+      ]);
       setProofs(allProofs);
+      setUsers(allUsers);
+      setBookings(allBookings);
+      setVendorProfiles(allVendorProfiles);
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Nom de la personne (client ou vendeur) qui a soumis la preuve
+  const getSubmitterName = (proof) => {
+    const u = users.find(usr => usr.id === proof.user_id);
+    return u ? (u.full_name || u.email) : 'Utilisateur inconnu';
+  };
+
+  // Nom du compte vendeur concerné par ce paiement (via la reservation, ou via le vendeur lui-meme pour une recharge/abonnement)
+  const getVendorName = (proof) => {
+    // Cas 1 : recharge de portefeuille ou abonnement -> le vendeur EST le soumetteur
+    if (proof.payment_method === 'wallet_recharge_orange' || proof.membership_id) {
+      const vp = vendorProfiles.find(v => v.user_id === proof.user_id);
+      return vp?.business_name || null;
+    }
+    // Cas 2 : paiement de reservation -> le vendeur est le prestataire de la reservation
+    if (proof.booking_id) {
+      const booking = bookings.find(b => b.id === proof.booking_id);
+      if (booking) {
+        const vp = vendorProfiles.find(v => v.user_id === booking.planner_id);
+        return vp?.business_name || null;
+      }
+    }
+    return null;
   };
 
   const handleValidate = async (proofId, status) => {
@@ -41,7 +76,6 @@ export default function PaymentProofValidation() {
       const currentUser = await base44.auth.me();
       const proof = proofs.find(p => p.id === proofId);
 
-      // Chargee une seule fois pour toutes les branches qui ont besoin d'envoyer un email
       const userList = await base44.entities.User.list();
       const proofUser = userList.find(u => u.id === proof.user_id);
 
@@ -53,10 +87,9 @@ export default function PaymentProofValidation() {
       });
 
       if (status === 'approved' && proof.payment_method === 'wallet_recharge_orange') {
-        // Recharge du portefeuille vendeur (pas liee a une reservation/abonnement)
-        const vendorProfiles = await base44.entities.VendorProfile.filter({ user_id: proof.user_id });
-        if (vendorProfiles.length > 0) {
-          const vp = vendorProfiles[0];
+        const vendorProfilesFiltered = await base44.entities.VendorProfile.filter({ user_id: proof.user_id });
+        if (vendorProfilesFiltered.length > 0) {
+          const vp = vendorProfilesFiltered[0];
           await base44.entities.VendorProfile.update(vp.id, {
             account_balance: (vp.account_balance || 0) + proof.amount
           });
@@ -79,7 +112,6 @@ export default function PaymentProofValidation() {
             is_read: false
           });
 
-          // Email de confirmation de recharge
           if (proofUser) {
             await SendEmail({
               to: proofUser.email,
@@ -103,10 +135,8 @@ export default function PaymentProofValidation() {
       }
 
       if (status === 'approved') {
-        // Process the payment
         let payment_method = proof.payment_method;
         
-        // Create Transaction Record (Escrow)
         const transaction = await base44.entities.Transaction.create({
           user_id: proof.user_id,
           amount: proof.amount,
@@ -117,7 +147,6 @@ export default function PaymentProofValidation() {
           reference_id: proof.booking_id
         });
 
-        // Generate Receipt
         if (proof.booking_id) {
           const booking = await base44.entities.Booking.list().then(b => b.find(bk => bk.id === proof.booking_id));
           if (booking) {
@@ -133,19 +162,16 @@ export default function PaymentProofValidation() {
               details: `Payment validated from proof ${proof.proof_code}`
             });
 
-            // Update Invoice Status
             if (proof.invoice_id) {
               await base44.entities.Invoice.update(proof.invoice_id, { status: 'paid' });
             }
 
-            // Update Booking Status
             await base44.entities.Booking.update(proof.booking_id, {
               status: 'confirmed',
               payment_status: 'paid',
               paid_amount: (booking.paid_amount || 0) + proof.amount
             });
 
-            // Notify Vendor
             await base44.entities.Notification.create({
               user_id: booking.planner_id,
               title: "Paiement Validé - Prêt à démarrer",
@@ -155,7 +181,6 @@ export default function PaymentProofValidation() {
               is_read: false
             });
 
-            // Email au vendeur
             const vendorUser = userList.find(u => u.id === booking.planner_id);
             if (vendorUser) {
               await SendEmail({
@@ -167,7 +192,6 @@ export default function PaymentProofValidation() {
           }
         }
 
-        // Handle membership subscription
         if (proof.membership_id) {
           const membership = await base44.entities.Membership.list().then(m => m.find(mb => mb.id === proof.membership_id));
           if (membership) {
@@ -176,10 +200,9 @@ export default function PaymentProofValidation() {
               payment_status: 'paid'
             });
 
-            // SÉCURITÉ CRITIQUE: SEUL l'admin peut changer le plan après validation
-            const vendorProfiles = await base44.entities.VendorProfile.filter({ user_id: proof.user_id });
-            if (vendorProfiles.length > 0) {
-              await base44.entities.VendorProfile.update(vendorProfiles[0].id, {
+            const vendorProfilesFiltered = await base44.entities.VendorProfile.filter({ user_id: proof.user_id });
+            if (vendorProfilesFiltered.length > 0) {
+              await base44.entities.VendorProfile.update(vendorProfilesFiltered[0].id, {
                 plan: membership.membership_type_code.toLowerCase(),
                 subscription_status: 'active',
                 subscription_end_date: membership.end_date
@@ -188,7 +211,6 @@ export default function PaymentProofValidation() {
           }
         }
 
-        // Notify user
         await base44.entities.Notification.create({
           user_id: proof.user_id,
           title: "Paiement Validé ✅",
@@ -198,7 +220,6 @@ export default function PaymentProofValidation() {
           is_read: false
         });
 
-        // Email au client
         if (proofUser) {
           await SendEmail({
             to: proofUser.email,
@@ -213,7 +234,6 @@ export default function PaymentProofValidation() {
           duration: 4000
         });
       } else {
-        // Notify user of rejection (cloche + email)
         await base44.entities.Notification.create({
           user_id: proof.user_id,
           title: "Paiement Rejeté ❌",
@@ -256,7 +276,6 @@ export default function PaymentProofValidation() {
   const handleNotifyRejection = async (proof) => {
     setNotifyingUser(true);
     try {
-      // Notification via cloche
       await base44.entities.Notification.create({
         user_id: proof.user_id,
         title: "Paiement Rejeté ❌",
@@ -266,7 +285,6 @@ export default function PaymentProofValidation() {
         is_read: false
       });
 
-      // Email
       const userList = await base44.entities.User.list();
       const rejectedUser = userList.find(u => u.id === proof.user_id);
       
@@ -372,33 +390,47 @@ L'équipe EventCrafter`
             </div>
           ) : (
             <div className="space-y-4">
-              {proofs.map((proof) => (
-                <div key={proof.id} className="border rounded-lg p-4 hover:bg-stone-50">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-grow space-y-2">
-                      <div className="flex items-center gap-3">
-                        <h4 className="font-semibold">{proof.proof_code}</h4>
-                        <StatusBadge status={proof.status} />
+              {proofs.map((proof) => {
+                const submitterName = getSubmitterName(proof);
+                const vendorName = getVendorName(proof);
+                return (
+                  <div key={proof.id} className="border rounded-lg p-4 hover:bg-stone-50">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-grow space-y-2">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <h4 className="font-semibold">{proof.proof_code}</h4>
+                          <StatusBadge status={proof.status} />
+                        </div>
+                        <div className="flex items-center gap-4 flex-wrap text-sm">
+                          <span className="flex items-center gap-1 font-medium text-stone-800">
+                            <UserIcon className="w-3.5 h-3.5 text-stone-400" /> {submitterName}
+                          </span>
+                          {vendorName && (
+                            <span className="flex items-center gap-1 font-medium text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full">
+                              <Store className="w-3.5 h-3.5" /> Vendeur : {vendorName}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-stone-600 space-y-1">
+                          <p>Montant: <strong>{proof.amount?.toLocaleString()} FCFA</strong></p>
+                          <p>Méthode: {proof.payment_method}</p>
+                          <p>Téléphone: {proof.phone_number}</p>
+                          <p>Date: {new Date(proof.created_date).toLocaleString()}</p>
+                        </div>
                       </div>
-                      <div className="text-sm text-stone-600 space-y-1">
-                        <p>Montant: <strong>{proof.amount?.toLocaleString()} FCFA</strong></p>
-                        <p>Méthode: {proof.payment_method}</p>
-                        <p>Téléphone: {proof.phone_number}</p>
-                        <p>Date: {new Date(proof.created_date).toLocaleString()}</p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedProof(proof)}
+                        >
+                          Voir détails
+                        </Button>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSelectedProof(proof)}
-                      >
-                        Voir détails
-                      </Button>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
@@ -414,6 +446,16 @@ L'équipe EventCrafter`
             <div className="space-y-4">
               <div className="border rounded-lg p-4 bg-stone-50">
                 <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="col-span-2 flex items-center gap-2 pb-2 border-b border-stone-200">
+                    <UserIcon className="w-4 h-4 text-stone-500" />
+                    <strong>Soumis par :</strong> {getSubmitterName(selectedProof)}
+                  </div>
+                  {getVendorName(selectedProof) && (
+                    <div className="col-span-2 flex items-center gap-2 pb-2 border-b border-stone-200">
+                      <Store className="w-4 h-4 text-rose-600" />
+                      <strong>Vendeur concerné :</strong> {getVendorName(selectedProof)}
+                    </div>
+                  )}
                   <div><strong>Montant:</strong> {selectedProof.amount?.toLocaleString()} FCFA</div>
                   <div><strong>Méthode:</strong> {selectedProof.payment_method}</div>
                   <div><strong>Téléphone:</strong> {selectedProof.phone_number}</div>
