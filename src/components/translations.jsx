@@ -2299,6 +2299,7 @@ export const translations = {
       searchErrorMessage: "Une erreur est survenue pendant la recherche. Reessayez.",
       assistantTitle: "Assistant EventCrafter",
       assistantSubtitle: "Trouvez le bon prestataire en quelques questions, ou posez directement votre question"
+    }
   },
   pcm: {
     nav: {
