@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/apiClient";
+import { UploadFile } from "@/api/integrations";
 import { FileText, Plus, Download, Send, CreditCard, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,17 +13,77 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+async function generateInvoiceFile(invoiceData, booking) {
+    const invoiceHtml = `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Facture ${invoiceData.invoice_number}</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }
+  .header { background: #FF6B35; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { margin: 0; font-size: 28px; }
+  .invoice-meta { text-align: right; }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  th { background: #f5f5f5; padding: 10px; text-align: left; border-bottom: 2px solid #ddd; }
+  td { padding: 10px; border-bottom: 1px solid #eee; }
+  .total-section { text-align: right; margin: 20px 0; }
+  .total-amount { font-size: 20px; font-weight: bold; color: #FF6B35; }
+  .footer { background: #f5f5f5; padding: 15px; text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
+  @media print { body { padding: 0; } .no-print { display: none; } }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div><h1>EventCrafter</h1><p style="margin:0">Marketplace</p></div>
+    <div class="invoice-meta">
+      <h2 style="margin:0;color:white">FACTURE</h2>
+      <p style="margin:0">N. ${invoiceData.invoice_number}</p>
+      <p style="margin:0">Emise le: ${new Date(invoiceData.issued_date).toLocaleDateString('fr-FR')}</p>
+      <p style="margin:0">Echeance: ${new Date(invoiceData.due_date).toLocaleDateString('fr-FR')}</p>
+    </div>
+  </div>
+  <div style="margin: 20px 0;">
+    <p><strong>Facture a :</strong> ${invoiceData.billing_address || ''}</p>
+    ${invoiceData.focal_point_name ? `<p><strong>A l'attention de :</strong> ${invoiceData.focal_point_name}</p>` : ''}
+    ${invoiceData.focal_point_contact ? `<p><strong>Contact :</strong> ${invoiceData.focal_point_contact}</p>` : ''}
+  </div>
+  <table>
+    <thead><tr><th>Description</th><th>Quantite</th><th>Prix Unitaire</th><th>Total</th></tr></thead>
+    <tbody>
+      ${invoiceData.items.map(item => `
+      <tr>
+        <td>${item.description}</td>
+        <td>${item.quantity}</td>
+        <td>${item.unit_price.toLocaleString()} FCFA</td>
+        <td>${item.total.toLocaleString()} FCFA</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>
+  <div class="total-section">
+    <p class="total-amount">TOTAL: ${invoiceData.amount.toLocaleString()} FCFA</p>
+  </div>
+  <div class="footer">
+    <p>EventCrafter Marketplace - Plateforme de services evenementiels</p>
+    <p>Contact: support@eventcraftercm.com | +237 670 93 43 78 | Merci de votre confiance !</p>
+  </div>
+</body>
+</html>`;
+
+    const htmlBlob = new Blob([invoiceHtml], { type: 'text/html' });
+    const invoiceFile = new File([htmlBlob], `Facture_${invoiceData.invoice_number}.html`, { type: 'text/html' });
+    const { file_url } = await UploadFile({ file: invoiceFile });
+    return file_url;
+}
+
 export default function InvoiceManager({ booking, currentUser, onPaymentClick }) {
     const { toast } = useToast();
     const [open, setOpen] = useState(false);
     const [invoices, setInvoices] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [view, setView] = useState("list"); // list, create
+    const [view, setView] = useState("list");
     const [contract, setContract] = useState(null);
 
     const isProvider = currentUser.id === booking.planner_id;
 
-    // New Invoice Form State
     const [newInvoice, setNewInvoice] = useState({
         type: "global",
         percentage: 100,
@@ -49,16 +110,14 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
             if (contracts.length > 0) {
                 const c = contracts[0];
                 setContract(c);
-                // Default amount and details to contract data
                 setNewInvoice(prev => ({ 
                     ...prev, 
                     amount: c.contract_amount,
-                    billing_address: c.delivery_address || "", // Default billing to delivery if available
+                    billing_address: c.delivery_address || "",
                     focal_point_name: c.focal_point_name || "",
                     focal_point_contact: c.focal_point_contact || ""
                 }));
             } else {
-                // Fallback to booking amount
                 setNewInvoice(prev => ({ ...prev, amount: booking.total_amount }));
             }
         } catch (error) {
@@ -85,7 +144,7 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
                 booking_id: booking.id,
                 contract_id: contract ? contract.id : null,
                 emitter_id: booking.planner_id,
-                recipient_id: currentUser.id === booking.planner_id ? booking.client_id : currentUser.id, // Recipient is Client
+                recipient_id: currentUser.id === booking.planner_id ? booking.client_id : currentUser.id,
                 type: newInvoice.type,
                 percentage: newInvoice.type === 'partial_deposit' ? parseFloat(newInvoice.percentage) : 100,
                 amount: parseFloat(finalAmount),
@@ -105,6 +164,9 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
                 ]
             };
 
+            const invoiceUrl = await generateInvoiceFile(invoiceData, booking);
+            invoiceData.invoice_url = invoiceUrl;
+
             await base44.entities.Invoice.create(invoiceData);
             toast({ title: "Facture Générée", description: "La facture a été créée avec succès." });
             setView("list");
@@ -115,6 +177,14 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleDownload = (inv) => {
+        if (!inv.invoice_url) {
+            toast({ title: "Facture indisponible", description: "Le fichier de cette facture n'a pas pu etre genere. Contactez le support.", variant: "destructive" });
+            return;
+        }
+        window.open(inv.invoice_url, '_blank', 'noopener,noreferrer');
     };
 
     const getStatusConfig = (status) => {
@@ -197,21 +267,19 @@ export default function InvoiceManager({ booking, currentUser, onPaymentClick })
                                                 <p className="font-bold text-lg mt-1">{inv.amount?.toLocaleString()} FCFA</p>
                                             </div>
                                             <div className="flex gap-2">
-                                                <Button size="sm" variant="outline" title="Télécharger PDF">
+                                                <Button size="sm" variant="outline" title="Télécharger la facture" onClick={() => handleDownload(inv)}>
                                                     <Download className="w-4 h-4" />
                                                 </Button>
                                                 {!isProvider && inv.status !== 'paid' && (
                                                     <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => {
                                                         if(onPaymentClick) onPaymentClick(inv);
-                                                        setOpen(false); // Close invoice manager to show payment modal
+                                                        setOpen(false);
                                                     }}>
                                                         <CreditCard className="w-4 h-4 mr-2" /> Payer Maintenant
                                                     </Button>
                                                 )}
                                                 {inv.status === 'paid' && (
-                                                    <Button size="sm" variant="outline" className="text-stone-600" onClick={() => {
-                                                        toast({ description: "Téléchargement du reçu... (Simulé)" });
-                                                    }}>
+                                                    <Button size="sm" variant="outline" className="text-stone-600" onClick={() => handleDownload(inv)}>
                                                         <FileText className="w-4 h-4 mr-2" /> Reçu
                                                     </Button>
                                                 )}
