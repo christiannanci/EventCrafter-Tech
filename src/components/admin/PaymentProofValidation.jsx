@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle2, XCircle, Clock, Image as ImageIcon, Loader2, Bell, RotateCcw, Store, User as UserIcon, Crown } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Image as ImageIcon, Loader2, Bell, RotateCcw, Store, User as UserIcon, Crown, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function PaymentProofValidation() {
@@ -22,6 +22,7 @@ export default function PaymentProofValidation() {
   const [notifyingUser, setNotifyingUser] = useState(false);
   const [reexamining, setReexamining] = useState(false);
   const [settingPlan, setSettingPlan] = useState(false);
+  const [deletingAll, setDeletingAll] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -397,6 +398,28 @@ L'équipe EventCrafter`
     await handleSetVendorPlan(proof, plan);
   };
 
+  const handleDeleteAll = async () => {
+    if (proofs.length === 0) return;
+    const confirmed = confirm(`Etes-vous sur de vouloir supprimer definitivement les ${proofs.length} preuve(s) de paiement de cette liste ? Cette action est irreversible.`);
+    if (!confirmed) return;
+
+    setDeletingAll(true);
+    try {
+      for (const proof of proofs) {
+        await base44.entities.PaymentProof.delete(proof.id);
+      }
+      toast({ title: "Liste supprimee", description: `${proofs.length} preuve(s) supprimee(s).`, duration: 4000 });
+      setSelectedProof(null);
+      fetchProofs();
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Erreur", description: "Certaines preuves n'ont pas pu etre supprimees.", variant: "destructive" });
+      fetchProofs();
+    } finally {
+      setDeletingAll(false);
+    }
+  };
+
   const handleReexamine = async (proofId) => {
     setReexamining(true);
     try {
@@ -451,10 +474,24 @@ L'équipe EventCrafter`
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ImageIcon className="w-5 h-5" />
-            Validation des preuves de paiement
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <ImageIcon className="w-5 h-5" />
+              Validation des preuves de paiement
+            </CardTitle>
+            {proofs.length > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-red-300 text-red-600 hover:bg-red-50"
+                onClick={handleDeleteAll}
+                disabled={deletingAll}
+              >
+                {deletingAll ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                Supprimer toute la liste
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {proofs.length === 0 ? (
