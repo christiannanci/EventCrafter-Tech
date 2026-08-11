@@ -240,7 +240,7 @@ export default function LeadsSection({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-rose-600" />
