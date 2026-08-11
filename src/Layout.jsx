@@ -349,6 +349,16 @@ function LayoutContent({ children }) {
               ))}
                {user ? (
                 <>
+                  {(user.role === 'admin' || (user.staff_role && user.staff_role !== 'none')) && (
+                    <Link
+                      to={createPageUrl('AdminDashboard')}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium text-rose-600 hover:bg-rose-50 rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Shield className="w-4 h-4" />
+                      {t('layout.backOffice')}
+                    </Link>
+                  )}
                   {hasVendorProfile && (
                     <Link 
                       to={createPageUrl('VendorDashboard')}
