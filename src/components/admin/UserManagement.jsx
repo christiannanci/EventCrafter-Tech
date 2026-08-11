@@ -6,12 +6,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Users, Shield } from "lucide-react";
+import { Users, Shield, Trash2, Loader2 } from "lucide-react";
 import StaffInviteDialog from './StaffInviteDialog';
 
 export default function UserManagement() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [deletingId, setDeletingId] = useState(null);
 
     useEffect(() => {
         fetchUsers();
@@ -60,6 +61,44 @@ export default function UserManagement() {
         } catch (error) {
             console.error("Failed to update role", error);
             toast.error("Erreur lors de la mise a jour du role");
+        }
+    };
+
+    // Supprime les services et les profils (vendeur/client) d'un compte. Le compte
+    // de connexion Supabase Auth lui-meme n'est PAS supprime (necessite une cle
+    // service_role non exposee cote client) - il reste mais vide, sans donnees utilisables.
+    const handleDeleteAccount = async (user) => {
+        const confirmed = confirm(
+            `Etes-vous sur de vouloir supprimer definitivement le compte de "${user.full_name || user.email}" et toutes ses offres de service associees ?\n\nCette action est irreversible. Le compte de connexion restera techniquement present mais sera vide et inutilisable.`
+        );
+        if (!confirmed) return;
+
+        setDeletingId(user.id);
+        try {
+            const allServices = await base44.entities.Service.list();
+            const userServices = allServices.filter(s => s.planner_id === user.id || s.created_by === user.id);
+            for (const service of userServices) {
+                await base44.entities.Service.delete(service.id);
+            }
+
+            const vendorProfiles = await base44.entities.VendorProfile.filter({ user_id: user.id });
+            for (const vp of vendorProfiles) {
+                await base44.entities.VendorProfile.delete(vp.id);
+            }
+
+            const clientProfiles = await base44.entities.ClientProfile.filter({ user_id: user.id });
+            for (const cp of clientProfiles) {
+                await base44.entities.ClientProfile.delete(cp.id);
+            }
+
+            toast.success(`Compte supprime : ${userServices.length} service(s), ${vendorProfiles.length} profil(s) vendeur et ${clientProfiles.length} profil(s) client retires.`);
+            fetchUsers();
+        } catch (error) {
+            console.error("Failed to delete account", error);
+            toast.error("Erreur lors de la suppression du compte. Certaines donnees ont peut-etre ete partiellement supprimees.");
+            fetchUsers();
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -113,6 +152,7 @@ export default function UserManagement() {
                                 <TableHead>Email</TableHead>
                                 <TableHead>Role Back Office</TableHead>
                                 <TableHead>Action</TableHead>
+                                <TableHead>Supprimer</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -143,6 +183,21 @@ export default function UserManagement() {
                                                     <SelectItem value="tech">{'\uD83D\uDD27'} Technicien</SelectItem>
                                                 </SelectContent>
                                             </Select>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="border-red-300 text-red-600 hover:bg-red-50"
+                                                disabled={deletingId === u.id}
+                                                onClick={() => handleDeleteAccount(u)}
+                                            >
+                                                {deletingId === u.id ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="w-4 h-4" />
+                                                )}
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 );
