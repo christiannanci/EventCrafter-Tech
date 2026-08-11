@@ -79,6 +79,14 @@ function LayoutContent({ children }) {
         setHasVendorProfile(vendorProfiles.length > 0);
         setHasClientProfile(clientProfiles.length > 0);
 
+        // Bloque la connexion si le compte vendeur a ete suspendu par l'admin
+        if (vendorProfiles.length > 0 && vendorProfiles[0].account_suspended === true) {
+          await base44.auth.logout();
+          alert("Votre compte a ete suspendu par l'administration. Contactez le support pour plus d'informations.");
+          window.location.href = '/';
+          return;
+        }
+
         import('@/components/RealtimeNotificationSystem').then(({ realtimeNotifications }) => {
           if (mounted) realtimeNotifications.initialize(currentUser.id, currentUser.role);
         }).catch(() => {});
