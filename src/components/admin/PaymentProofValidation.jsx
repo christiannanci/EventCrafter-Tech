@@ -476,7 +476,7 @@ L'équipe EventCrafter`
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <CardTitle className="flex items-center gap-2">
               <ImageIcon className="w-5 h-5" />
               Validation des preuves de paiement
@@ -503,7 +503,7 @@ L'équipe EventCrafter`
                 const vendorName = getVendorName(proof);
                 return (
                   <div key={proof.id} className="border rounded-lg p-4 hover:bg-stone-50">
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                       <div className="flex-grow space-y-2">
                         <div className="flex items-center gap-3 flex-wrap">
                           <h4 className="font-semibold">{proof.proof_code}</h4>
