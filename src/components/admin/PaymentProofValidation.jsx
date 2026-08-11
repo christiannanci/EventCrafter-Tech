@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle2, XCircle, Clock, Image as ImageIcon, Loader2, Bell, RotateCcw, Store, User as UserIcon } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Image as ImageIcon, Loader2, Bell, RotateCcw, Store, User as UserIcon, Crown } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function PaymentProofValidation() {
@@ -14,12 +14,14 @@ export default function PaymentProofValidation() {
   const [users, setUsers] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [vendorProfiles, setVendorProfiles] = useState([]);
+  const [memberships, setMemberships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProof, setSelectedProof] = useState(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [processing, setProcessing] = useState(false);
   const [notifyingUser, setNotifyingUser] = useState(false);
   const [reexamining, setReexamining] = useState(false);
+  const [settingPlan, setSettingPlan] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -29,16 +31,18 @@ export default function PaymentProofValidation() {
   const fetchProofs = async () => {
     setLoading(true);
     try {
-      const [allProofs, allUsers, allBookings, allVendorProfiles] = await Promise.all([
+      const [allProofs, allUsers, allBookings, allVendorProfiles, allMemberships] = await Promise.all([
         base44.entities.PaymentProof.list('-created_date'),
         base44.entities.User.list(),
         base44.entities.Booking.list(),
-        base44.entities.VendorProfile.list()
+        base44.entities.VendorProfile.list(),
+        base44.entities.Membership.list()
       ]);
       setProofs(allProofs);
       setUsers(allUsers);
       setBookings(allBookings);
       setVendorProfiles(allVendorProfiles);
+      setMemberships(allMemberships);
     } catch (error) {
       console.error(error);
     } finally {
@@ -46,20 +50,39 @@ export default function PaymentProofValidation() {
     }
   };
 
-  // Nom de la personne (client ou vendeur) qui a soumis la preuve
   const getSubmitterName = (proof) => {
     const u = users.find(usr => usr.id === proof.user_id);
     return u ? (u.full_name || u.email) : 'Utilisateur inconnu';
   };
 
-  // Nom du compte vendeur concerné par ce paiement (via la reservation, ou via le vendeur lui-meme pour une recharge/abonnement)
+  const getChosenPlan = (proof) => {
+    if (!proof.membership_id) return null;
+    const membership = memberships.find(m => m.id === proof.membership_id);
+    if (!membership) return null;
+    const code = (membership.membership_type_code || '').toLowerCase();
+    if (code.includes('premium')) return 'premium';
+    if (code.includes('gold')) return 'gold';
+    return null;
+  };
+
+  const getVendorProfile = (proof) => {
+    if (proof.payment_method === 'wallet_recharge_orange' || proof.membership_id) {
+      return vendorProfiles.find(v => v.user_id === proof.user_id) || null;
+    }
+    if (proof.booking_id) {
+      const booking = bookings.find(b => b.id === proof.booking_id);
+      if (booking) {
+        return vendorProfiles.find(v => v.user_id === booking.planner_id) || null;
+      }
+    }
+    return null;
+  };
+
   const getVendorName = (proof) => {
-    // Cas 1 : recharge de portefeuille ou abonnement -> le vendeur EST le soumetteur
     if (proof.payment_method === 'wallet_recharge_orange' || proof.membership_id) {
       const vp = vendorProfiles.find(v => v.user_id === proof.user_id);
       return vp?.business_name || null;
     }
-    // Cas 2 : paiement de reservation -> le vendeur est le prestataire de la reservation
     if (proof.booking_id) {
       const booking = bookings.find(b => b.id === proof.booking_id);
       if (booking) {
@@ -136,7 +159,7 @@ export default function PaymentProofValidation() {
 
       if (status === 'approved') {
         let payment_method = proof.payment_method;
-        
+
         const transaction = await base44.entities.Transaction.create({
           user_id: proof.user_id,
           amount: proof.amount,
@@ -228,8 +251,8 @@ export default function PaymentProofValidation() {
           });
         }
 
-        toast({ 
-          title: "Validé", 
+        toast({
+          title: "Validé",
           description: "Paiement approuvé et traité",
           duration: 4000
         });
@@ -251,8 +274,8 @@ export default function PaymentProofValidation() {
           });
         }
 
-        toast({ 
-          title: "Rejeté", 
+        toast({
+          title: "Rejeté",
           description: "Paiement rejeté et utilisateur notifié",
           duration: 4000
         });
@@ -263,8 +286,8 @@ export default function PaymentProofValidation() {
       setAdminNotes("");
     } catch (error) {
       console.error(error);
-      toast({ 
-        title: "Erreur", 
+      toast({
+        title: "Erreur",
         variant: "destructive",
         duration: 4000
       });
@@ -287,7 +310,7 @@ export default function PaymentProofValidation() {
 
       const userList = await base44.entities.User.list();
       const rejectedUser = userList.find(u => u.id === proof.user_id);
-      
+
       if (rejectedUser) {
         await SendEmail({
           to: rejectedUser.email,
@@ -306,15 +329,15 @@ L'équipe EventCrafter`
         });
       }
 
-      toast({ 
-        title: "✅ Notification envoyée", 
+      toast({
+        title: "✅ Notification envoyée",
         description: "L'utilisateur a été notifié du rejet (cloche + email)",
         duration: 4000
       });
     } catch (error) {
       console.error(error);
-      toast({ 
-        title: "Erreur d'envoi", 
+      toast({
+        title: "Erreur d'envoi",
         description: "Impossible d'envoyer la notification",
         variant: "destructive",
         duration: 4000
@@ -322,6 +345,56 @@ L'équipe EventCrafter`
     } finally {
       setNotifyingUser(false);
     }
+  };
+
+  const handleSetVendorPlan = async (proof, newPlan) => {
+    const vendorProfile = getVendorProfile(proof);
+    if (!vendorProfile) {
+      toast({ title: "Erreur", description: "Aucun profil vendeur trouve pour ce paiement.", variant: "destructive" });
+      return;
+    }
+    setSettingPlan(true);
+    try {
+      const payload = {
+        plan: newPlan,
+        subscription_status: newPlan === 'free' ? 'inactive' : 'active'
+      };
+
+      if (newPlan !== 'free') {
+        const oneMonthFromNow = new Date();
+        oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+        payload.subscription_end_date = oneMonthFromNow.toISOString();
+      }
+
+      await base44.entities.VendorProfile.update(vendorProfile.id, payload);
+
+      await base44.entities.Notification.create({
+        user_id: vendorProfile.user_id,
+        title: "Statut d'abonnement mis a jour",
+        message: `Votre statut a ete mis a jour vers ${newPlan.toUpperCase()} par l'administration.`,
+        type: "payment",
+        link: "/VendorDashboard",
+        is_read: false
+      });
+
+      toast({
+        title: "Statut mis a jour",
+        description: `Le compte est maintenant en statut ${newPlan.toUpperCase()}.`,
+        duration: 4000
+      });
+
+      fetchProofs();
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Erreur", description: "Impossible de mettre a jour le statut du vendeur.", variant: "destructive" });
+    } finally {
+      setSettingPlan(false);
+    }
+  };
+
+  const handleApproveWithPlan = async (proof, plan) => {
+    await handleValidate(proof.id, 'approved');
+    await handleSetVendorPlan(proof, plan);
   };
 
   const handleReexamine = async (proofId) => {
@@ -334,8 +407,8 @@ L'équipe EventCrafter`
         validated_date: null
       });
 
-      toast({ 
-        title: "✅ Réouvert pour réexamen", 
+      toast({
+        title: "✅ Réouvert pour réexamen",
         description: "La preuve de paiement est de nouveau en attente",
         duration: 4000
       });
@@ -344,8 +417,8 @@ L'équipe EventCrafter`
       setSelectedProof(null);
     } catch (error) {
       console.error(error);
-      toast({ 
-        title: "Erreur", 
+      toast({
+        title: "Erreur",
         variant: "destructive",
         duration: 4000
       });
@@ -414,7 +487,7 @@ L'équipe EventCrafter`
                         <div className="text-sm text-stone-600 space-y-1">
                           <p>Montant: <strong>{proof.amount?.toLocaleString()} FCFA</strong></p>
                           <p>Méthode: {proof.payment_method}</p>
-                          <p>Téléphone: {proof.phone_number}</p>
+                          <p>Téléphone: {proof.phone_number || 'Non renseigné'}</p>
                           <p>Date: {new Date(proof.created_date).toLocaleString()}</p>
                         </div>
                       </div>
@@ -442,7 +515,7 @@ L'équipe EventCrafter`
             <DialogHeader>
               <DialogTitle>Validation de preuve - {selectedProof.proof_code}</DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-4">
               <div className="border rounded-lg p-4 bg-stone-50">
                 <div className="grid grid-cols-2 gap-3 text-sm">
@@ -458,7 +531,7 @@ L'équipe EventCrafter`
                   )}
                   <div><strong>Montant:</strong> {selectedProof.amount?.toLocaleString()} FCFA</div>
                   <div><strong>Méthode:</strong> {selectedProof.payment_method}</div>
-                  <div><strong>Téléphone:</strong> {selectedProof.phone_number}</div>
+                  <div><strong>Téléphone:</strong> {selectedProof.phone_number || 'Non renseigné'}</div>
                   <div><strong>Date:</strong> {new Date(selectedProof.created_date).toLocaleString()}</div>
                 </div>
               </div>
@@ -466,9 +539,9 @@ L'équipe EventCrafter`
               <div>
                 <h4 className="font-semibold mb-2">Preuve de paiement:</h4>
                 {selectedProof.proof_image_url ? (
-                  <img 
-                    src={selectedProof.proof_image_url} 
-                    alt="Payment proof" 
+                  <img
+                    src={selectedProof.proof_image_url}
+                    alt="Payment proof"
                     className="w-full rounded-lg border max-h-[500px] object-contain bg-stone-50"
                     onError={(e) => {
                       console.error("Failed to load image:", selectedProof.proof_image_url);
@@ -531,16 +604,43 @@ L'équipe EventCrafter`
                         </div>
                       </DialogContent>
                     </Dialog>
-                    
-                    <Button
-                      className="flex-1 bg-green-600 hover:bg-green-700"
-                      onClick={() => handleValidate(selectedProof.id, 'approved')}
-                      disabled={processing}
-                    >
-                      {processing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-                      Approuver
-                    </Button>
+
+                    {selectedProof.membership_id ? (
+                      <>
+                        <Button
+                          className="flex-1 bg-purple-600 hover:bg-purple-700"
+                          onClick={() => handleApproveWithPlan(selectedProof, 'premium')}
+                          disabled={processing || settingPlan}
+                        >
+                          {(processing || settingPlan) ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Crown className="w-4 h-4 mr-2" />}
+                          Premium
+                        </Button>
+                        <Button
+                          className="flex-1 bg-amber-500 hover:bg-amber-600"
+                          onClick={() => handleApproveWithPlan(selectedProof, 'gold')}
+                          disabled={processing || settingPlan}
+                        >
+                          {(processing || settingPlan) ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Crown className="w-4 h-4 mr-2" />}
+                          Gold
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                        onClick={() => handleValidate(selectedProof.id, 'approved')}
+                        disabled={processing}
+                      >
+                        {processing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                        Approuver
+                      </Button>
+                    )}
                   </div>
+
+                  {selectedProof.membership_id && getChosenPlan(selectedProof) && (
+                    <p className="text-xs text-stone-500 text-center">
+                      Le vendeur avait demande le plan <strong className="uppercase">{getChosenPlan(selectedProof)}</strong> — cliquez sur le bouton correspondant pour confirmer, ou choisissez l'autre pour l'attribuer a la place.
+                    </p>
+                  )}
                 </>
               )}
 
@@ -555,6 +655,46 @@ L'équipe EventCrafter`
                       <p className="text-sm mt-2"><strong>Notes:</strong> {selectedProof.admin_notes}</p>
                     )}
                   </div>
+
+                  {selectedProof.membership_id && getVendorProfile(selectedProof) && (
+                    <div className="mt-4">
+                      <p className="text-xs font-semibold text-stone-500 mb-2 flex items-center gap-1">
+                        <Crown className="w-3.5 h-3.5 text-amber-500" /> Redefinir manuellement le statut du vendeur :
+                      </p>
+                      <div className="flex gap-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 border-purple-300 text-purple-700 hover:bg-purple-50"
+                          disabled={settingPlan}
+                          onClick={() => handleSetVendorPlan(selectedProof, 'premium')}
+                        >
+                          {settingPlan ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Crown className="w-3.5 h-3.5 mr-2" />}
+                          Premium
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 border-amber-300 text-amber-700 hover:bg-amber-50"
+                          disabled={settingPlan}
+                          onClick={() => handleSetVendorPlan(selectedProof, 'gold')}
+                        >
+                          {settingPlan ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Crown className="w-3.5 h-3.5 mr-2" />}
+                          Gold
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 border-stone-300 text-stone-600 hover:bg-stone-50"
+                          disabled={settingPlan}
+                          onClick={() => handleSetVendorPlan(selectedProof, 'free')}
+                        >
+                          {settingPlan ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : null}
+                          Redevenir Free
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
                   {selectedProof.status === 'rejected' && (
                     <div className="flex gap-3 mt-4">
