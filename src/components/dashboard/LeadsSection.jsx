@@ -97,7 +97,7 @@ export default function LeadsSection({
       if (useCredit) {
         if ((vendorProfile.reward_credits || 0) < 1) {
           toast({
-            title: `? ${t('vendor.notEnoughCreditsTitle')}`,
+            title: `\uD83D\uDCB3 ${t('vendor.notEnoughCreditsTitle')}`,
             description: t('vendor.notEnoughCreditsDesc'),
             variant: "destructive"
           });
@@ -113,7 +113,7 @@ export default function LeadsSection({
       } else {
         if ((vendorProfile.account_balance || 0) < amountPaid) {
           toast({
-            title: `? ${t('vendor.insufficientBalanceTitle')}`,
+            title: `\u26A0\uFE0F ${t('vendor.insufficientBalanceTitle')}`,
             description: `${t('vendor.insufficientBalanceDescPrefix')} ${amountPaid.toLocaleString()} FCFA ${t('vendor.insufficientBalanceDescSuffix')}`,
             variant: "destructive"
           });
@@ -144,7 +144,7 @@ export default function LeadsSection({
       setUnlockedLeads(new Set([...unlockedLeads, lead.id]));
 
       toast({
-        title: useCredit ? `? ${t('vendor.leadUnlockedCreditTitle')}` : `? ${t('vendor.leadUnlockedTitle')}`,
+        title: useCredit ? `\u2705 ${t('vendor.leadUnlockedCreditTitle')}` : `\u2705 ${t('vendor.leadUnlockedTitle')}`,
         description: useCredit 
           ? `${t('vendor.creditUsed')} ${(vendorProfile.reward_credits || 0) - 1} ${t('vendor.creditsRemaining')}`
           : `${pricing.priceFCFA} ${t('vendor.debitedContactsVisible')}`,
@@ -155,7 +155,7 @@ export default function LeadsSection({
     } catch (error) {
       console.error('Unlock error:', error);
       toast({
-        title: `? ${t('vendor.genericError')}`,
+        title: `\u26A0\uFE0F ${t('vendor.genericError')}`,
         description: t('vendor.unlockLeadError'),
         variant: "destructive"
       });
@@ -222,7 +222,7 @@ export default function LeadsSection({
       });
 
       toast({
-        title: `? ${t('vendor.refundRequestSentTitle')}`,
+        title: `\u2705 ${t('vendor.refundRequestSentTitle')}`,
         description: unlock[0].unlock_type === 'reward_credit' 
           ? t('vendor.refundRequestSentCreditDesc')
           : `${t('vendor.refundRequestSentAmountPrefix')} ${(unlock[0].amount_paid || 0).toLocaleString()} FCFA ${t('vendor.refundRequestSentAmountSuffix')}`,
@@ -230,7 +230,7 @@ export default function LeadsSection({
     } catch (error) {
       console.error('Refund request error:', error);
       toast({
-        title: `? ${t('vendor.genericError')}`,
+        title: `\u26A0\uFE0F ${t('vendor.genericError')}`,
         description: t('vendor.refundRequestError'),
         variant: "destructive"
       });
@@ -248,7 +248,7 @@ export default function LeadsSection({
             </CardTitle>
             <p className="text-sm text-stone-500">
               {membershipStatus === 'premium' || membershipStatus === 'gold' 
-                ? `? ${t('vendor.unlimitedInstantAccess')}` 
+                ? `\uD83D\uDC51 ${t('vendor.unlimitedInstantAccess')}` 
                 : `${t('vendor.freePlanUsage2LeadsWeek')}`}
             </p>
           </div>
