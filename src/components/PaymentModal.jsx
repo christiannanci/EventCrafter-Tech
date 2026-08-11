@@ -83,7 +83,8 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
           payment_method: paymentMethod,
           proof_image_url: proofImage,
           phone_number: "",
-          status: 'pending'
+          status: 'pending',
+          created_date: new Date().toISOString()
         };
 
         if (booking?.id) proofData.booking_id = booking.id;
