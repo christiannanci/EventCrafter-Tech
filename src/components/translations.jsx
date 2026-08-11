@@ -1099,14 +1099,14 @@ export const translations = {
       "Garantie d'IntÃ©gritÃ© Spirituelle (audit de crÃ©dibilitÃ© par l'admin)": "Spiritual Integrity Guarantee (credibility audit by admin)"
     },
     aiAssistant: {
-      greetingLine1: "Hello ðŸ‘‹ I'm the EventCrafter Assistant.",
+      greetingLine1: "Hello \uD83D\uDC4B I'm the EventCrafter Assistant.",
       greetingLine2: "Answer a few questions and I'll suggest the best vendors for your event. You can also type directly what you're looking for in the text box below.",
       askEventType: "What type of event are you organizing?",
       askCategory: "What category of vendor are you looking for?",
       askCity: "Which city or neighborhood? (or leave empty if it doesn't matter)",
       askBudget: "What is your approximate budget?",
       askCultural: "Any particular cultural preference?",
-      searching: "Searching for the best vendors for you... ðŸ”",
+      searching: "Searching for the best vendors for you... \uD83D\uDD0D",
       anyPreference: "Doesn't matter",
       allServicesOption: "All Services",
       eventWedding: "Wedding",
@@ -2258,14 +2258,14 @@ export const translations = {
       "Garantie d'IntÃ©gritÃ© Spirituelle (audit de crÃ©dibilitÃ© par l'admin)": "Garantie d'Integrite Spirituelle (audit de credibilite par l'admin)"
     },
     aiAssistant: {
-      greetingLine1: "Bonjour ðŸ‘‹ Je suis l'Assistant EventCrafter.",
+      greetingLine1: "Bonjour \uD83D\uDC4B Je suis l'Assistant EventCrafter.",
       greetingLine2: "Repondez a quelques questions et je vous proposerai les meilleurs prestataires pour votre evenement. Vous pouvez aussi taper directement ce que vous cherchez dans la zone de texte en bas.",
       askEventType: "Quel type d'evenement organisez-vous ?",
       askCategory: "Quelle categorie de prestataire recherchez-vous ?",
       askCity: "Dans quelle ville ou quartier ? (ou laissez vide si peu importe)",
       askBudget: "Quel est votre budget approximatif ?",
       askCultural: "Une preference culturelle particuliere ?",
-      searching: "Je recherche les meilleurs prestataires pour vous... ðŸ”",
+      searching: "Je recherche les meilleurs prestataires pour vous... \uD83D\uDD0D",
       anyPreference: "Peu importe",
       allServicesOption: "Tous les Services",
       eventWedding: "Mariage",
