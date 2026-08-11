@@ -705,22 +705,34 @@ export default function Marketplace() {
                   size="icon"
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
+                  className="flex-shrink-0"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
                 
-                <div className="flex gap-1">
-                  {[...Array(totalPages)].map((_, i) => (
-                    <Button
-                      key={i}
-                      variant={page === i + 1 ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setPage(i + 1)}
-                      className={page === i + 1 ? "bg-rose-600 hover:bg-rose-700" : ""}
-                    >
-                      {i + 1}
-                    </Button>
-                  ))}
+                <div className="flex gap-1 overflow-x-auto max-w-[60vw] sm:max-w-none scrollbar-hide px-1">
+                  {[...Array(totalPages)].map((_, i) => {
+                    const pageNum = i + 1;
+                    const isNearCurrent = Math.abs(pageNum - page) <= 2;
+                    const isFirstOrLast = pageNum === 1 || pageNum === totalPages;
+                    if (!isNearCurrent && !isFirstOrLast && totalPages > 7) {
+                      if (pageNum === page - 3 || pageNum === page + 3) {
+                        return <span key={i} className="px-1 text-stone-400 flex items-center">...</span>;
+                      }
+                      return null;
+                    }
+                    return (
+                      <Button
+                        key={i}
+                        variant={page === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setPage(pageNum)}
+                        className={`flex-shrink-0 ${page === pageNum ? "bg-rose-600 hover:bg-rose-700" : ""}`}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
                 </div>
                 
                 <Button
@@ -728,6 +740,7 @@ export default function Marketplace() {
                   size="icon"
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
+                  className="flex-shrink-0"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Button>
