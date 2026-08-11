@@ -6,30 +6,7 @@ import { Sparkles, Send, Loader2, Star, MapPin, CheckCircle2, ArrowRight, Messag
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { fuzzySearch } from '@/components/FuzzySearch';
-
-// Options fixes du parcours guidé
-const EVENT_TYPES = [
-  { value: 'Wedding', label: 'Mariage' },
-  { value: 'Birthday', label: 'Anniversaire' },
-  { value: 'Corporate', label: 'Événement d\'Entreprise' },
-  { value: 'Conference', label: 'Conférence' },
-  { value: 'Religious', label: 'Cérémonie Religieuse / Dot' },
-  { value: 'Funeral', label: 'Funérailles' },
-  { value: 'Other', label: 'Autre' },
-];
-
-const BUDGET_RANGES = [
-  { value: 'low', label: 'Moins de 100 000 FCFA', max: 100000 },
-  { value: 'mid', label: '100 000 - 300 000 FCFA', max: 300000 },
-  { value: 'high', label: '300 000 - 1 000 000 FCFA', max: 1000000 },
-  { value: 'top', label: 'Plus de 1 000 000 FCFA', max: Infinity },
-  { value: 'any', label: 'Peu importe', max: Infinity },
-];
-
-const CULTURAL_ZONES = [
-  'Peu importe', 'Bamiléké', 'Aire Sawa', 'Aire Grassfields',
-  'Aire Fang-Béti', 'Grand Nord (Soudano-Sahélien)', 'Bamoun', 'Bakweri'
-];
+import { useLanguage } from '@/components/LanguageContext';
 
 function BotBubble({ children }) {
   return (
@@ -70,42 +47,66 @@ function OptionButtons({ options, onSelect }) {
   );
 }
 
-function ServiceResultCard({ service, navigate }) {
-  return (
-    <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 hover:border-[#FF6B35] transition-colors">
-      <div className="flex justify-between items-start gap-2 mb-1">
-        <h4 className="font-bold text-[#2C2C2C]">{service.title}</h4>
-        {service.vendor_verified && (
-          <span className="flex items-center gap-1 text-xs text-blue-600 font-semibold flex-shrink-0">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Vérifié
-          </span>
-        )}
-      </div>
-      <div className="flex items-center gap-3 text-xs text-stone-500 mb-2">
-        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {service.location || 'Non précisé'}</span>
-        {service.rating > 0 && (
-          <span className="flex items-center gap-1">
-            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /> {service.rating.toFixed(1)} ({service.review_count || 0} avis)
-          </span>
-        )}
-      </div>
-      <p className="text-sm text-stone-600 mb-2 line-clamp-2">{service.description}</p>
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-bold text-[#FF6B35]">À partir de {service.price_min?.toLocaleString() || '?'} FCFA</span>
-        <button
-          onClick={() => navigate(`${createPageUrl('ServiceDetails')}?id=${service.id}`)}
-          className="flex items-center gap-1 text-xs font-medium text-[#FF6B35] hover:underline"
-        >
-          Voir le service <ArrowRight className="w-3 h-3" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function AIAssistantPage() {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
+  const { t } = useLanguage();
+
+  const EVENT_TYPES = [
+    { value: 'Wedding', label: t('aiAssistant.eventWedding') },
+    { value: 'Birthday', label: t('aiAssistant.eventBirthday') },
+    { value: 'Corporate', label: t('aiAssistant.eventCorporate') },
+    { value: 'Conference', label: t('aiAssistant.eventConference') },
+    { value: 'Religious', label: t('aiAssistant.eventReligious') },
+    { value: 'Funeral', label: t('aiAssistant.eventFuneral') },
+    { value: 'Other', label: t('aiAssistant.eventOther') },
+  ];
+
+  const BUDGET_RANGES = [
+    { value: 'low', label: t('aiAssistant.budgetLow'), max: 100000 },
+    { value: 'mid', label: t('aiAssistant.budgetMid'), max: 300000 },
+    { value: 'high', label: t('aiAssistant.budgetHigh'), max: 1000000 },
+    { value: 'top', label: t('aiAssistant.budgetTop'), max: Infinity },
+    { value: 'any', label: t('aiAssistant.anyPreference'), max: Infinity },
+  ];
+
+  const CULTURAL_ZONES = [
+    t('aiAssistant.anyPreference'), 'Bamiléké', 'Aire Sawa', 'Aire Grassfields',
+    'Aire Fang-Béti', 'Grand Nord (Soudano-Sahélien)', 'Bamoun', 'Bakweri'
+  ];
+
+  function ServiceResultCard({ service }) {
+    return (
+      <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 hover:border-[#FF6B35] transition-colors">
+        <div className="flex justify-between items-start gap-2 mb-1">
+          <h4 className="font-bold text-[#2C2C2C]">{service.title}</h4>
+          {service.vendor_verified && (
+            <span className="flex items-center gap-1 text-xs text-blue-600 font-semibold flex-shrink-0">
+              <CheckCircle2 className="w-3.5 h-3.5" /> {t('aiAssistant.verifiedLabel')}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3 text-xs text-stone-500 mb-2">
+          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {service.location || t('aiAssistant.locationNotSpecified')}</span>
+          {service.rating > 0 && (
+            <span className="flex items-center gap-1">
+              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /> {service.rating.toFixed(1)} ({service.review_count || 0} {t('aiAssistant.reviewsWord')})
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-stone-600 mb-2 line-clamp-2">{service.description}</p>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-bold text-[#FF6B35]">{t('aiAssistant.startingFromLabel')} {service.price_min?.toLocaleString() || '?'} FCFA</span>
+          <button
+            onClick={() => navigate(`${createPageUrl('ServiceDetails')}?id=${service.id}`)}
+            className="flex items-center gap-1 text-xs font-medium text-[#FF6B35] hover:underline"
+          >
+            {t('aiAssistant.viewServiceLink')} <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const [step, setStep] = useState('event_type');
   const [answers, setAnswers] = useState({});
@@ -116,7 +117,6 @@ export default function AIAssistantPage() {
   const [results, setResults] = useState(null);
   const [noMatch, setNoMatch] = useState(false);
 
-  // Zone de texte libre (en plus du parcours guidé)
   const [freeQuestion, setFreeQuestion] = useState('');
   const [freeSearching, setFreeSearching] = useState(false);
 
@@ -124,7 +124,7 @@ export default function AIAssistantPage() {
     const fetchCategories = async () => {
       try {
         const types = await base44.entities.ServiceType.list();
-        setCategories(types.filter(t => !t.status || t.status === 'active'));
+        setCategories(types.filter(tp => !tp.status || tp.status === 'active'));
       } catch (e) {
         console.error('Erreur chargement catégories', e);
       }
@@ -138,17 +138,18 @@ export default function AIAssistantPage() {
         from: 'bot',
         node: (
           <div>
-            <p className="text-sm mb-1">Bonjour 👋 Je suis l'Assistant EventCrafter.</p>
-            <p className="text-sm">Répondez à quelques questions et je vous proposerai les meilleurs prestataires pour votre événement. Vous pouvez aussi taper directement ce que vous cherchez dans la zone de texte en bas.</p>
+            <p className="text-sm mb-1">{t('aiAssistant.greetingLine1')}</p>
+            <p className="text-sm">{t('aiAssistant.greetingLine2')}</p>
           </div>
         )
       },
       {
         from: 'bot',
-        node: <p className="text-sm font-medium">Quel type d'événement organisez-vous ?</p>
+        node: <p className="text-sm font-medium">{t('aiAssistant.askEventType')}</p>
       }
     ]);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -167,37 +168,37 @@ export default function AIAssistantPage() {
   const handleEventType = (opt) => {
     pushUser(opt.label);
     setAnswers(prev => ({ ...prev, eventType: opt.value }));
-    pushBot(<p className="text-sm font-medium">Quelle catégorie de prestataire recherchez-vous ?</p>);
+    pushBot(<p className="text-sm font-medium">{t('aiAssistant.askCategory')}</p>);
     setStep('category');
   };
 
   const handleCategory = (opt) => {
     pushUser(opt.name || opt);
     setAnswers(prev => ({ ...prev, category: opt.name || null }));
-    pushBot(<p className="text-sm font-medium">Dans quelle ville ou quartier ? (ou laissez vide si peu importe)</p>);
+    pushBot(<p className="text-sm font-medium">{t('aiAssistant.askCity')}</p>);
     setStep('city');
   };
 
   const handleCitySubmit = () => {
     const city = cityInput.trim();
-    pushUser(city || 'Peu importe');
+    pushUser(city || t('aiAssistant.anyPreference'));
     setAnswers(prev => ({ ...prev, city: city || null }));
-    pushBot(<p className="text-sm font-medium">Quel est votre budget approximatif ?</p>);
+    pushBot(<p className="text-sm font-medium">{t('aiAssistant.askBudget')}</p>);
     setStep('budget');
   };
 
   const handleBudget = (opt) => {
     pushUser(opt.label);
     setAnswers(prev => ({ ...prev, budgetMax: opt.max }));
-    pushBot(<p className="text-sm font-medium">Une préférence culturelle particulière ?</p>);
+    pushBot(<p className="text-sm font-medium">{t('aiAssistant.askCultural')}</p>);
     setStep('cultural');
   };
 
   const handleCultural = async (zone) => {
     pushUser(zone);
-    const finalAnswers = { ...answers, culturalZone: zone === 'Peu importe' ? null : zone };
+    const finalAnswers = { ...answers, culturalZone: zone === t('aiAssistant.anyPreference') ? null : zone };
     setAnswers(finalAnswers);
-    pushBot(<p className="text-sm">Je recherche les meilleurs prestataires pour vous... 🔍</p>);
+    pushBot(<p className="text-sm">{t('aiAssistant.searching')}</p>);
     setStep('results');
     setSearching(true);
     await runSearch(finalAnswers);
@@ -206,10 +207,11 @@ export default function AIAssistantPage() {
 
   const runSearch = async (criteria) => {
     try {
-      const [allServices, allVendors] = await Promise.all([
+      const [rawServices, allVendors] = await Promise.all([
         base44.entities.Service.list(),
         base44.entities.VendorProfile.list()
       ]);
+      const allServices = rawServices.filter(s => !s.is_hidden && !s.is_suspended);
 
       const scoreAndFilter = (relaxCity, relaxBudget, relaxCultural) => {
         return allServices
@@ -262,7 +264,7 @@ export default function AIAssistantPage() {
         setNoMatch(false);
         setResults(top);
         if (relaxed) {
-          pushBot(<p className="text-sm italic text-stone-500">Je n'ai pas trouvé de correspondance exacte, voici les options les plus proches :</p>);
+          pushBot(<p className="text-sm italic text-stone-500">{t('aiAssistant.noMatchFound')}</p>);
         }
       }
     } catch (e) {
@@ -272,7 +274,6 @@ export default function AIAssistantPage() {
     }
   };
 
-  // Recherche libre : declenchee par la zone de texte, independante du parcours guide
   const handleFreeQuestion = async () => {
     const question = freeQuestion.trim();
     if (!question) return;
@@ -282,7 +283,8 @@ export default function AIAssistantPage() {
     setFreeSearching(true);
 
     try {
-      const allServices = await base44.entities.Service.list();
+      const rawServices = await base44.entities.Service.list();
+      const allServices = rawServices.filter(s => !s.is_hidden && !s.is_suspended);
       const searchResults = fuzzySearch(
         question,
         allServices,
@@ -294,10 +296,10 @@ export default function AIAssistantPage() {
         const top = searchResults.slice(0, 5);
         pushBot(
           <div>
-            <p className="text-sm mb-3">Voici ce que j'ai trouvé pour "{question}" :</p>
+            <p className="text-sm mb-3">{t('aiAssistant.foundResultsFor')} "{question}" :</p>
             <div className="space-y-3">
               {top.map(service => (
-                <ServiceResultCard key={service.id} service={service} navigate={navigate} />
+                <ServiceResultCard key={service.id} service={service} />
               ))}
             </div>
           </div>
@@ -306,21 +308,21 @@ export default function AIAssistantPage() {
         pushBot(
           <div>
             <p className="text-sm mb-3">
-              Je n'ai trouvé aucun prestataire correspondant à "{question}". Essayez avec d'autres mots-clés, ou publiez une demande pour que les prestataires vous contactent directement.
+              {t('aiAssistant.noResultsFor')} "{question}". {t('aiAssistant.tryOtherKeywords')}
             </p>
             <Button
               onClick={() => navigate(createPageUrl('PostRequest'))}
               size="sm"
               className="bg-[#FF6B35] hover:bg-[#e05a2b] text-white"
             >
-              Publier une Demande
+              {t('aiAssistant.postRequestButton')}
             </Button>
           </div>
         );
       }
     } catch (e) {
       console.error('Erreur recherche libre', e);
-      pushBot(<p className="text-sm text-red-500">Une erreur est survenue pendant la recherche. Réessayez.</p>);
+      pushBot(<p className="text-sm text-red-500">{t('aiAssistant.searchErrorMessage')}</p>);
     } finally {
       setFreeSearching(false);
     }
@@ -333,26 +335,24 @@ export default function AIAssistantPage() {
     setCityInput('');
     setStep('event_type');
     setHistory([
-      { from: 'bot', node: <p className="text-sm font-medium">Parfait, recommençons. Quel type d'événement organisez-vous ?</p> }
+      { from: 'bot', node: <p className="text-sm font-medium">{t('aiAssistant.restartMessage')}</p> }
     ]);
   };
 
   return (
     <div className="min-h-[calc(100vh-80px)] flex flex-col bg-[#F9F7F3]">
-      {/* Header */}
       <div className="bg-white border-b border-stone-200 px-4 py-4 sticky top-20 z-10">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF6B35] to-[#F4C542] flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-[#2C2C2C] font-['Poppins']">Assistant EventCrafter</h1>
-            <p className="text-xs text-stone-500">Trouvez le bon prestataire en quelques questions, ou posez directement votre question</p>
+            <h1 className="text-lg font-bold text-[#2C2C2C] font-['Poppins']">{t('aiAssistant.assistantTitle')}</h1>
+            <p className="text-xs text-stone-500">{t('aiAssistant.assistantSubtitle')}</p>
           </div>
         </div>
       </div>
 
-      {/* Zone de conversation */}
       <div className="flex-1 overflow-y-auto px-4 py-6" ref={scrollRef}>
         <div className="max-w-3xl mx-auto">
           {history.map((h, idx) => (
@@ -368,8 +368,8 @@ export default function AIAssistantPage() {
           {step === 'category' && (
             <BotBubble>
               <OptionButtons
-                options={[{ name: 'Tous les Services' }, ...categories]}
-                onSelect={(opt) => handleCategory(opt.name === 'Tous les Services' ? { name: null } : opt)}
+                options={[{ name: t('aiAssistant.allServicesOption') }, ...categories]}
+                onSelect={(opt) => handleCategory(opt.name === t('aiAssistant.allServicesOption') ? { name: null } : opt)}
               />
             </BotBubble>
           )}
@@ -407,14 +407,14 @@ export default function AIAssistantPage() {
             <>
               {searching && (
                 <div className="flex items-center gap-2 text-stone-500 text-sm px-2 py-4">
-                  <Loader2 className="w-4 h-4 animate-spin" /> Recherche en cours...
+                  <Loader2 className="w-4 h-4 animate-spin" /> {t('aiAssistant.searching')}
                 </div>
               )}
 
               {!searching && results && results.length > 0 && (
                 <div className="space-y-3 mb-4">
                   {results.map(service => (
-                    <ServiceResultCard key={service.id} service={service} navigate={navigate} />
+                    <ServiceResultCard key={service.id} service={service} />
                   ))}
                 </div>
               )}
@@ -422,14 +422,13 @@ export default function AIAssistantPage() {
               {!searching && noMatch && (
                 <BotBubble>
                   <p className="text-sm mb-3">
-                    Je n'ai trouvé aucun prestataire correspondant à votre recherche pour le moment.
-                    Publiez une demande, et les prestataires intéressés viendront directement vers vous !
+                    {t('aiAssistant.noVendorFoundTitle')}
                   </p>
                   <Button
                     onClick={() => navigate(createPageUrl('PostRequest'))}
                     className="bg-[#FF6B35] hover:bg-[#e05a2b] text-white"
                   >
-                    Publier une Demande
+                    {t('aiAssistant.postRequestButton')}
                   </Button>
                 </BotBubble>
               )}
@@ -437,7 +436,7 @@ export default function AIAssistantPage() {
               {!searching && (
                 <div className="text-center mt-4">
                   <Button variant="outline" onClick={restart}>
-                    Faire une nouvelle recherche
+                    {t('aiAssistant.newSearchButton')}
                   </Button>
                 </div>
               )}
@@ -446,24 +445,23 @@ export default function AIAssistantPage() {
 
           {freeSearching && (
             <div className="flex items-center gap-2 text-stone-500 text-sm px-2 py-4">
-              <Loader2 className="w-4 h-4 animate-spin" /> Recherche en cours...
+              <Loader2 className="w-4 h-4 animate-spin" /> {t('aiAssistant.searching')}
             </div>
           )}
         </div>
       </div>
 
-      {/* Zone de texte libre - toujours visible, independante du parcours guide */}
       <div className="border-t border-stone-200 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-2 mb-2">
             <MessageCircle className="w-3.5 h-3.5 text-stone-400" />
-            <span className="text-xs text-stone-400">Ou posez directement votre question</span>
+            <span className="text-xs text-stone-400">{t('aiAssistant.questionPromptSuffix')}</span>
           </div>
           <div className="flex gap-2">
             <Input
               value={freeQuestion}
               onChange={(e) => setFreeQuestion(e.target.value)}
-              placeholder="ex. traiteur pas cher a Douala pour mariage..."
+              placeholder={t('aiAssistant.freeSearchPlaceholder')}
               onKeyDown={(e) => { if (e.key === 'Enter' && !freeSearching) handleFreeQuestion(); }}
               className="flex-1"
               disabled={freeSearching}
@@ -477,7 +475,7 @@ export default function AIAssistantPage() {
             </Button>
           </div>
           <p className="text-xs text-stone-400 mt-2 text-center">
-            Les prix affichés sont des prix minimum — un devis précis sera établi après contact avec le prestataire.
+            {t('aiAssistant.priceDisclaimer')}
           </p>
         </div>
       </div>
