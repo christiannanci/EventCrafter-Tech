@@ -6,13 +6,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Users, Shield, Trash2, Loader2 } from "lucide-react";
+import { Users, Shield, Trash2, Loader2, ShieldOff, ShieldCheck } from "lucide-react";
 import StaffInviteDialog from './StaffInviteDialog';
+
+const ACCOUNT_SUSPEND_NOTE = "Compte suspendu par admin";
 
 export default function UserManagement() {
     const [users, setUsers] = useState([]);
+    const [vendorProfiles, setVendorProfiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [deletingId, setDeletingId] = useState(null);
+    const [togglingId, setTogglingId] = useState(null);
 
     useEffect(() => {
         fetchUsers();
@@ -21,8 +25,12 @@ export default function UserManagement() {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const data = await base44.entities.User.list();
+            const [data, vp] = await Promise.all([
+                base44.entities.User.list(),
+                base44.entities.VendorProfile.list()
+            ]);
             setUsers(data);
+            setVendorProfiles(vp);
         } catch (error) {
             console.error("Failed to fetch users", error);
         } finally {
@@ -64,6 +72,93 @@ export default function UserManagement() {
         }
     };
 
+    const getVendorProfile = (userId) => vendorProfiles.find(v => v.user_id === userId);
+
+    const isSuspended = (userId) => {
+        const vp = getVendorProfile(userId);
+        return vp?.account_suspended === true;
+    };
+
+    // Suspendre : bloque le compte (verifie au login) ET masque toutes les offres du vendeur.
+    // Reactiver : leve le blocage ET redemasque uniquement les offres qui avaient ete
+    // suspendues DANS LE CADRE de cette suspension de compte (pas celles suspendues
+    // independamment par l'admin pour un autre motif, via la moderation de services).
+    const handleToggleSuspend = async (user) => {
+        const vp = getVendorProfile(user.id);
+        if (!vp) {
+            toast.error("Aucun profil vendeur trouve pour ce compte.");
+            return;
+        }
+
+        const currentlySuspended = vp.account_suspended === true;
+        const action = currentlySuspended ? "reactiver" : "suspendre";
+        const confirmed = confirm(
+            currentlySuspended
+                ? `Reactiver le compte de "${user.full_name || user.email}" ? Il pourra de nouveau se connecter et ses offres redeviendront visibles.`
+                : `Suspendre le compte de "${user.full_name || user.email}" ? Il ne pourra plus se connecter et toutes ses offres seront masquees du site.`
+        );
+        if (!confirmed) return;
+
+        setTogglingId(user.id);
+        try {
+            await base44.entities.VendorProfile.update(vp.id, {
+                account_suspended: !currentlySuspended
+            });
+
+            const allServices = await base44.entities.Service.list();
+            const userServices = allServices.filter(s => s.planner_id === user.id || s.created_by === user.id);
+
+            if (!currentlySuspended) {
+                // Suspension : masquer toutes les offres actives, en marquant le motif
+                for (const service of userServices) {
+                    if (!service.is_suspended) {
+                        await base44.entities.Service.update(service.id, {
+                            is_suspended: true,
+                            suspension_note: ACCOUNT_SUSPEND_NOTE,
+                            suspended_at: new Date().toISOString()
+                        });
+                    }
+                }
+                await base44.entities.Notification.create({
+                    user_id: user.id,
+                    title: "Compte suspendu",
+                    message: "Votre compte a ete suspendu par l'administration. Contactez le support pour plus d'informations.",
+                    type: "admin_alert",
+                    link: "/",
+                    is_read: false
+                });
+            } else {
+                // Reactivation : ne redemasquer que les offres suspendues pour ce motif precis
+                for (const service of userServices) {
+                    if (service.is_suspended && service.suspension_note === ACCOUNT_SUSPEND_NOTE) {
+                        await base44.entities.Service.update(service.id, {
+                            is_suspended: false,
+                            suspension_note: null,
+                            suspended_at: null
+                        });
+                    }
+                }
+                await base44.entities.Notification.create({
+                    user_id: user.id,
+                    title: "Compte reactive",
+                    message: "Votre compte a ete reactive. Vous pouvez de nouveau vous connecter et vos offres sont a nouveau visibles.",
+                    type: "admin_alert",
+                    link: "/VendorDashboard",
+                    is_read: false
+                });
+            }
+
+            toast.success(currentlySuspended ? "Compte reactive avec succes" : "Compte suspendu avec succes");
+            fetchUsers();
+        } catch (error) {
+            console.error(`Failed to ${action} account`, error);
+            toast.error(`Erreur lors de l'operation. Certaines donnees ont peut-etre ete partiellement modifiees.`);
+            fetchUsers();
+        } finally {
+            setTogglingId(null);
+        }
+    };
+
     // Supprime les services et les profils (vendeur/client) d'un compte. Le compte
     // de connexion Supabase Auth lui-meme n'est PAS supprime (necessite une cle
     // service_role non exposee cote client) - il reste mais vide, sans donnees utilisables.
@@ -81,8 +176,8 @@ export default function UserManagement() {
                 await base44.entities.Service.delete(service.id);
             }
 
-            const vendorProfiles = await base44.entities.VendorProfile.filter({ user_id: user.id });
-            for (const vp of vendorProfiles) {
+            const vendorProfilesFiltered = await base44.entities.VendorProfile.filter({ user_id: user.id });
+            for (const vp of vendorProfilesFiltered) {
                 await base44.entities.VendorProfile.delete(vp.id);
             }
 
@@ -91,7 +186,7 @@ export default function UserManagement() {
                 await base44.entities.ClientProfile.delete(cp.id);
             }
 
-            toast.success(`Compte supprime : ${userServices.length} service(s), ${vendorProfiles.length} profil(s) vendeur et ${clientProfiles.length} profil(s) client retires.`);
+            toast.success(`Compte supprime : ${userServices.length} service(s), ${vendorProfilesFiltered.length} profil(s) vendeur et ${clientProfiles.length} profil(s) client retires.`);
             fetchUsers();
         } catch (error) {
             console.error("Failed to delete account", error);
@@ -152,12 +247,15 @@ export default function UserManagement() {
                                 <TableHead>Email</TableHead>
                                 <TableHead>Role Back Office</TableHead>
                                 <TableHead>Action</TableHead>
+                                <TableHead>Statut Compte</TableHead>
                                 <TableHead>Supprimer</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {users.map((u) => {
                                 const currentRole = getRoleValue(u);
+                                const vp = getVendorProfile(u.id);
+                                const suspended = isSuspended(u.id);
                                 return (
                                     <TableRow key={u.id}>
                                         <TableCell className="font-medium">{u.full_name}</TableCell>
@@ -183,6 +281,28 @@ export default function UserManagement() {
                                                     <SelectItem value="tech">{'\uD83D\uDD27'} Technicien</SelectItem>
                                                 </SelectContent>
                                             </Select>
+                                        </TableCell>
+                                        <TableCell>
+                                            {vp ? (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className={suspended ? "border-green-300 text-green-700 hover:bg-green-50" : "border-amber-300 text-amber-700 hover:bg-amber-50"}
+                                                    disabled={togglingId === u.id}
+                                                    onClick={() => handleToggleSuspend(u)}
+                                                >
+                                                    {togglingId === u.id ? (
+                                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                    ) : suspended ? (
+                                                        <ShieldCheck className="w-4 h-4 mr-2" />
+                                                    ) : (
+                                                        <ShieldOff className="w-4 h-4 mr-2" />
+                                                    )}
+                                                    {suspended ? "Reactiver" : "Suspendre"}
+                                                </Button>
+                                            ) : (
+                                                <span className="text-xs text-stone-400">N/A (pas vendeur)</span>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <Button
