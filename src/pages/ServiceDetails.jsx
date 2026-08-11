@@ -404,7 +404,7 @@ export default function ServiceDetails() {
 
           {/* Sidebar Booking Card */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24">
+            <div className="lg:sticky lg:top-24">
               <Card className="border-stone-200 shadow-xl shadow-stone-200/50 overflow-hidden">
                 <div className="bg-rose-600 h-2 w-full" />
                 <CardContent className="p-6">
