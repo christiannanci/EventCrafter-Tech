@@ -117,8 +117,10 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
         }
 
         setSuccessMessage({
-          title: "Preuve de Paiement Envoyee!",
-          description: "Votre preuve a ete transmise a notre equipe. Nous validerons votre paiement dans les 24 heures."
+          title: paymentMethod === 'bank_transfer' ? "Verification en cours" : "Preuve de Paiement Envoyee!",
+          description: paymentMethod === 'bank_transfer'
+            ? "Votre virement bancaire est en cours de verification. Vous serez notifie d'ici 72 heures."
+            : "Votre preuve a ete transmise a notre equipe. Nous validerons votre paiement dans les 24 heures."
         });
         setSuccess(true);
         setLoading(false);
