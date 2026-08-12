@@ -37,6 +37,14 @@ export default function ServiceCard({ service, eventId, isTopRated, position }) 
 
   const isActiveVendor = service._isActiveVendor || false;
 
+  // Construit la localisation a partir des champs reels (city/region/neighborhood_code),
+  // le champ "location" seul n'existe pas dans la table service.
+  const getLocationLabel = () => {
+    const parts = [service?.neighborhood_code, service?.city, service?.region].filter(Boolean);
+    if (parts.length === 0) return t('serviceCard.locationNotSpecified');
+    return [...new Set(parts)].join(', ');
+  };
+
   useEffect(() => {
     try {
       const cart = JSON.parse(localStorage.getItem('contact_cart') || '[]');
@@ -247,7 +255,7 @@ export default function ServiceCard({ service, eventId, isTopRated, position }) 
               </h3>
               <div className="flex items-center text-stone-500 text-sm mt-1">
                 <MapPin className="w-3.5 h-3.5 mr-1" />
-                {service?.location || t('serviceCard.locationNotSpecified')}
+                {getLocationLabel()}
               </div>
             </div>
           </div>
