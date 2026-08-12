@@ -102,7 +102,7 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
           title: "Nouvelle preuve de paiement",
           message: notificationMessage,
           type: "payment",
-          link: "/AdminDashboard"
+          link: "/AdminDashboard?tab=payment_proofs"
         });
 
         const allUsers = await base44.entities.User.list();

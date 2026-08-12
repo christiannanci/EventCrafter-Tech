@@ -40,6 +40,16 @@ export default function AdminDashboard() {
     const [simulatedRole, setSimulatedRole] = useState(null);
     const [activeTab, setActiveTab] = useState("overview");
 
+    // Ouvre automatiquement l'onglet indique dans l'URL (ex: ?tab=payment_proofs),
+    // utilise par les liens de notification pour aller directement au bon endroit.
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = params.get('tab');
+        if (tabParam) {
+            setActiveTab(tabParam);
+        }
+    }, []);
+
     useEffect(() => {
         const checkAuth = async () => {
             try {
