@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Send, Loader2, Star, MapPin, CheckCircle2, ArrowRight, MessageCircle } from 'lucide-react';
+import { Sparkles, Send, Loader2, Star, MapPin, CheckCircle2, ArrowRight, MessageCircle, FileText, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { fuzzySearch } from '@/components/FuzzySearch';
@@ -274,6 +274,97 @@ export default function AIAssistantPage() {
     }
   };
 
+  const isContractQuestion = (text) => {
+    return /contrat|contract|signer|signature|litige|dispute|dossier/i.test(text);
+  };
+
+  const contractStatusLabel = (status) => {
+    const labels = {
+      draft: 'Brouillon',
+      pending_signature: 'En attente de signature',
+      signed: 'Signe',
+      active: 'Actif',
+      completed: 'Termine',
+      cancelled: 'Annule',
+      disputed: 'En litige'
+    };
+    return labels[status] || status;
+  };
+
+  const handleContractQuestion = async (question) => {
+    try {
+      const currentUser = await base44.auth.me();
+      if (!currentUser) {
+        pushBot(
+          <div>
+            <p className="text-sm mb-3">
+              Pour consulter vos contrats, vous devez d'abord vous connecter a votre compte.
+            </p>
+            <Button
+              onClick={() => navigate(createPageUrl('Login'))}
+              size="sm"
+              className="bg-[#FF6B35] hover:bg-[#e05a2b] text-white"
+            >
+              Se connecter
+            </Button>
+          </div>
+        );
+        return;
+      }
+
+      const allContracts = await base44.entities.Contract.list('-created_date', 20);
+      const myContracts = allContracts.filter(
+        c => c.client_account_id === currentUser.id || c.provider_account_id === currentUser.id
+      );
+
+      if (myContracts.length === 0) {
+        pushBot(
+          <p className="text-sm">
+            Vous n'avez pour le moment aucun contrat enregistre sur la plateforme. Un contrat est cree automatiquement lorsqu'un prestataire et un client valident ensemble les termes d'une prestation.
+          </p>
+        );
+        return;
+      }
+
+      const isVendorSideDashboard = myContracts.some(c => c.provider_account_id === currentUser.id);
+      const dashboardLink = isVendorSideDashboard ? createPageUrl('VendorDashboard') + '?tab=dossiers' : createPageUrl('ClientDashboard');
+
+      pushBot(
+        <div>
+          <p className="text-sm mb-3">
+            Voici {myContracts.length > 1 ? `vos ${myContracts.length} contrats` : 'votre contrat'} :
+          </p>
+          <div className="space-y-2">
+            {myContracts.slice(0, 5).map(c => (
+              <div key={c.id} className="bg-stone-50 border border-stone-200 rounded-lg p-3">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="font-semibold text-sm text-[#2C2C2C] flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-stone-400" /> {c.contract_number || `Contrat #${c.id?.slice(0, 8)}`}
+                  </span>
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#FFF0E8] text-[#FF6B35]">
+                    {contractStatusLabel(c.status)}
+                  </span>
+                </div>
+                {c.contract_amount ? (
+                  <p className="text-xs text-stone-500">Montant : {c.contract_amount.toLocaleString()} FCFA</p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={() => navigate(dashboardLink)}
+            className="flex items-center gap-1 text-xs font-medium text-[#FF6B35] hover:underline mt-3"
+          >
+            Gerer mes contrats <ExternalLink className="w-3 h-3" />
+          </button>
+        </div>
+      );
+    } catch (e) {
+      console.error('Erreur recherche contrats', e);
+      pushBot(<p className="text-sm text-red-500">Une erreur est survenue lors de la recuperation de vos contrats. Reessayez ou consultez directement votre tableau de bord.</p>);
+    }
+  };
+
   const handleFreeQuestion = async () => {
     const question = freeQuestion.trim();
     if (!question) return;
@@ -281,6 +372,12 @@ export default function AIAssistantPage() {
     pushUser(question);
     setFreeQuestion('');
     setFreeSearching(true);
+
+    if (isContractQuestion(question)) {
+      await handleContractQuestion(question);
+      setFreeSearching(false);
+      return;
+    }
 
     try {
       const rawServices = await base44.entities.Service.list();
