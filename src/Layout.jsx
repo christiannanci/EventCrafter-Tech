@@ -349,6 +349,10 @@ function LayoutContent({ children }) {
               ))}
                {user ? (
                 <>
+                  <div className="px-3 py-3 flex items-center justify-between">
+                    <span className="text-sm font-medium text-stone-500">Notifications</span>
+                    <NotificationBell user={user} />
+                  </div>
                   {(user.role === 'admin' || (user.staff_role && user.staff_role !== 'none')) && (
                     <Link
                       to={createPageUrl('AdminDashboard')}
