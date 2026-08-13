@@ -115,6 +115,7 @@ export default function VendorDashboard() {
     function_codes: [],
     supported_event_types: [],
     price_min: "",
+    price_max: "",
     availability_level: "ville",
     availability_code: "",
     location: "",
@@ -364,6 +365,7 @@ export default function VendorDashboard() {
         description: newService.description,
         category: newService.category,
         price_min: parseFloat(newService.price_min),
+        price_max: newService.price_max ? parseFloat(newService.price_max) : null,
         availability_level: newService.availability_level,
         availability_code: newService.availability_code,
         city: newService.city,
@@ -395,6 +397,7 @@ export default function VendorDashboard() {
           service_code: generateEntityCode('SERVICE'),
           slug: generateSlug(newService.title),
           price_min: parseFloat(newService.price_min),
+        price_max: newService.price_max ? parseFloat(newService.price_max) : null,
           planner_id: user.id
         });
         toast({ title: "Service cree avec succes" });
@@ -405,7 +408,8 @@ export default function VendorDashboard() {
       setNewService({ 
           title: "", description: "", description_details: "", description_terms: "",
     description_terms_en: "",
-          category: "", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "", 
+          category: "", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "",
+    price_max: "", 
           availability_level: "ville", availability_code: "",
           location: "", city: "", region: "", neighborhood_code: "", 
           address_details: "", image_url: "",
@@ -435,6 +439,7 @@ export default function VendorDashboard() {
       function_codes: service.function_codes || [],
       supported_event_types: service.supported_event_types || [],
       price_min: service.price_min || "",
+      price_max: service.price_max || "",
       availability_level: service.availability_level || "ville",
       availability_code: service.availability_code || "",
       location: service.location || "",
@@ -734,6 +739,10 @@ export default function VendorDashboard() {
                   <label className="text-xs font-medium text-stone-600">{t('vendor.minPriceLabel')}</label>
                   <Input type="number" placeholder="50000" value={newService.price_min} onChange={e => setNewService({...newService, price_min: e.target.value})} />
                 </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-stone-600">Prix Maximum (FCFA) - optionnel</label>
+                  <Input type="number" placeholder="ex. 150000" value={newService.price_max} onChange={e => setNewService({...newService, price_max: e.target.value})} />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -783,23 +792,28 @@ export default function VendorDashboard() {
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')} (Francais)</label>
-                  <Textarea placeholder={t('vendor.presentServicePlaceholder')} className="h-24" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
+                  <Textarea placeholder={t('vendor.presentServicePlaceholder')} className="h-24" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} maxLength={1000} />
+                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description || '').length}/1000 caracteres</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')} (English - optional)</label>
-                  <Textarea placeholder="Present your service in English..." className="h-24" value={newService.description_en} onChange={e => setNewService({...newService, description_en: e.target.value})} />
+                  <Textarea placeholder="Present your service in English..." className="h-24" value={newService.description_en} onChange={e => setNewService({...newService, description_en: e.target.value})} maxLength={1000} />
+                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_en || '').length}/1000 caracteres</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.detailsIncluded')}</label>
-                  <Textarea placeholder={t('vendor.detailPlaceholder')} className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} />
+                  <Textarea placeholder={t('vendor.detailPlaceholder')} className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} maxLength={1500} />
+                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_details || '').length}/1500 caracteres</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')} (Francais)</label>
-                  <Textarea placeholder={t('vendor.termsPlaceholder')} className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} />
+                  <Textarea placeholder={t('vendor.termsPlaceholder')} className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} maxLength={800} />
+                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_terms || '').length}/800 caracteres</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')} (English - optional)</label>
-                  <Textarea placeholder="Important terms in English..." className="h-24" value={newService.description_terms_en} onChange={e => setNewService({...newService, description_terms_en: e.target.value})} />
+                  <Textarea placeholder="Important terms in English..." className="h-24" value={newService.description_terms_en} onChange={e => setNewService({...newService, description_terms_en: e.target.value})} maxLength={800} />
+                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_terms_en || '').length}/800 caracteres</p>
                 </div>
               </div>
               <Button onClick={handleCreateService} className="w-full bg-rose-600">
@@ -1120,7 +1134,7 @@ export default function VendorDashboard() {
                     </div>
                   )}
                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold">
-                    {service.price_min?.toLocaleString()} FCFA
+                    {service.price_min?.toLocaleString()}{service.price_max ?  - ${service.price_max.toLocaleString()} : ''} FCFA
                   </div>
                   <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs text-white flex items-center gap-1">
                     <Eye className="w-3 h-3" /> {service.views || 0}
