@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/apiClient";
 import { SendEmail, UploadFile } from "@/api/integrations";
 import { CreditCard, Loader2, CheckCircle2, Smartphone, ShieldCheck, Landmark, Copy } from "lucide-react";
@@ -28,6 +29,7 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
   const [proofImage, setProofImage] = useState(null);
   const [uploadingProof, setUploadingProof] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("orange_momo");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const amountToPay = invoice ? invoice.amount : booking.total_amount;
 
@@ -73,6 +75,16 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
         return;
       }
 
+      if (!phoneNumber.trim()) {
+        toast({
+          title: "Numero requis",
+          description: "Veuillez indiquer le numero utilise pour le paiement",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
       try {
         const proofCode = `PROOF-${Date.now()}`;
 
@@ -82,7 +94,7 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
           amount: Number(amountToPay),
           payment_method: paymentMethod,
           proof_image_url: proofImage,
-          phone_number: "",
+          phone_number: phoneNumber.trim(),
           status: 'pending',
           created_date: new Date().toISOString()
         };
@@ -129,6 +141,7 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
           if (onPaymentComplete) onPaymentComplete();
           setSuccess(false);
           setProofImage(null);
+          setPhoneNumber("");
         }, 3500);
         return;
       } catch (proofError) {
@@ -313,6 +326,19 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
                       <li>Telechargez la preuve ci-dessous</li>
                       <li>Validez pour soumettre a l'equipe</li>
                     </ol>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-stone-700">
+                      Numero utilise pour le paiement <span className="text-rose-500">*</span>
+                    </label>
+                    <Input
+                      type="tel"
+                      placeholder="ex. 6XX XX XX XX"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      className="bg-white"
+                    />
                   </div>
 
                   <div className="border-2 border-dashed border-rose-300 bg-white rounded-lg p-4 text-center hover:border-rose-400 transition-colors">
