@@ -23,6 +23,10 @@ export default function ServiceCard({ service, eventId, isTopRated, position }) 
 
   const hasCoupDeCoeurBoost = service?.featured_until && new Date(service.featured_until) > new Date();
 
+  // Fourchette de prix : n'affiche une fourchette que si price_max existe ET est strictement
+  // superieur a price_min (sinon un seul prix suffit, comportement inchange).
+  const hasPriceRange = service?.price_max != null && service.price_max > (service?.price_min || 0);
+
   const isNewService = () => {
     if (!service?.created_date) return false;
     try {
@@ -305,8 +309,14 @@ export default function ServiceCard({ service, eventId, isTopRated, position }) 
 
         <CardFooter className="p-5 pt-0 flex items-center justify-between border-t border-gray-100 mt-auto bg-[#F9F7F3]/50">
           <div>
-            <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">{t('serviceDetails.startingAt')}</span>
-            <div className="text-[#FF6B35] font-['Poppins'] font-bold text-lg">{formatPrice(service.price_min)}</div>
+            <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">
+              {hasPriceRange ? t('serviceCard.priceRangeLabel') : t('serviceDetails.startingAt')}
+            </span>
+            <div className="text-[#FF6B35] font-['Poppins'] font-bold text-lg">
+              {hasPriceRange
+                ? `${formatPrice(service.price_min)} - ${formatPrice(service.price_max)}`
+                : formatPrice(service.price_min)}
+            </div>
           </div>
           <Button size="sm" variant="ghost" className="text-[#FF6B35] hover:text-[#e05a2b] hover:bg-[#FFF0E8] p-0 font-medium">
             {t('serviceDetails.viewDetails')} <ArrowRight className="w-4 h-4 ml-1" />
