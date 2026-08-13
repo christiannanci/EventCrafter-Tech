@@ -92,6 +92,11 @@ export default function ClientDashboard() {
         if (currentUser) {
           const clientProfiles = await base44.entities.ClientProfile.filter({ user_id: currentUser.id });
           if (clientProfiles.length === 0) {
+            const vendorProfiles = await base44.entities.VendorProfile.filter({ user_id: currentUser.id });
+            if (vendorProfiles.length > 0) {
+              window.location.href = '/VendorDashboard';
+              return;
+            }
             window.location.href = '/ProfileSelection';
             return;
           }
