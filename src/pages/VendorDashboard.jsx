@@ -1134,7 +1134,7 @@ export default function VendorDashboard() {
                     </div>
                   )}
                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold">
-                    {service.price_min?.toLocaleString()}{service.price_max ?  - ${service.price_max.toLocaleString()} : ''} FCFA
+                    {service.price_min?.toLocaleString()}{service.price_max ? ` - ${service.price_max.toLocaleString()}` : ''} FCFA
                   </div>
                   <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs text-white flex items-center gap-1">
                     <Eye className="w-3 h-3" /> {service.views || 0}
