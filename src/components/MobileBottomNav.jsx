@@ -2,21 +2,23 @@ import { useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Home, PlusCircle, LayoutDashboard } from 'lucide-react';
 import { createPageUrl } from '@/utils';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function MobileBottomNav({ user, hasVendorProfile, hasClientProfile }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   // Store the last visited path per tab root
   const tabHistory = useRef({});
 
   const tabs = [
-    { icon: Home, label: 'Accueil', root: '/' },
-    { icon: Search, label: 'Explorer', root: createPageUrl('Marketplace') },
-    { icon: PlusCircle, label: 'Publier', root: createPageUrl('PostRequest') },
+    { icon: Home, label: t('mobileNav.home'), root: '/' },
+    { icon: Search, label: t('mobileNav.explore'), root: createPageUrl('Marketplace') },
+    { icon: PlusCircle, label: t('mobileNav.publish'), root: createPageUrl('PostRequest') },
     {
       icon: LayoutDashboard,
-      label: 'Mon Espace',
+      label: t('mobileNav.mySpace'),
       root: hasVendorProfile
         ? createPageUrl('VendorDashboard')
         : createPageUrl('ClientDashboard'),

@@ -869,7 +869,8 @@ export const translations = {
       newNoReviews: "New (0 reviews)",
       reviewsLabel: "reviews",
       scoreLabel: "Score",
-      addButton: "+ Add"
+      addButton: "+ Add",
+      priceRangeLabel: "Price range"
     },
     reviews: {
       loadingReviews: "Loading reviews...",
@@ -1140,6 +1141,12 @@ export const translations = {
       searchErrorMessage: "An error occurred during the search. Try again.",
       assistantTitle: "EventCrafter Assistant",
       assistantSubtitle: "Find the right vendor in a few questions, or ask directly"
+    },
+    mobileNav: {
+      home: "Home",
+      explore: "Explore",
+      publish: "Publish",
+      mySpace: "My Space"
     }
   },
   fr: {
@@ -2028,7 +2035,8 @@ export const translations = {
       newNoReviews: "Nouveau (0 avis)",
       reviewsLabel: "avis",
       scoreLabel: "Score",
-      addButton: "+ Ajouter"
+      addButton: "+ Ajouter",
+      priceRangeLabel: "Fourchette de prix"
     },
     reviews: {
       loadingReviews: "Chargement des avis...",
@@ -2299,6 +2307,12 @@ export const translations = {
       searchErrorMessage: "Une erreur est survenue pendant la recherche. Reessayez.",
       assistantTitle: "Assistant EventCrafter",
       assistantSubtitle: "Trouvez le bon prestataire en quelques questions, ou posez directement votre question"
+    },
+    mobileNav: {
+      home: "Accueil",
+      explore: "Explorer",
+      publish: "Publier",
+      mySpace: "Mon Espace"
     }
   },
   pcm: {
