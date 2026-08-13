@@ -8,7 +8,7 @@ import { createPageUrl } from '../utils';
 import { useLanguage } from '@/components/LanguageContext';
 import { useLocationContext } from '@/components/LocationContext';
 import { useCurrency } from '@/components/CurrencyContext';
-import { base44 } from "@/api/apiClient";
+import { base44, supabase } from "@/api/apiClient";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function ServiceCard({ service, eventId, isTopRated, position }) {
@@ -95,6 +95,16 @@ export default function ServiceCard({ service, eventId, isTopRated, position }) 
           link: "/VendorDashboard",
           is_read: false
         });
+
+        // Vraie push notification (bandeau/son, meme app fermee) - non bloquant si echec
+        supabase.functions.invoke('send-push', {
+          body: {
+            user_id: service.planner_id,
+            title: t('serviceCard.newBookingNotifTitle'),
+            body: `${user.full_name || user.email} ${t('serviceCard.newBookingNotifMessage')} "${service.title}" ${t('serviceCard.forEvent')} ${event[0].title}`,
+            url: '/VendorDashboard'
+          }
+        }).catch((e) => console.error('Erreur envoi push:', e));
 
         toast({ title: t('serviceCard.serviceAddedTitle'), description: t('serviceCard.serviceAddedDesc') });
 
