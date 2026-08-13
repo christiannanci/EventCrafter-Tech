@@ -1,4 +1,4 @@
-// EventCrafter Service Worker — v3 (safe)
+// EventCrafter Service Worker — v4 (push notifications)
 const CACHE_NAME = 'eventcrafter-v3';
 
 // Assets statiques à mettre en cache au premier chargement
@@ -84,4 +84,49 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Tout le reste → Network only (pas d'interception)
+});
+
+// ---- Push Notifications ----
+
+// Reception d'une notification push envoyee par le serveur (Edge Function + web-push)
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: 'EventCrafter', body: event.data ? event.data.text() : '' };
+  }
+
+  const title = data.title || 'EventCrafter';
+  const options = {
+    body: data.body || '',
+    icon: data.icon || '/logo192.png',
+    badge: data.badge || '/logo192.png',
+    data: {
+      url: data.url || '/', // page a ouvrir au clic (ex: /Chat?conversationId=... ou /VendorDashboard)
+    },
+    vibrate: [100, 50, 100],
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Clic sur la notification : ouvre l'app sur la bonne page, ou focus un onglet existant
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || '/';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        const clientUrl = new URL(client.url);
+        if (clientUrl.pathname === targetUrl && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
+      }
+    })
+  );
 });
