@@ -43,6 +43,11 @@ export default function ServiceDetails() {
   const displayDescription = (currentLang === 'en' && service?.description_en) ? service.description_en : service?.description;
   const displayDescriptionDetails = (currentLang === 'en' && service?.description_details_en) ? service.description_details_en : service?.description_details;
   const displayDescriptionTerms = (currentLang === 'en' && service?.description_terms_en) ? service.description_terms_en : service?.description_terms;
+
+  // Fourchette de prix : n'affiche une fourchette que si price_max existe ET est strictement
+  // superieur a price_min (sinon un seul prix suffit, comportement inchange). Meme logique que ServiceCard.jsx.
+  const hasPriceRange = service?.price_max != null && service.price_max > (service?.price_min || 0);
+
   const [planner, setPlanner] = useState(null);
   const [bookingDate, setBookingDate] = useState(null);
   const [bookingNotes, setBookingNotes] = useState("");
@@ -410,9 +415,13 @@ export default function ServiceDetails() {
                 <CardContent className="p-6">
                   <div className="flex justify-between items-end mb-6">
                     <div>
-                      <span className="text-stone-400 text-sm">{t('serviceDetails.startingAt')}</span>
+                      <span className="text-stone-400 text-sm">
+                        {hasPriceRange ? t('serviceCard.priceRangeLabel') : t('serviceDetails.startingAt')}
+                      </span>
                       <div className="text-3xl font-bold text-stone-900">
-                        {formatPrice(service.price_min)}
+                        {hasPriceRange
+                          ? `${formatPrice(service.price_min)} - ${formatPrice(service.price_max)}`
+                          : formatPrice(service.price_min)}
                       </div>
                     </div>
                     <div className="text-right">
