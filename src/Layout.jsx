@@ -90,6 +90,10 @@ function LayoutContent({ children }) {
         import('@/components/RealtimeNotificationSystem').then(({ realtimeNotifications }) => {
           if (mounted) realtimeNotifications.initialize(currentUser.id, currentUser.role);
         }).catch(() => {});
+
+        import('@/lib/pushNotifications').then(({ subscribeToPush }) => {
+          if (mounted) subscribeToPush(currentUser.id);
+        }).catch(() => {});
       } catch (e) {
         if (!mounted) return;
         setUser(null);
@@ -137,12 +141,7 @@ function LayoutContent({ children }) {
             
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
-              <span className="text-2xl font-['Poppins'] font-bold tracking-tight text-[#2C2C2C]">
-                Event<span className="text-[#FF6B35] relative">
-                  Crafter
-                  <span className="absolute -top-1 -right-2 text-[#F4C542] text-xs">*</span>
-                </span>
-              </span>
+              <img src="/logo-header.png" alt="EventCrafter" className="h-10 w-auto" />
             </Link>
 
             {/* Desktop Nav */}
