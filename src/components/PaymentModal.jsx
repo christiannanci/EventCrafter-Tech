@@ -4,9 +4,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { base44 } from "@/api/apiClient";
 import { SendEmail, UploadFile } from "@/api/integrations";
-import { CreditCard, Loader2, CheckCircle2, Smartphone, ShieldCheck } from "lucide-react";
+import { CreditCard, Loader2, CheckCircle2, Smartphone, ShieldCheck, Landmark, Copy } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { NotificationService } from '@/components/NotificationService';
+
+const BANK_DETAILS = {
+  accountHolder: "IMMOBILIERE SONAN",
+  bank: "RIB SONAN",
+  iban: "CM21 10003 04000 06401341228 80",
+  swift: "SGCMCMCX"
+};
 
 export default function PaymentModal({ booking, invoice, onPaymentComplete, label = "Proceed to Payment", open, onOpenChange }) {
   const [internalOpen, setInternalOpen] = useState(false);
@@ -18,12 +25,16 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
   const [successMessage, setSuccessMessage] = useState({ title: "", description: "" });
   const { toast } = useToast();
 
+  const [activeMethod, setActiveMethod] = useState("bank");
   const [proofImage, setProofImage] = useState(null);
   const [uploadingProof, setUploadingProof] = useState(false);
-  const [cardLoading, setCardLoading] = useState(false);
 
   const amountToPay = invoice ? invoice.amount : booking.total_amount;
-  const payment_method = "orange_momo";
+
+  const copyToClipboard = (text, label) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copié !", description: `${label} copié dans le presse-papier` });
+  };
 
   const handleProofUpload = async (e) => {
     const file = e.target.files[0];
@@ -42,50 +53,6 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
       });
     } finally {
       setUploadingProof(false);
-    }
-  };
-
-  const handleCardPayment = async () => {
-    setCardLoading(true);
-    try {
-      const currentUser = await base44.auth.me();
-
-      const nameParts = (currentUser.full_name || currentUser.first_name || "Client EventCrafter").trim().split(" ");
-      const firstName = currentUser.first_name || nameParts[0] || "Client";
-      const lastName = currentUser.last_name || nameParts.slice(1).join(" ") || "EventCrafter";
-
-      const response = await fetch('/api/cinetpay-init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: amountToPay,
-          currency: 'XAF',
-          description: booking ? `Reservation ${booking.service_title || 'EventCrafter'}` : `Abonnement EventCrafter`,
-          client_email: currentUser.email,
-          client_first_name: firstName,
-          client_last_name: lastName,
-          client_phone_number: currentUser.phone || undefined,
-          booking_id: booking?.id,
-          invoice_id: invoice?.id
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.payment_url) {
-        throw new Error(data.error || "Impossible d'initialiser le paiement par carte");
-      }
-
-      window.location.href = data.payment_url;
-
-    } catch (error) {
-      console.error("Card payment init failed", error);
-      toast({
-        title: "Échec du Paiement par Carte",
-        description: error.message || "Une erreur est survenue. Veuillez réessayer.",
-        variant: "destructive"
-      });
-      setCardLoading(false);
     }
   };
 
@@ -113,7 +80,7 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
           proof_code: proofCode,
           user_id: currentUser.id,
           amount: Number(amountToPay),
-          payment_method: payment_method,
+          payment_method: activeMethod === "bank" ? "bank_transfer" : "orange_momo",
           proof_image_url: proofImage,
           phone_number: "",
           status: 'pending'
@@ -143,7 +110,7 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
           await SendEmail({
             to: admin.email,
             subject: "💰 Nouvelle preuve de paiement à valider",
-            body: `Bonjour ${admin.full_name},\n\nUne nouvelle preuve de paiement nécessite votre validation:\n\nMontant: ${amountToPay?.toLocaleString()} FCFA\nType: ${booking ? 'Réservation' : 'Abonnement'}\nCode: ${proofCode}\n\nAccéder au back office: ${window.location.origin}/AdminDashboard\n\nCordialement,\nL'équipe EventCrafter`
+            body: `Bonjour ${admin.full_name},\n\nUne nouvelle preuve de paiement nécessite votre validation:\n\nMontant: ${amountToPay?.toLocaleString()} FCFA\nMéthode: ${activeMethod === "bank" ? "Virement Bancaire" : "Mobile Money"}\nType: ${booking ? 'Réservation' : 'Abonnement'}\nCode: ${proofCode}\n\nAccéder au back office: ${window.location.origin}/AdminDashboard\n\nCordialement,\nL'équipe EventCrafter`
           });
         }
 
@@ -225,185 +192,191 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
               )}
             </div>
 
-            <Tabs defaultValue="card" className="w-full">
+            <Tabs value={activeMethod} onValueChange={setActiveMethod} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="card">Carte Bancaire</TabsTrigger>
+                <TabsTrigger value="bank">Virement Bancaire</TabsTrigger>
                 <TabsTrigger value="momo">Mobile Money</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="card" className="space-y-4">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-4 space-y-3">
-                  <div className="flex items-center gap-2 text-blue-700 font-semibold">
-                    <CreditCard className="w-4 h-4" />
-                    Paiement par Carte Visa / Mastercard
-                  </div>
-                  <p className="text-xs text-stone-600">
-                    Vous serez redirige vers une page de paiement securisee (3D Secure). Le paiement est confirme instantanement, sans attente de validation.
-                  </p>
-                  <div className="flex items-center gap-2 text-xs text-stone-500 bg-white rounded-lg p-2 border border-blue-100">
-                    <ShieldCheck className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                    Paiement securise via CinetPay
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  className="w-full bg-blue-600 hover:bg-blue-700 h-11"
-                  onClick={handleCardPayment}
-                  disabled={cardLoading}
-                >
-                  {cardLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Redirection en cours...
-                    </>
-                  ) : (
-                    `Payer ${amountToPay?.toLocaleString()} FCFA par carte`
-                  )}
-                </Button>
-              </TabsContent>
-
               <form onSubmit={handlePayment}>
-                <TabsContent value="momo" className="space-y-4">
-                  <div className="space-y-4">
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                      <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-orange-200 rounded-lg p-4 space-y-3">
-                        <div className="flex items-center gap-2 text-orange-700 font-semibold">
-                          <Smartphone className="w-4 h-4" />
-                          Code de paiement USSD Orange Money
-                        </div>
-
-                        <div className="bg-white rounded-lg p-4 border-2 border-orange-300">
-                          <p className="text-xs text-stone-600 mb-2">Composez ce code sur votre téléphone:</p>
-                          <code className="text-2xl font-bold text-orange-600 block select-all">
-                            #150*47*974936*{amountToPay}#
-                          </code>
-                        </div>
-
-                        <p className="text-xs text-stone-600">
-                          Après avoir composé ce code, suivez les instructions sur votre téléphone pour confirmer le paiement.
-                        </p>
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => {
-                            const code = `#150*47*974936*${amountToPay}#`;
-                            navigator.clipboard.writeText(code);
-                            toast({ title: "Code copié!", description: "Collez-le dans votre application téléphone" });
-                          }}
-                        >
-                          Copier le code
-                        </Button>
-
-                        <div className="pt-2 border-t border-orange-200">
-                          <p className="text-xs text-stone-700">
-                            <strong>Amount to send:</strong> {amountToPay?.toLocaleString()} FCFA
-                          </p>
-                          <p className="text-xs text-stone-600 mt-1">
-                            After transfer, click "Confirm Payment" below. Our team will verify and activate your payment within 24 hours.
-                          </p>
-                        </div>
-                      </div>
+                <TabsContent value="bank" className="space-y-4">
+                  <div className="bg-gradient-to-br from-slate-50 to-blue-50 border-2 border-slate-200 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-slate-700 font-semibold">
+                      <Landmark className="w-4 h-4" />
+                      Coordonnées bancaires pour virement
                     </div>
 
-                    <div className="space-y-3 bg-gradient-to-br from-rose-50 to-orange-50 border-2 border-rose-200 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-rose-700 font-semibold">
-                        <CheckCircle2 className="w-5 h-5" />
-                        <span>Étape Finale : Preuve de Paiement</span>
-                      </div>
-
-                      <div className="bg-white rounded-lg p-3 border border-rose-100">
-                        <p className="text-xs text-stone-700 mb-2">
-                          <strong>Instructions :</strong>
-                        </p>
-                        <ol className="text-xs text-stone-600 space-y-1 list-decimal ml-4">
-                          <li>Effectuez le transfert avec le code USSD ci-dessus</li>
-                          <li>Prenez une capture d'écran du message de confirmation</li>
-                          <li>Téléchargez la preuve ci-dessous</li>
-                          <li>Validez pour soumettre à l'équipe</li>
-                        </ol>
-                      </div>
-
-                      <div className="border-2 border-dashed border-rose-300 bg-white rounded-lg p-4 text-center hover:border-rose-400 transition-colors">
-                        {proofImage ? (
-                          <div className="space-y-3">
-                            <div className="relative inline-block">
-                              <img
-                                src={proofImage}
-                                alt="Proof"
-                                className="max-h-64 mx-auto rounded-lg border-2 border-green-200 shadow-md"
-                                onError={(e) => {
-                                  console.error("Image failed to load:", proofImage);
-                                  e.target.style.display = 'none';
-                                }}
-                              />
-                              <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1">
-                                <CheckCircle2 className="w-4 h-4" />
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <p className="text-sm text-green-700 font-semibold">Preuve téléchargée avec succès</p>
-                              <p className="text-xs text-stone-500">Cette image sera envoyée à notre équipe de validation</p>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                className="border-rose-300 text-rose-600 hover:bg-rose-50"
-                                onClick={() => setProofImage(null)}
-                              >
-                                Changer l'image
-                              </Button>
-                            </div>
+                    <div className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-100">
+                      {[
+                        { label: "Titulaire du compte", value: BANK_DETAILS.accountHolder },
+                        { label: "Banque", value: BANK_DETAILS.bank },
+                        { label: "IBAN / RIB", value: BANK_DETAILS.iban },
+                        { label: "Code SWIFT / BIC", value: BANK_DETAILS.swift }
+                      ].map((field) => (
+                        <div key={field.label} className="flex items-center justify-between p-3">
+                          <div>
+                            <p className="text-xs text-stone-500">{field.label}</p>
+                            <p className="text-sm font-semibold text-stone-900">{field.value}</p>
                           </div>
-                        ) : (
-                          <label className="cursor-pointer block">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={handleProofUpload}
-                              disabled={uploadingProof}
-                            />
-                            <div className="space-y-3 py-4">
-                              <div className="text-5xl">
-                                {uploadingProof ? (
-                                  <Loader2 className="w-12 h-12 mx-auto animate-spin text-rose-400" />
-                                ) : (
-                                  <div className="w-16 h-16 mx-auto bg-rose-100 rounded-full flex items-center justify-center">
-                                    <span className="text-3xl">📤</span>
-                                  </div>
-                                )}
-                              </div>
-                              <div>
-                                <p className="text-base text-stone-800 font-semibold mb-1">
-                                  {uploadingProof ? "Téléchargement en cours..." : "Télécharger la preuve de paiement"}
-                                </p>
-                                <p className="text-sm text-stone-600">
-                                  Cliquez pour sélectionner votre capture d'écran
-                                </p>
-                              </div>
-                              <div className="flex items-center justify-center gap-2 text-xs text-stone-500">
-                                <span>JPG</span>
-                                <span>•</span>
-                                <span>PNG</span>
-                                <span>•</span>
-                                <span>HEIC</span>
-                              </div>
-                            </div>
-                          </label>
-                        )}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-slate-500 hover:text-slate-900"
+                            onClick={() => copyToClipboard(field.value, field.label)}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-200">
+                      <p className="text-xs text-stone-700">
+                        <strong>Montant à virer :</strong> {amountToPay?.toLocaleString()} FCFA
+                      </p>
+                      <p className="text-xs text-stone-600 mt-1">
+                        Après le virement, téléchargez votre preuve ci-dessous. Notre équipe validera votre paiement sous 24 heures.
+                      </p>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="momo" className="space-y-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-orange-200 rounded-lg p-4 space-y-3">
+                      <div className="flex items-center gap-2 text-orange-700 font-semibold">
+                        <Smartphone className="w-4 h-4" />
+                        Code de paiement USSD Orange Money
                       </div>
 
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <p className="text-xs text-blue-800">
-                          <strong>Notification automatique :</strong> Notre équipe recevra une alerte immédiate et validera votre paiement sous 24 heures.
+                      <div className="bg-white rounded-lg p-4 border-2 border-orange-300">
+                        <p className="text-xs text-stone-600 mb-2">Composez ce code sur votre téléphone:</p>
+                        <code className="text-2xl font-bold text-orange-600 block select-all">
+                          #150*47*974936*{amountToPay}#
+                        </code>
+                      </div>
+
+                      <p className="text-xs text-stone-600">
+                        Après avoir composé ce code, suivez les instructions sur votre téléphone pour confirmer le paiement.
+                      </p>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => copyToClipboard(`#150*47*974936*${amountToPay}#`, "Code USSD")}
+                      >
+                        Copier le code
+                      </Button>
+
+                      <div className="pt-2 border-t border-orange-200">
+                        <p className="text-xs text-stone-700">
+                          <strong>Montant à envoyer :</strong> {amountToPay?.toLocaleString()} FCFA
+                        </p>
+                        <p className="text-xs text-stone-600 mt-1">
+                          Après le transfert, téléchargez votre preuve ci-dessous. Notre équipe validera votre paiement sous 24 heures.
                         </p>
                       </div>
                     </div>
                   </div>
                 </TabsContent>
+
+                <div className="space-y-3 bg-gradient-to-br from-rose-50 to-orange-50 border-2 border-rose-200 rounded-lg p-4 mt-4">
+                  <div className="flex items-center gap-2 text-rose-700 font-semibold">
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span>Étape Finale : Preuve de Paiement</span>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-3 border border-rose-100">
+                    <p className="text-xs text-stone-700 mb-2">
+                      <strong>Instructions :</strong>
+                    </p>
+                    <ol className="text-xs text-stone-600 space-y-1 list-decimal ml-4">
+                      <li>Effectuez le {activeMethod === "bank" ? "virement" : "transfert"} avec les informations ci-dessus</li>
+                      <li>Prenez une capture d'écran du message de confirmation</li>
+                      <li>Téléchargez la preuve ci-dessous</li>
+                      <li>Validez pour soumettre à l'équipe</li>
+                    </ol>
+                  </div>
+
+                  <div className="border-2 border-dashed border-rose-300 bg-white rounded-lg p-4 text-center hover:border-rose-400 transition-colors">
+                    {proofImage ? (
+                      <div className="space-y-3">
+                        <div className="relative inline-block">
+                          <img
+                            src={proofImage}
+                            alt="Proof"
+                            className="max-h-64 mx-auto rounded-lg border-2 border-green-200 shadow-md"
+                            onError={(e) => {
+                              console.error("Image failed to load:", proofImage);
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                          <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1">
+                            <CheckCircle2 className="w-4 h-4" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm text-green-700 font-semibold">Preuve téléchargée avec succès</p>
+                          <p className="text-xs text-stone-500">Cette image sera envoyée à notre équipe de validation</p>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="border-rose-300 text-rose-600 hover:bg-rose-50"
+                            onClick={() => setProofImage(null)}
+                          >
+                            Changer l'image
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label className="cursor-pointer block">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleProofUpload}
+                          disabled={uploadingProof}
+                        />
+                        <div className="space-y-3 py-4">
+                          <div className="text-5xl">
+                            {uploadingProof ? (
+                              <Loader2 className="w-12 h-12 mx-auto animate-spin text-rose-400" />
+                            ) : (
+                              <div className="w-16 h-16 mx-auto bg-rose-100 rounded-full flex items-center justify-center">
+                                <span className="text-3xl">📤</span>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-base text-stone-800 font-semibold mb-1">
+                              {uploadingProof ? "Téléchargement en cours..." : "Télécharger la preuve de paiement"}
+                            </p>
+                            <p className="text-sm text-stone-600">
+                              Cliquez pour sélectionner votre capture d'écran
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-center gap-2 text-xs text-stone-500">
+                            <span>JPG</span>
+                            <span>•</span>
+                            <span>PNG</span>
+                            <span>•</span>
+                            <span>HEIC</span>
+                          </div>
+                        </div>
+                      </label>
+                    )}
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-xs text-blue-800">
+                      <strong>Notification automatique :</strong> Notre équipe recevra une alerte immédiate et validera votre paiement sous 24 heures.
+                    </p>
+                  </div>
+                </div>
 
                 <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700 h-11 mt-6" disabled={loading}>
                   {loading ? (
