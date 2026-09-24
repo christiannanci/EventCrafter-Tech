@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
 import { base44, supabase } from "@/api/apiClient";
 import { UploadFile } from "@/api/integrations";
+import React, { useState, useEffect } from 'react';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,10 +12,8 @@ import {
   AlertCircle,
   Crown,
   Eye,
-  EyeOff,
   TrendingUp,
   ShieldCheck,
-  ShieldAlert,
   Store,
   FileSignature,
   Pencil,
@@ -54,7 +53,6 @@ import { checkAndGrantAutoRewards } from '@/components/RewardSystem';
 import VerificationGuard from '@/components/VerificationGuard';
 import CulturalBadgeManager from '@/components/dashboard/CulturalBadgeManager';
 import LeadCreditPacks from '@/components/dashboard/LeadCreditPacks';
-import VendorPayments from '@/components/dashboard/VendorPayments';
 import SmartMatchBoost from '@/components/dashboard/SmartMatchBoost';
 import { checkPerformanceReward } from '@/components/PerformanceRewardSystem';
 import DeleteAccountDialog from '@/components/DeleteAccountDialog';
@@ -65,13 +63,13 @@ import { generateEntityCode, generateSlug } from '@/components/SecurityUtils';
 import { useLanguage } from '@/components/LanguageContext';
 
 export default function VendorDashboard() {
+  const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [isMembershipDialogOpen, setIsMembershipDialogOpen] = useState(false);
   const [isNewServiceOpen, setIsNewServiceOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [availableFunctions, setAvailableFunctions] = useState([]);
   const { toast } = useToast();
-  const { t } = useLanguage();
   
   const [selectedDisputeBooking, setSelectedDisputeBooking] = useState(null);
   const [selectedContractBooking, setSelectedContractBooking] = useState(null);
@@ -108,15 +106,12 @@ export default function VendorDashboard() {
 
   const [newService, setNewService] = useState({
     title: "",
-    title_en: "",
     description: "",
-    description_en: "",
     category: "",
     service_type_code: "",
     function_codes: [],
     supported_event_types: [],
     price_min: "",
-    price_max: "",
     availability_level: "ville",
     availability_code: "",
     location: "",
@@ -127,7 +122,6 @@ export default function VendorDashboard() {
     image_url: "",
     description_details: "",
     description_terms: "",
-    description_terms_en: "",
     cultural_zones: [],
     cultural_compliance_details: "",
     spoken_languages: [],
@@ -138,7 +132,6 @@ export default function VendorDashboard() {
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [verifMessage, setVerifMessage] = useState("");
   const [sendingVerif, setSendingVerif] = useState(false);
-  const [togglingVisibility, setTogglingVisibility] = useState(null);
 
   const getVerifStatusInfo = (status) => {
     const info = {
@@ -152,11 +145,11 @@ export default function VendorDashboard() {
 
   const handleSendVerifRequest = async () => {
     if (!verifMessage.trim()) {
-      toast({ title: "Message requis", description: "Veuillez expliquer votre demande.", variant: "destructive" });
+      toast({ title: t('vendor.messageRequired'), description: t('vendor.explainRequestNeeded'), variant: "destructive" });
       return;
     }
     if (!vendorProfile?.verification_docs?.length) {
-      toast({ title: "Documents requis", description: "Veuillez télécharger au moins un document.", variant: "destructive" });
+      toast({ title: t('vendor.documentsRequired'), description: t('vendor.uploadAtLeastOne'), variant: "destructive" });
       return;
     }
     setSendingVerif(true);
@@ -172,17 +165,17 @@ export default function VendorDashboard() {
       });
       await base44.entities.VendorProfile.update(vendorProfile.id, { verification_status: 'pending' });
       await NotificationService.sendToAdmins({
-        title: "Nouvelle demande de vérification",
-        message: `${vendorProfile.business_name || user.full_name} a demandé la vérification de son compte prestataire`,
+        title: "Nouvelle demande de verification",
+        message: `${vendorProfile.business_name || user.full_name} a demande la verification de son compte prestataire`,
         type: "system",
         link: "/AdminDashboard"
       });
-      toast({ title: "Demande envoyée", description: "Un administrateur vous contactera sous peu." });
+      toast({ title: t('vendor.verifRequestSent'), description: t('vendor.adminWillContact') });
       setVerifMessage("");
       refetch();
     } catch (error) {
       console.error("Error sending verification request:", error);
-      toast({ title: "Erreur", description: "Impossible d'envoyer la demande.", variant: "destructive" });
+      toast({ title: t('vendor.genericError'), description: t('vendor.unableToSendRequest'), variant: "destructive" });
     } finally {
       setSendingVerif(false);
     }
@@ -269,13 +262,13 @@ export default function VendorDashboard() {
           setBookings(prev => [newBooking, ...prev]);
           await NotificationService.sendToVendor({
             vendorId: user.id,
-            title: "Nouvelle Réservation",
+            title: "Nouvelle Reservation",
             message: `Vous avez recu une nouvelle reservation de ${newBooking.client_name || 'un client'} pour le ${new Date(newBooking.event_date).toLocaleDateString('fr-FR')}. Montant: ${newBooking.total_amount?.toLocaleString() || 'a negocier'} FCFA`,
             type: "booking",
             link: "/VendorDashboard?tab=bookings_received"
           });
           toast({ 
-            title: "🎉 Nouvelle Réservation !",
+            title: "Nouvelle Reservation !",
             description: `${newBooking.client_name || 'Un client'} a reserve pour le ${new Date(newBooking.event_date).toLocaleDateString('fr-FR')}`
           });
         }
@@ -305,7 +298,7 @@ export default function VendorDashboard() {
       
         if (isImage(file)) {
           const originalSize = file.size;
-          toast({ title: "Compression de l'image..." });
+          toast({ title: t('vendor.compressingImage') });
           
           fileToUpload = await compressImage(file, {
             maxWidth: 1920,
@@ -318,19 +311,19 @@ export default function VendorDashboard() {
           const savedPercent = Math.round((1 - compressedSize / originalSize) * 100);
           
           toast({ 
-            title: `Image optimisee (${savedPercent}% réduit)`,
-            description: `${formatFileSize(originalSize)} → ${formatFileSize(compressedSize)}`
+            title: `${t('vendor.imageOptimized')} (${savedPercent}% ${t('vendor.reduced')})`,
+            description: `${formatFileSize(originalSize)} -> ${formatFileSize(compressedSize)}`
           });
         }
       
         const result = await UploadFile({ file: fileToUpload });
         setNewService({...newService, image_url: result.file_url});
-        toast({ title: "Image telechargee avec succès" });
+        toast({ title: t('vendor.imageUploadedSuccess') });
         return true;
       });
     } catch (error) {
       toast({ 
-        title: error.message.includes('Rate limit') ? "⚠️ Limite atteinte" : "Echec du telechargement",
+        title: error.message.includes('Rate limit') ? t('vendor.rateLimitReached') : t('vendor.uploadFailed'),
         description: error.message.includes('Rate limit') ? error.message : undefined,
         variant: "destructive" 
       });
@@ -347,10 +340,10 @@ export default function VendorDashboard() {
       setUploadingVideo(true);
       const result = await UploadFile({ file });
       setNewService({...newService, video_url: result.file_url});
-      toast({ title: "Video telechargee avec succès" });
+      toast({ title: t('vendor.videoUploadedSuccess') });
     } catch (error) {
       toast({ 
-        title: "Echec du telechargement", 
+        title: t('vendor.uploadFailed'), 
         description: "La video n'a pas pu etre telechargee. Verifiez votre connexion.",
         variant: "destructive" 
       });
@@ -366,7 +359,6 @@ export default function VendorDashboard() {
         description: newService.description,
         category: newService.category,
         price_min: parseFloat(newService.price_min),
-        price_max: newService.price_max ? parseFloat(newService.price_max) : null,
         availability_level: newService.availability_level,
         availability_code: newService.availability_code,
         city: newService.city,
@@ -379,7 +371,7 @@ export default function VendorDashboard() {
       if (!validation.success) {
         const firstError = Object.values(validation.errors)[0];
         toast({ 
-          title: "Validation échouée", 
+          title: t('vendor.validationFailed'), 
           description: firstError,
           variant: "destructive" 
         });
@@ -391,26 +383,23 @@ export default function VendorDashboard() {
           ...newService,
           price_min: parseFloat(newService.price_min)
         });
-        toast({ title: "Service modifie avec succes" });
+        toast({ title: t('vendor.serviceUpdated') });
       } else {
         await base44.entities.Service.create({
           ...newService,
           service_code: generateEntityCode('SERVICE'),
           slug: generateSlug(newService.title),
           price_min: parseFloat(newService.price_min),
-        price_max: newService.price_max ? parseFloat(newService.price_max) : null,
           planner_id: user.id
         });
-        toast({ title: "Service cree avec succes" });
+        toast({ title: t('vendor.serviceCreated') });
       }
       
       setIsNewServiceOpen(false);
       setEditingService(null);
       setNewService({ 
           title: "", description: "", description_details: "", description_terms: "",
-    description_terms_en: "",
-          category: "", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "",
-    price_max: "", 
+          category: "", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "", 
           availability_level: "ville", availability_code: "",
           location: "", city: "", region: "", neighborhood_code: "", 
           address_details: "", image_url: "",
@@ -421,8 +410,8 @@ export default function VendorDashboard() {
     } catch (error) {
       console.error("Error creating/updating service", error);
       toast({ 
-        title: "Erreur de sauvegarde", 
-        description: error.message || "Le service n'a pas pu etre sauvegarde.",
+        title: t('vendor.saveError'), 
+        description: error.message || t('vendor.saveErrorDesc'),
         variant: "destructive" 
       });
     }
@@ -432,15 +421,12 @@ export default function VendorDashboard() {
     setEditingService(service);
     setNewService({
       title: service.title || "",
-      title_en: service.title_en || "",
       description: service.description || "",
-      description_en: service.description_en || "",
       category: service.category || "",
       service_type_code: service.service_type_code || "",
       function_codes: service.function_codes || [],
       supported_event_types: service.supported_event_types || [],
       price_min: service.price_min || "",
-      price_max: service.price_max || "",
       availability_level: service.availability_level || "ville",
       availability_code: service.availability_code || "",
       location: service.location || "",
@@ -451,7 +437,6 @@ export default function VendorDashboard() {
       image_url: service.image_url || "",
       description_details: service.description_details || "",
       description_terms: service.description_terms || "",
-      description_terms_en: service.description_terms_en || "",
       cultural_zones: service.cultural_zones || [],
       cultural_compliance_details: service.cultural_compliance_details || "",
       spoken_languages: service.spoken_languages || [],
@@ -459,7 +444,7 @@ export default function VendorDashboard() {
       diaspora_ready: service.diaspora_ready || false
     });
     
-    const selectedType = serviceTypes.find(t => t.code_service === service.service_type_code);
+    const selectedType = serviceTypes.find(t2 => t2.code_service === service.service_type_code);
     if (selectedType) {
       setAvailableFunctions(allFunctions.filter(f => f.service_type_code === selectedType.code_service));
     }
@@ -473,7 +458,7 @@ export default function VendorDashboard() {
       
       if (status === 'completed') {
           const txs = await base44.entities.Transaction.list();
-          const tx = txs.find(t => t.reference_id === id && t.status === 'escrow_held');
+          const tx = txs.find(t2 => t2.reference_id === id && t2.status === 'escrow_held');
           
           if (tx) {
               await base44.entities.Transaction.update(tx.id, { 
@@ -483,8 +468,8 @@ export default function VendorDashboard() {
               
               await NotificationService.sendToVendor({
                   vendorId: user.id,
-                  title: "Fonds Liberes",
-                  message: "L'evenement est termine. Les fonds ont ete liberees vers votre portefeuille.",
+                  title: t('vendor.fundsReleasedTitle'),
+                  message: t('vendor.fundsReleasedDesc'),
                   type: "payment",
                   link: "/VendorDashboard"
               });
@@ -492,63 +477,42 @@ export default function VendorDashboard() {
       }
       
       refetch();
-      toast({ title: "Statut mis a jour" });
+      toast({ title: t('vendor.statusUpdated') });
     } catch (e) {
       console.error(e);
       toast({ 
-        title: "Erreur de mise a jour", 
-        description: "Impossible de modifier le statut. Reessayez.",
+        title: t('vendor.statusUpdateError'), 
+        description: t('vendor.statusUpdateErrorDesc'),
         variant: "destructive" 
       });
     }
   };
 
   const deleteService = async (id) => {
-    if(confirm("Etes-vous sur de vouloir supprimer ce service ?")) {
+    if(confirm(t('vendor.confirmDeleteService'))) {
       try {
         const services = await base44.entities.Service.list();
         const service = services.find(s => s.id === id);
         
         if (!service) {
-          throw new Error("Service introuvable");
+          throw new Error(t('vendor.serviceNotFound'));
         }
 
         const canDelete = await PermissionGuard.canDeleteService(service);
         if (!canDelete) {
-          throw new Error("Vous n'avez pas la permission de supprimer ce service");
+          throw new Error(t('vendor.noDeletePermission'));
         }
 
         await base44.entities.Service.delete(id);
-        toast({ title: "Service supprime avec succes" });
+        toast({ title: t('vendor.serviceDeleted') });
         refetch();
       } catch (error) {
         toast({ 
-          title: "Echec de suppression", 
-          description: error.message || "Le service n'a pas pu etre supprime.",
+          title: t('vendor.deleteFailed'), 
+          description: error.message || t('vendor.saveErrorDesc'),
           variant: "destructive" 
         });
       }
-    }
-  };
-
-  // Masquer / afficher une offre (controle vendeur, independant de la suspension admin)
-  const toggleServiceVisibility = async (service) => {
-    setTogglingVisibility(service.id);
-    try {
-      const newHiddenState = !service.is_hidden;
-      await base44.entities.Service.update(service.id, { is_hidden: newHiddenState });
-      toast({
-        title: newHiddenState ? "Offre masquée" : "Offre affichée",
-        description: newHiddenState
-          ? "Cette offre n'apparaît plus dans le marché."
-          : "Cette offre est de nouveau visible sur le marché."
-      });
-      refetch();
-    } catch (error) {
-      console.error("Toggle visibility error", error);
-      toast({ title: "Erreur", description: "Impossible de modifier la visibilité.", variant: "destructive" });
-    } finally {
-      setTogglingVisibility(null);
     }
   };
 
@@ -569,12 +533,12 @@ export default function VendorDashboard() {
     };
 
     const labels = {
-      contract_pending: "Waiting Signature",
-      awaiting_payment: "Waiting Payment",
-      in_progress: "In Progress",
-      delivered: "Delivered (Wait Recept.)",
-      warranty_period: "Warranty",
-      disputed: "In Dispute"
+      contract_pending: t('clientDashboard.statusWaitingSignature'),
+      awaiting_payment: t('clientDashboard.statusWaitingPayment'),
+      in_progress: t('clientDashboard.statusInProgress'),
+      delivered: t('clientDashboard.statusDelivered'),
+      warranty_period: t('clientDashboard.statusWarranty'),
+      disputed: t('clientDashboard.statusDispute')
     };
 
     return (
@@ -595,10 +559,10 @@ export default function VendorDashboard() {
       <Card className="max-w-md">
         <CardContent className="p-8 text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-stone-900 mb-2">Erreur de Chargement</h3>
+          <h3 className="text-lg font-bold text-stone-900 mb-2">{t('vendor.loadingError')}</h3>
           <p className="text-stone-600 mb-4">{error}</p>
           <Button onClick={refetch} className="bg-rose-600 hover:bg-rose-700">
-            Ressayer
+            {t('vendor.retry')}
           </Button>
         </CardContent>
       </Card>
@@ -617,7 +581,7 @@ export default function VendorDashboard() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-6">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl sm:text-3xl font-bold text-stone-900">{t('vendorHeader.dashboardTitle')}</h1>
+            <h1 className="text-xl sm:text-3xl font-bold text-stone-900">{t('vendor.title')}</h1>
             <Badge 
               className={`cursor-pointer hover:opacity-80 transition-opacity shrink-0 ${
                 membershipStatus === 'premium' ? 'bg-rose-600 text-white' :
@@ -630,13 +594,13 @@ export default function VendorDashboard() {
               {membershipStatus.charAt(0).toUpperCase() + membershipStatus.slice(1)}
             </Badge>
           </div>
-          <p className="text-stone-500 text-sm">{t('vendorHeader.welcomePrefix')} {user.first_name || user.email}</p>
+          <p className="text-stone-500 text-sm">{t('vendor.welcome')} {user.first_name || user.email}</p>
           
           {membershipStatus === 'free' && (
             <div className="mt-4 max-w-md">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-stone-600">
-                  {t('vendorHeader.requestsThisMonth')}
+                  {t('vendor.newBookingRequests')}
                 </span>
                 <span className={`text-sm font-bold ${notificationCount >= 10 ? 'text-red-600' : 'text-green-600'}`}>
                   {notificationCount}/10
@@ -654,12 +618,12 @@ export default function VendorDashboard() {
               </div>
               {notificationCount >= 7 && notificationCount < 10 && (
                 <p className="text-xs text-orange-600 mt-1">
-                  Plus que {10 - notificationCount} demande{10 - notificationCount > 1 ? 's' : ''} disponible{10 - notificationCount > 1 ? 's' : ''}
+                  {10 - notificationCount} {t('vendor.moreAvailable')}
                 </p>
               )}
               {notificationCount >= 10 && (
                 <p className="text-xs text-red-600 mt-1">
-                  {t('vendorHeader.limitReachedShort')}
+                  {t('vendor.limitReachedShort')}
                 </p>
               )}
             </div>
@@ -689,25 +653,21 @@ export default function VendorDashboard() {
             </DialogHeader>
             <div className="space-y-4 py-4 overflow-y-auto max-h-[70vh] px-1">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-stone-600">{t('vendor.serviceTitleLabel')} (Francais)</label>
+                <label className="text-xs font-medium text-stone-600">{t('vendor.serviceTitleLabel')}</label>
                 <Input placeholder={t('vendor.serviceTitlePlaceholder')} value={newService.title} onChange={e => setNewService({...newService, title: e.target.value})} />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-stone-600">{t('vendor.serviceTitleLabel')} (English - optional)</label>
-                <Input placeholder="ex. Luxury Wedding Planning" value={newService.title_en} onChange={e => setNewService({...newService, title_en: e.target.value})} />
               </div>
               <div className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-stone-600">{t('vendor.categoryLabel')}</label>
                   <Select value={newService.category} onValueChange={val => {
-                    const selectedType = serviceTypes.find(t => t.name === val);
+                    const selectedType = serviceTypes.find(t2 => t2.name === val);
                     setNewService({...newService, category: val, service_type_code: selectedType ? selectedType.code_service : ""});
                     if (selectedType) setAvailableFunctions(allFunctions.filter(f => f.service_type_code === selectedType.code_service));
                     else setAvailableFunctions([]);
                   }}>
                     <SelectTrigger><SelectValue placeholder={t('vendor.chooseCategoryPlaceholder')} /></SelectTrigger>
                     <SelectContent>
-                      {serviceTypes.length > 0 ? serviceTypes.map(t => (<SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>)) : (<SelectItem value="Event Planner">Event Planner</SelectItem>)}
+                      {serviceTypes.map(t2 => (<SelectItem key={t2.id} value={t2.name}>{t2.name}</SelectItem>))}
                     </SelectContent>
                   </Select>
                   {availableFunctions.length > 0 && (
@@ -730,7 +690,7 @@ export default function VendorDashboard() {
                   <div className="grid grid-cols-2 gap-2 border rounded-md p-3 max-h-48 overflow-y-auto">
                     {["Wedding","Birthday","Corporate","Conference","Baby Shower","Graduation","Religious","Funeral","Concert","Other"].map(eventType => (
                       <div key={eventType} className="flex items-center space-x-2">
-                        <input type="checkbox" id={`event-${eventType}`} checked={newService.supported_event_types?.includes(eventType)} onChange={(e) => { const checked = e.target.checked; setNewService(prev => { const current = prev.supported_event_types || []; if (checked) return {...prev, supported_event_types: [...current, eventType]}; return {...prev, supported_event_types: current.filter(t => t !== eventType)}; }); }} className="h-4 w-4 rounded border-gray-300 text-rose-600" />
+                        <input type="checkbox" id={`event-${eventType}`} checked={newService.supported_event_types?.includes(eventType)} onChange={(e) => { const checked = e.target.checked; setNewService(prev => { const current = prev.supported_event_types || []; if (checked) return {...prev, supported_event_types: [...current, eventType]}; return {...prev, supported_event_types: current.filter(t3 => t3 !== eventType)}; }); }} className="h-4 w-4 rounded border-gray-300 text-rose-600" />
                         <label htmlFor={`event-${eventType}`} className="text-xs text-stone-700 cursor-pointer">{eventType}</label>
                       </div>
                     ))}
@@ -739,10 +699,6 @@ export default function VendorDashboard() {
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-stone-600">{t('vendor.minPriceLabel')}</label>
                   <Input type="number" placeholder="50000" value={newService.price_min} onChange={e => setNewService({...newService, price_min: e.target.value})} />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Prix Maximum (FCFA) - optionnel</label>
-                  <Input type="number" placeholder="ex. 150000" value={newService.price_max} onChange={e => setNewService({...newService, price_max: e.target.value})} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -767,11 +723,11 @@ export default function VendorDashboard() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Input placeholder={t('location.city')} value={newService.city} onChange={e => setNewService({...newService, city: e.target.value})} />
-                <Input placeholder={t('location.region')} value={newService.region} onChange={e => setNewService({...newService, region: e.target.value})} />
+                <Input placeholder="Ville" value={newService.city} onChange={e => setNewService({...newService, city: e.target.value})} />
+                <Input placeholder="Region" value={newService.region} onChange={e => setNewService({...newService, region: e.target.value})} />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Input placeholder={t('location.neighborhood')} value={newService.neighborhood_code} onChange={e => setNewService({...newService, neighborhood_code: e.target.value})} />
+                <Input placeholder="Quartier" value={newService.neighborhood_code} onChange={e => setNewService({...newService, neighborhood_code: e.target.value})} />
                 <Input placeholder={t('vendor.preciseAddress')} value={newService.address_details} onChange={e => setNewService({...newService, address_details: e.target.value})} />
               </div>
               <div className="space-y-2">
@@ -792,29 +748,16 @@ export default function VendorDashboard() {
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')} (Francais)</label>
-                  <Textarea placeholder={t('vendor.presentServicePlaceholder')} className="h-24" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} maxLength={1000} />
-                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description || '').length}/1000 caracteres</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')} (English - optional)</label>
-                  <Textarea placeholder="Present your service in English..." className="h-24" value={newService.description_en} onChange={e => setNewService({...newService, description_en: e.target.value})} maxLength={1000} />
-                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_en || '').length}/1000 caracteres</p>
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')}</label>
+                  <Textarea placeholder={t('vendor.presentServicePlaceholder')} className="h-24" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.detailsIncluded')}</label>
-                  <Textarea placeholder={t('vendor.detailPlaceholder')} className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} maxLength={1500} />
-                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_details || '').length}/1500 caracteres</p>
+                  <Textarea placeholder={t('vendor.detailPlaceholder')} className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')} (Francais)</label>
-                  <Textarea placeholder={t('vendor.termsPlaceholder')} className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} maxLength={800} />
-                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_terms || '').length}/800 caracteres</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')} (English - optional)</label>
-                  <Textarea placeholder="Important terms in English..." className="h-24" value={newService.description_terms_en} onChange={e => setNewService({...newService, description_terms_en: e.target.value})} maxLength={800} />
-                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_terms_en || '').length}/800 caracteres</p>
+                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')}</label>
+                  <Textarea placeholder={t('vendor.termsPlaceholder')} className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} />
                 </div>
               </div>
               <Button onClick={handleCreateService} className="w-full bg-rose-600">
@@ -848,7 +791,6 @@ export default function VendorDashboard() {
           <TabsTrigger value="listings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabCatalogue')}</TabsTrigger>
           <TabsTrigger value="leads" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabProspects')}</TabsTrigger>
           <TabsTrigger value="growth" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabCroissance')}</TabsTrigger>
-          <TabsTrigger value="payments" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Paiement</TabsTrigger>
           <TabsTrigger value="availability" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabCalendrier')}</TabsTrigger>
           <TabsTrigger value="settings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabParametres')}</TabsTrigger>
         </TabsList>
@@ -889,10 +831,6 @@ export default function VendorDashboard() {
               onUpdate={refetch}
             />
           </div>
-        </TabsContent>
-
-        <TabsContent value="payments">
-          <VendorPayments user={user} vendorProfile={vendorProfile} onUpdate={refetch} />
         </TabsContent>
 
         <TabsContent value="dossiers">
@@ -952,17 +890,17 @@ export default function VendorDashboard() {
                             const files = Array.from(e.target.files || []);
                             if (files.length === 0) return;
                             try {
-                              toast({ title: "Televersement en cours..." });
+                              toast({ title: t('vendor.uploadingInProgress') });
                               const results = await Promise.all(files.map(file => UploadFile({ file })));
                               const urls = results.map(r => r.file_url);
                               const currentDocs = vendorProfile.verification_docs || [];
                               await base44.entities.VendorProfile.update(vendorProfile.id, {
                                 verification_docs: [...currentDocs, ...urls]
                               });
-                              toast({ title: "Documents televerses" });
+                              toast({ title: t('vendor.docsUploaded') });
                               refetch();
                             } catch (error) {
-                              toast({ title: "Echec du televersement", variant: "destructive" });
+                              toast({ title: t('vendor.uploadFailed'), variant: "destructive" });
                             }
                           }}
                           className="hidden"
@@ -978,11 +916,11 @@ export default function VendorDashboard() {
                         </Button>
                         {vendorProfile.verification_docs?.length > 0 && (
                           <div className="space-y-1">
-                            <p className="text-xs font-medium text-stone-500">Documents televerses :</p>
+                            <p className="text-xs font-medium text-stone-500">{t('vendor.uploadedDocs')}</p>
                             {vendorProfile.verification_docs.map((doc, i) => (
                               <a key={i} href={doc} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 bg-stone-50 rounded hover:bg-stone-100 text-sm">
                                 <FileSignature className="w-4 h-4 text-rose-600" />
-                                Document {i + 1}
+                                {t('vendor.document')} {i + 1}
                               </a>
                             ))}
                           </div>
@@ -1001,8 +939,8 @@ export default function VendorDashboard() {
                           <StatusIcon className={`w-8 h-8 ${statusInfo.color}`} />
                         </div>
                         <p className="text-sm text-stone-600">
-                          {vendorProfile.verification_status === 'pending' && "Votre demande est en cours de traitement."}
-                          {vendorProfile.verification_status === 'verified' && "Felicitations ! Votre entreprise est verifiee."}
+                          {vendorProfile.verification_status === 'pending' && t('vendor.pendingReview')}
+                          {vendorProfile.verification_status === 'verified' && t('vendor.congratsVerified')}
                         </p>
                       </div>
                     )}
@@ -1057,7 +995,7 @@ export default function VendorDashboard() {
                        onClick={() => setIsMembershipDialogOpen(true)}
                      >
                        <Crown className="w-3 h-3 mr-1" />
-                       Passer Premium
+                       {t('vendor.passPremium')}
                      </Button>
                    )}
                  </div>
@@ -1071,13 +1009,13 @@ export default function VendorDashboard() {
                  <div className="flex-1">
                    <h3 className="text-xl font-bold flex items-center gap-2 mb-2">
                      <AlertCircle className="w-6 h-6" /> 
-                     Limite de Notifications Atteinte
+                     {t('vendor.limitReached')}
                    </h3>
                    <p className="text-white/90 mb-2">
-                     Vous avez reçu {notificationCount}/10 notifications ce mois. Vous ne recevrez plus de nouvelles demandes clients.
+                     {t('vendor.limitDesc').replace('{count}', notificationCount)}
                    </p>
                    <p className="text-white font-semibold">
-                     Passez à Premium ou Gold pour recevoir des notifications illimitées !
+                     {t('vendor.limitCTA')}
                    </p>
                  </div>
                  <Button 
@@ -1085,7 +1023,7 @@ export default function VendorDashboard() {
                    onClick={() => setIsMembershipDialogOpen(true)}
                  >
                    <Crown className="w-4 h-4 mr-2" />
-                   Améliorer l'Abonnement
+                   {t('vendor.upgradePlan')}
                  </Button>
                </div>
              </div>
@@ -1121,7 +1059,7 @@ export default function VendorDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {myServices.length > 0 ? myServices.map(service => (
-              <Card key={service.id} className={`group relative ${service.is_suspended ? 'border-2 border-amber-400' : ''} ${service.is_hidden ? 'opacity-60' : ''}`}>
+              <Card key={service.id} className="group relative">
                 <div className="aspect-video bg-stone-100 relative overflow-hidden rounded-t-lg">
                   {service.image_url && (service.image_url.endsWith('.mp4') || service.image_url.endsWith('.webm') || service.image_url.includes('video')) ? (
                     <video src={service.image_url} className="object-cover w-full h-full opacity-90 group-hover:opacity-100 transition-opacity" muted loop playsInline />
@@ -1140,47 +1078,22 @@ export default function VendorDashboard() {
                     </div>
                   )}
                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold">
-                    {service.price_min?.toLocaleString()}{service.price_max ? ` - ${service.price_max.toLocaleString()}` : ''} FCFA
+                    {service.price_min?.toLocaleString()} FCFA
                   </div>
                   <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs text-white flex items-center gap-1">
                     <Eye className="w-3 h-3" /> {service.views || 0}
                   </div>
-                  {service.is_hidden && (
-                    <div className="absolute top-2 left-2 bg-stone-800/90 backdrop-blur px-2 py-1 rounded text-xs text-white flex items-center gap-1">
-                      <EyeOff className="w-3 h-3" /> Masquée
-                    </div>
-                  )}
                 </div>
                 <CardHeader>
-                  <CardTitle className="flex justify-between items-start gap-2">
+                  <CardTitle className="flex justify-between items-start">
                     <span className="truncate">{service.title}</span>
-                    {service.is_suspended && (
-                      <Badge className="bg-amber-500 text-white flex-shrink-0 text-[10px]">
-                        <ShieldAlert className="w-3 h-3 mr-1" /> Suspendue
-                      </Badge>
-                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {service.is_suspended && service.suspension_note && (
-                    <div className="mb-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
-                      <strong>Motif de suspension :</strong> {service.suspension_note}
-                    </div>
-                  )}
                   <p className="text-stone-500 text-sm line-clamp-2 mb-4">{service.description}</p>
                   <div className="flex justify-between items-center mt-4">
                     <Badge variant="outline">{service.category}</Badge>
                     <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={service.is_hidden ? "text-stone-400 hover:text-stone-600 hover:bg-stone-100" : "text-stone-500 hover:text-stone-700 hover:bg-stone-100"}
-                        onClick={() => toggleServiceVisibility(service)}
-                        disabled={togglingVisibility === service.id || service.is_suspended}
-                        title={service.is_suspended ? "Suspendue par l'administration" : (service.is_hidden ? "Afficher l'offre" : "Masquer l'offre")}
-                      >
-                        {service.is_hidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </Button>
                       <Button variant="ghost" size="icon" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => openEditService(service)}>
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -1194,9 +1107,9 @@ export default function VendorDashboard() {
             )) : (
               <div className="col-span-full text-center py-20 bg-stone-50 rounded-xl border border-dashed border-stone-200">
                 <Package className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-stone-900">Aucun service répertorié</h3>
-                <p className="text-stone-500 mb-6">Commencez à gagner en listant vos services d'organisation d'événements.</p>
-                <Button onClick={() => setIsNewServiceOpen(true)} variant="outline">Créer Première Offre</Button>
+                <h3 className="text-lg font-medium text-stone-900">{t('vendor.noServices')}</h3>
+                <p className="text-stone-500 mb-6">{t('vendor.noServicesDesc')}</p>
+                <Button onClick={() => setIsNewServiceOpen(true)} variant="outline">{t('vendor.createFirst')}</Button>
               </div>
             )}
           </div>
@@ -1220,7 +1133,7 @@ export default function VendorDashboard() {
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                <StatCard 
                  icon={Wallet}
-                 label="Gains en Attente"
+                 label={t('vendor.pendingEarnings')}
                  value={`${bookings
                    .filter(b => b.status === 'confirmed' || b.status === 'completed')
                    .reduce((acc, curr) => acc + (curr.total_amount || 0), 0)
@@ -1229,7 +1142,7 @@ export default function VendorDashboard() {
                />
                <StatCard 
                  icon={Crown}
-                 label="Frais Plateforme (5%)"
+                 label={t('vendor.platformFees')}
                  value={`${bookings
                    .filter(b => b.status === 'confirmed' || b.status === 'completed')
                    .reduce((acc, curr) => acc + (curr.commission_amount || 0), 0)

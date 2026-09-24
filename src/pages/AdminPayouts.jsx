@@ -88,7 +88,12 @@ export default function AdminPayouts() {
   };
 
   const handleProcessPayout = async (payout) => {
-    const voucherNumber = prompt("Enter Cash Voucher Number (NUMERO_PIECE_CAISSE) to approve:");
+    const isWithdrawal = payout.payment_nature === 'withdrawal';
+    const voucherNumber = prompt(
+        isWithdrawal
+            ? "Entrez le numero de reference du virement effectue :"
+            : "Enter Cash Voucher Number (NUMERO_PIECE_CAISSE) to approve:"
+    );
     if (!voucherNumber) return;
     
     setProcessingId(payout.id);
@@ -100,33 +105,39 @@ export default function AdminPayouts() {
             payment_date: new Date().toISOString()
         });
 
-        // 2. Update Vendor Balance
+        // 2. Update Vendor Balance (credit si versement admin, debit si retrait vendeur)
         const profiles = await base44.entities.VendorProfile.filter({ user_id: payout.provider_id });
         if (profiles.length > 0) {
             const profile = profiles[0];
+            const currentBalance = profile.account_balance || 0;
+            const newBalance = isWithdrawal
+                ? Math.max(0, currentBalance - (payout.amount_paid || 0))
+                : currentBalance + (payout.amount_paid || 0);
             await base44.entities.VendorProfile.update(profile.id, {
-                account_balance: (profile.account_balance || 0) + (payout.amount_paid || 0)
+                account_balance: newBalance
             });
         }
         
         // 3. Notify Vendor
         await base44.entities.Notification.create({
             user_id: payout.provider_id,
-            title: "Payout Approved",
-            message: `Your payout of ${payout.amount_paid?.toLocaleString()} FCFA (Ref: ${payout.payment_code}) has been approved and added to your balance. Voucher: ${voucherNumber}`,
+            title: isWithdrawal ? "Retrait effectue" : "Payout Approved",
+            message: isWithdrawal
+                ? `Votre retrait de ${payout.amount_paid?.toLocaleString()} FCFA vers ${payout.bank_account_label || 'votre compte'} a ete envoye. Reference: ${voucherNumber}`
+                : `Your payout of ${payout.amount_paid?.toLocaleString()} FCFA (Ref: ${payout.payment_code}) has been approved and added to your balance. Voucher: ${voucherNumber}`,
             type: "payment",
-            link: "/Dashboard",
+            link: "/VendorDashboard?tab=payments",
             is_read: false
         });
 
-        // Email au vendeur (confirmation financière importante)
+        // Email au vendeur (confirmation financiere importante)
         const allUsers = await base44.entities.User.list();
         const vendorUser = allUsers.find(u => u.id === payout.provider_id);
         if (vendorUser) {
             await SendEmail({
                 to: vendorUser.email,
-                subject: "✅ Paiement approuvé",
-                body: `Bonjour ${vendorUser.full_name},\n\nVotre paiement de ${payout.amount_paid?.toLocaleString()} FCFA (référence ${payout.payment_code}) a été approuvé et ajouté à votre solde.\n\nNuméro de pièce de caisse : ${voucherNumber}\n\nCordialement,\nL'équipe EventCrafter`
+                subject: "Paiement approuve",
+                body: `Bonjour ${vendorUser.full_name},\n\nVotre paiement de ${payout.amount_paid?.toLocaleString()} FCFA (reference ${payout.payment_code}) a ete approuve et ajoute a votre solde.\n\nNumero de piece de caisse : ${voucherNumber}\n\nCordialement,\nL'equipe EventCrafter`
             });
         }
 
@@ -170,14 +181,14 @@ export default function AdminPayouts() {
                   is_read: false
               });
 
-              // Email au client (confirmation financière importante)
+              // Email au client (confirmation financiere importante)
               const allUsers = await base44.entities.User.list();
               const clientUser = allUsers.find(u => u.id === refund.client_id);
               if (clientUser) {
                   await SendEmail({
                       to: clientUser.email,
-                      subject: "✅ Remboursement traité",
-                      body: `Bonjour ${clientUser.full_name},\n\nVotre remboursement de ${refund.amount_refunded?.toLocaleString()} FCFA (référence ${refund.refund_code}) a été traité.\n\nCordialement,\nL'équipe EventCrafter`
+                      subject: "Remboursement traite",
+                      body: `Bonjour ${clientUser.full_name},\n\nVotre remboursement de ${refund.amount_refunded?.toLocaleString()} FCFA (reference ${refund.refund_code}) a ete traite.\n\nCordialement,\nL'equipe EventCrafter`
                   });
               }
           }
@@ -236,7 +247,12 @@ export default function AdminPayouts() {
                                             <td className="p-4">{format(new Date(payout.created_date), 'MMM d, yyyy')}</td>
                                             <td className="p-4 font-mono text-xs">{payout.payment_code}</td>
                                             <td className="p-4 font-mono text-xs">{payout.provider_id}</td>
-                                            <td className="p-4 text-xs uppercase">{payout.payment_nature}</td>
+                                            <td className="p-4 text-xs">
+                                                <span className="uppercase">{payout.payment_nature}</span>
+                                                {payout.payment_nature === 'withdrawal' && payout.bank_account_label && (
+                                                    <div className="text-[10px] text-stone-400 normal-case mt-0.5">{payout.bank_account_label}</div>
+                                                )}
+                                            </td>
                                             <td className="p-4 font-bold text-emerald-700">{payout.amount_paid?.toLocaleString()} FCFA</td>
                                             <td className="p-4 text-xs text-rose-600 font-medium">-{payout.admin_fee?.toLocaleString()}</td>
                                             <td className="p-4">

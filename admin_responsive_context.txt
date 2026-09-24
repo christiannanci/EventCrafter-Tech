@@ -1,0 +1,232 @@
+﻿
+  src\components\admin\ContractMonitoring.jsx:193:          <CardContent className="pt-6">
+> src\components\admin\ContractMonitoring.jsx:194:            <div className="flex items-center justify-between">
+  src\components\admin\ContractMonitoring.jsx:195:              <div>
+  src\components\admin\ContractMonitoring.jsx:196:                <p className="text-xs text-stone-600">Factures En 
+Attente</p>
+  src\components\admin\ContractMonitoring.jsx:197:                <p className="text-2xl font-bold 
+text-orange-600">{totalPending.toLocaleString()} FCFA</p>
+  src\components\admin\ContractMonitoring.jsx:206:          <CardContent className="pt-6">
+> src\components\admin\ContractMonitoring.jsx:207:            <div className="flex items-center justify-between">
+  src\components\admin\ContractMonitoring.jsx:208:              <div>
+  src\components\admin\ContractMonitoring.jsx:209:                <p className="text-xs text-stone-600">Factures 
+Payees</p>
+  src\components\admin\ContractMonitoring.jsx:210:                <p className="text-2xl font-bold 
+text-green-600">{totalPaid.toLocaleString()} FCFA</p>
+  src\components\admin\ContractMonitoring.jsx:219:          <CardContent className="pt-6">
+> src\components\admin\ContractMonitoring.jsx:220:            <div className="flex items-center justify-between">
+  src\components\admin\ContractMonitoring.jsx:221:              <div>
+  src\components\admin\ContractMonitoring.jsx:222:                <p className="text-xs text-stone-600">GMV Actif</p>
+  src\components\admin\ContractMonitoring.jsx:223:                <p className="text-2xl font-bold 
+text-indigo-600">{activeGMV.toLocaleString()} FCFA</p>
+  src\components\admin\ContractMonitoring.jsx:232:          <CardContent className="pt-6">
+> src\components\admin\ContractMonitoring.jsx:233:            <div className="flex items-center justify-between">
+  src\components\admin\ContractMonitoring.jsx:234:              <div>
+  src\components\admin\ContractMonitoring.jsx:235:                <p className="text-xs text-stone-600">Commission 
+Generee</p>
+  src\components\admin\ContractMonitoring.jsx:236:                <p className="text-2xl font-bold 
+text-purple-600">{totalCommission.toLocaleString()} FCFA</p>
+  src\components\admin\DisputeManagement.jsx:471:          <CardContent className="pt-6">
+> src\components\admin\DisputeManagement.jsx:472:            <div className="flex items-center justify-between">
+  src\components\admin\DisputeManagement.jsx:473:              <div>
+  src\components\admin\DisputeManagement.jsx:474:                <p className="text-xs text-stone-600">Litiges Actifs</p>
+  src\components\admin\DisputeManagement.jsx:475:                <p className="text-2xl font-bold 
+text-red-600">{openDisputes.length}</p>
+  src\components\admin\DisputeManagement.jsx:483:          <CardContent className="pt-6">
+> src\components\admin\DisputeManagement.jsx:484:            <div className="flex items-center justify-between">
+  src\components\admin\DisputeManagement.jsx:485:              <div>
+  src\components\admin\DisputeManagement.jsx:486:                <p className="text-xs text-stone-600">Résolus</p>
+  src\components\admin\DisputeManagement.jsx:487:                <p className="text-2xl font-bold 
+text-green-600">{resolvedDisputes.length}</p>
+  src\components\admin\DisputeManagement.jsx:495:          <CardContent className="pt-6">
+> src\components\admin\DisputeManagement.jsx:496:            <div className="flex items-center justify-between">
+  src\components\admin\DisputeManagement.jsx:497:              <div>
+  src\components\admin\DisputeManagement.jsx:498:                <p className="text-xs text-stone-600">Taux de 
+Résolution</p>
+  src\components\admin\DisputeManagement.jsx:499:                <p className="text-2xl font-bold text-indigo-600">
+  src\components\admin\DisputeManagement.jsx:531:                        {/* Header */}
+> src\components\admin\DisputeManagement.jsx:532:                        <div className="flex items-start 
+justify-between">
+  src\components\admin\DisputeManagement.jsx:533:                          <div>
+  src\components\admin\DisputeManagement.jsx:534:                            <div className="flex items-center gap-2 
+mb-2">
+  src\components\admin\DisputeManagement.jsx:535:                              <Badge className="bg-red-600 text-white">
+  src\components\admin\DossiersMonitoring.jsx:221:            <CardContent className="pt-6">
+> src\components\admin\DossiersMonitoring.jsx:222:              <div className="flex items-center justify-between">
+  src\components\admin\DossiersMonitoring.jsx:223:                <div>
+  src\components\admin\DossiersMonitoring.jsx:224:                  <p className="text-xs text-stone-600">Dossiers en 
+Discussion</p>
+  src\components\admin\DossiersMonitoring.jsx:225:                  <p className="text-2xl font-bold 
+text-blue-600">{globalMetrics.totalConversations}</p>
+  src\components\admin\DossiersMonitoring.jsx:233:            <CardContent className="pt-6">
+> src\components\admin\DossiersMonitoring.jsx:234:              <div className="flex items-center justify-between">
+  src\components\admin\DossiersMonitoring.jsx:235:                <div>
+  src\components\admin\DossiersMonitoring.jsx:236:                  <p className="text-xs text-stone-600">Dossiers 
+Confirmés</p>
+  src\components\admin\DossiersMonitoring.jsx:237:                  <p className="text-2xl font-bold 
+text-green-600">{globalMetrics.totalConfirmed}</p>
+  src\components\admin\DossiersMonitoring.jsx:245:            <CardContent className="pt-6">
+> src\components\admin\DossiersMonitoring.jsx:246:              <div className="flex items-center justify-between">
+  src\components\admin\DossiersMonitoring.jsx:247:                <div>
+  src\components\admin\DossiersMonitoring.jsx:248:                  <p className="text-xs text-stone-600">Temps Moyen 
+Conversion</p>
+  src\components\admin\DossiersMonitoring.jsx:249:                  <p className="text-2xl font-bold 
+text-purple-600">{globalMetrics.avgDaysToConfirm}j</p>
+  src\components\admin\DossiersMonitoring.jsx:257:            <CardContent className="pt-6">
+> src\components\admin\DossiersMonitoring.jsx:258:              <div className="flex items-center justify-between">
+  src\components\admin\DossiersMonitoring.jsx:259:                <div>
+  src\components\admin\DossiersMonitoring.jsx:260:                  <p className="text-xs text-stone-600">Dossiers 
+Bloqués</p>
+  src\components\admin\DossiersMonitoring.jsx:261:                  <p className={`text-2xl font-bold 
+${globalMetrics.stuckDossiers > 0 ? 'text-amber-600' : 'text-stone-600'}`}>
+  src\components\admin\LeadManagement.jsx:260:      
+> src\components\admin\LeadManagement.jsx:261:      <div className="flex items-center justify-between">
+  src\components\admin\LeadManagement.jsx:262:        <div>
+  src\components\admin\LeadManagement.jsx:263:          <h2 className="text-2xl font-bold text-stone-900 flex 
+items-center gap-2">
+  src\components\admin\LeadManagement.jsx:264:            <Target className="w-6 h-6 text-rose-600" />
+  src\components\admin\LeadManagement.jsx:284:          <CardContent className="p-6">
+> src\components\admin\LeadManagement.jsx:285:            <div className="flex items-center justify-between">
+  src\components\admin\LeadManagement.jsx:286:              <div>
+  src\components\admin\LeadManagement.jsx:287:                <p className="text-sm text-stone-600">Leads Créés</p>
+  src\components\admin\LeadManagement.jsx:288:                <h3 className="text-3xl font-bold text-stone-900 
+mt-1">{analytics.totalLeads}</h3>
+  src\components\admin\LeadManagement.jsx:296:          <CardContent className="p-6">
+> src\components\admin\LeadManagement.jsx:297:            <div className="flex items-center justify-between">
+  src\components\admin\LeadManagement.jsx:298:              <div>
+  src\components\admin\LeadManagement.jsx:299:                <p className="text-sm text-stone-600">Leads Débloqués</p>
+  src\components\admin\LeadManagement.jsx:300:                <h3 className="text-3xl font-bold text-stone-900 
+mt-1">{analytics.totalUnlocks}</h3>
+  src\components\admin\LeadManagement.jsx:308:          <CardContent className="p-6">
+> src\components\admin\LeadManagement.jsx:309:            <div className="flex items-center justify-between">
+  src\components\admin\LeadManagement.jsx:310:              <div>
+  src\components\admin\LeadManagement.jsx:311:                <p className="text-sm text-purple-700 
+font-medium">Conversion Free->Payant</p>
+  src\components\admin\LeadManagement.jsx:312:                <h3 className="text-3xl font-bold text-purple-600 
+mt-1">{analytics.freeToPayingConversionRate}%</h3>
+  src\components\admin\LeadManagement.jsx:321:          <CardContent className="p-6">
+> src\components\admin\LeadManagement.jsx:322:            <div className="flex items-center justify-between">
+  src\components\admin\LeadManagement.jsx:323:              <div>
+  src\components\admin\LeadManagement.jsx:324:                <p className="text-sm text-stone-600">Taux Déblocage</p>
+  src\components\admin\LeadManagement.jsx:325:                <h3 className="text-3xl font-bold text-green-600 
+mt-1">{analytics.conversionRate}%</h3>
+  src\components\admin\LeadManagement.jsx:333:          <CardContent className="p-6">
+> src\components\admin\LeadManagement.jsx:334:            <div className="flex items-center justify-between">
+  src\components\admin\LeadManagement.jsx:335:              <div>
+  src\components\admin\LeadManagement.jsx:336:                <p className="text-sm text-stone-600">Revenus Générés</p>
+  src\components\admin\LeadManagement.jsx:337:                <h3 className="text-3xl font-bold text-rose-600 
+mt-1">{formatPrice(analytics.totalRevenue || 0)}</h3>
+  src\components\admin\LeadManagement.jsx:431:                    .map(([category, count]) => (
+> src\components\admin\LeadManagement.jsx:432:                      <div key={category} className="flex items-center 
+justify-between">
+  src\components\admin\LeadManagement.jsx:433:                        <span className="text-sm 
+text-stone-700">{category}</span>
+  src\components\admin\LeadManagement.jsx:434:                        <div className="flex items-center gap-3">
+  src\components\admin\LeadManagement.jsx:435:                          <div className="w-32 bg-stone-200 rounded-full 
+h-2">
+  src\components\admin\LeadManagement.jsx:458:                  {Object.entries(analytics.byPlan || {}).map(([plan, 
+count]) => (
+> src\components\admin\LeadManagement.jsx:459:                    <div key={plan} className="flex items-center 
+justify-between">
+  src\components\admin\LeadManagement.jsx:460:                      <div className="flex items-center gap-2">
+  src\components\admin\LeadManagement.jsx:461:                        <Badge className={
+  src\components\admin\LeadManagement.jsx:462:                          plan === 'gold' ? 'bg-yellow-500' :
+  src\components\admin\LeadPricingConfigManager.jsx:81:    <div className="space-y-6">
+> src\components\admin\LeadPricingConfigManager.jsx:82:      <div className="flex items-center justify-between">
+  src\components\admin\LeadPricingConfigManager.jsx:83:        <div>
+  src\components\admin\LeadPricingConfigManager.jsx:84:          <h2 className="text-2xl font-bold text-stone-900 flex 
+items-center gap-2">
+  src\components\admin\LeadPricingConfigManager.jsx:85:            <Settings className="w-6 h-6 text-rose-600" />
+  src\components\admin\LeadUpsellConfigManager.jsx:76:    <div className="space-y-6">
+> src\components\admin\LeadUpsellConfigManager.jsx:77:      <div className="flex items-center justify-between">
+  src\components\admin\LeadUpsellConfigManager.jsx:78:        <div>
+  src\components\admin\LeadUpsellConfigManager.jsx:79:          <h2 className="text-2xl font-bold text-stone-900 flex 
+items-center gap-2">
+  src\components\admin\LeadUpsellConfigManager.jsx:80:            <Settings className="w-6 h-6 text-purple-600" />
+  src\components\admin\MonthlyGiftManager.jsx:227:    <div className="space-y-6">
+> src\components\admin\MonthlyGiftManager.jsx:228:      <div className="flex items-center justify-between">
+  src\components\admin\MonthlyGiftManager.jsx:229:        <div>
+  src\components\admin\MonthlyGiftManager.jsx:230:          <h2 className="text-2xl font-bold text-stone-900 flex 
+items-center gap-2">
+  src\components\admin\MonthlyGiftManager.jsx:231:            <Gift className="w-6 h-6 text-pink-600" />
+  src\components\admin\RankingConfigManager.jsx:129:        <div className="space-y-3">
+> src\components\admin\RankingConfigManager.jsx:130:          <div className="flex items-center justify-between">
+  src\components\admin\RankingConfigManager.jsx:131:            <Label className="flex items-center gap-2">
+  src\components\admin\RankingConfigManager.jsx:132:              <Zap className="w-4 h-4 text-amber-500" />
+  src\components\admin\RankingConfigManager.jsx:133:              Poids du Boost (Payant 3-5$/semaine)
+  src\components\admin\RankingConfigManager.jsx:151:        <div className="space-y-3">
+> src\components\admin\RankingConfigManager.jsx:152:          <div className="flex items-center justify-between">
+  src\components\admin\RankingConfigManager.jsx:153:            <Label className="flex items-center gap-2">
+  src\components\admin\RankingConfigManager.jsx:154:              <Star className="w-4 h-4 text-yellow-500" />
+  src\components\admin\RankingConfigManager.jsx:155:              Poids de la Note Client (Qualité)
+  src\components\admin\RankingConfigManager.jsx:173:        <div className="space-y-3">
+> src\components\admin\RankingConfigManager.jsx:174:          <div className="flex items-center justify-between">
+  src\components\admin\RankingConfigManager.jsx:175:            <Label className="flex items-center gap-2">
+  src\components\admin\RankingConfigManager.jsx:176:              <RotateCw className="w-4 h-4 text-blue-500" />
+  src\components\admin\RankingConfigManager.jsx:177:              Poids de la Réactivité (Réponse rapide)
+  src\components\admin\RankingConfigManager.jsx:195:        <div className="space-y-3">
+> src\components\admin\RankingConfigManager.jsx:196:          <div className="flex items-center justify-between">
+  src\components\admin\RankingConfigManager.jsx:197:            <Label className="flex items-center gap-2">
+  src\components\admin\RankingConfigManager.jsx:198:              <Shield className="w-4 h-4 text-green-500" />
+  src\components\admin\RankingConfigManager.jsx:199:              Poids Vérification Officielle
+  src\components\admin\RankingConfigManager.jsx:217:        <div className="space-y-3">
+> src\components\admin\RankingConfigManager.jsx:218:          <div className="flex items-center justify-between">
+  src\components\admin\RankingConfigManager.jsx:219:            <Label className="flex items-center gap-2">
+  src\components\admin\RankingConfigManager.jsx:220:              <Heart className="w-4 h-4 text-pink-500" />
+  src\components\admin\RankingConfigManager.jsx:221:              Poids Affinité Culturelle
+  src\components\admin\RankingConfigManager.jsx:239:        <div className="space-y-3">
+> src\components\admin\RankingConfigManager.jsx:240:          <div className="flex items-center justify-between">
+  src\components\admin\RankingConfigManager.jsx:241:            <Label className="flex items-center gap-2">
+  src\components\admin\RankingConfigManager.jsx:242:              <RotateCw className="w-4 h-4 text-purple-500" />
+  src\components\admin\RankingConfigManager.jsx:243:              Rotation Équitable (Heures)
+  src\components\admin\RankingDashboard.jsx:173:          <CardContent className="p-4">
+> src\components\admin\RankingDashboard.jsx:174:            <div className="flex items-center justify-between">
+  src\components\admin\RankingDashboard.jsx:175:              <div>
+  src\components\admin\RankingDashboard.jsx:176:                <p className="text-xs text-stone-500 uppercase">Total 
+Services</p>
+  src\components\admin\RankingDashboard.jsx:177:                <p className="text-2xl font-bold 
+text-stone-900">{rankedData.length}</p>
+  src\components\admin\RankingDashboard.jsx:185:          <CardContent className="p-4">
+> src\components\admin\RankingDashboard.jsx:186:            <div className="flex items-center justify-between">
+  src\components\admin\RankingDashboard.jsx:187:              <div>
+  src\components\admin\RankingDashboard.jsx:188:                <p className="text-xs text-stone-500 uppercase">Gold</p>
+  src\components\admin\RankingDashboard.jsx:189:                <p className="text-2xl font-bold 
+text-yellow-600">{goldServices.length}</p>
+  src\components\admin\RankingDashboard.jsx:197:          <CardContent className="p-4">
+> src\components\admin\RankingDashboard.jsx:198:            <div className="flex items-center justify-between">
+  src\components\admin\RankingDashboard.jsx:199:              <div>
+  src\components\admin\RankingDashboard.jsx:200:                <p className="text-xs text-stone-500 
+uppercase">Premium</p>
+  src\components\admin\RankingDashboard.jsx:201:                <p className="text-2xl font-bold 
+text-purple-600">{premiumServices.length}</p>
+  src\components\admin\RankingDashboard.jsx:209:          <CardContent className="p-4">
+> src\components\admin\RankingDashboard.jsx:210:            <div className="flex items-center justify-between">
+  src\components\admin\RankingDashboard.jsx:211:              <div>
+  src\components\admin\RankingDashboard.jsx:212:                <p className="text-xs text-stone-500 
+uppercase">Standard</p>
+  src\components\admin\RankingDashboard.jsx:213:                <p className="text-2xl font-bold 
+text-stone-600">{standardServices.length}</p>
+  src\components\admin\RefundPolicyManager.jsx:144:    <div className="space-y-6">
+> src\components\admin\RefundPolicyManager.jsx:145:      <div className="flex items-center justify-between">
+  src\components\admin\RefundPolicyManager.jsx:146:        <div>
+  src\components\admin\RefundPolicyManager.jsx:147:          <h2 className="text-2xl font-bold text-stone-900 flex 
+items-center gap-2">
+  src\components\admin\RefundPolicyManager.jsx:148:            <Shield className="w-6 h-6 text-blue-600" />
+  src\components\admin\RefundPolicyManager.jsx:389:      <CardHeader className="bg-orange-50">
+> src\components\admin\RefundPolicyManager.jsx:390:        <div className="flex items-start justify-between">
+  src\components\admin\RefundPolicyManager.jsx:391:          <div>
+  src\components\admin\RefundPolicyManager.jsx:392:            <CardTitle className="text-base flex items-center gap-2">
+  src\components\admin\RefundPolicyManager.jsx:393:              <AlertTriangle className="w-5 h-5 text-orange-600" />
+  src\components\admin\RewardConfigManager.jsx:81:    <div className="space-y-6">
+> src\components\admin\RewardConfigManager.jsx:82:      <div className="flex items-center justify-between">
+  src\components\admin\RewardConfigManager.jsx:83:        <div>
+  src\components\admin\RewardConfigManager.jsx:84:          <h2 className="text-2xl font-bold text-stone-900 flex 
+items-center gap-2">
+  src\components\admin\RewardConfigManager.jsx:85:            <Star className="w-6 h-6 text-amber-500" />
+  src\components\admin\UserManagement.jsx:229:            <CardHeader>
+> src\components\admin\UserManagement.jsx:230:                <div className="flex items-center justify-between">
+  src\components\admin\UserManagement.jsx:231:                    <div>
+  src\components\admin\UserManagement.jsx:232:                        <CardTitle className="flex items-center gap-2">
+  src\components\admin\UserManagement.jsx:233:                            <Users className="w-5 h-5" />
+
+

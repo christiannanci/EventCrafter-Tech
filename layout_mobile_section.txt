@@ -1,0 +1,86 @@
+﻿                  </DropdownMenu>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <CurrencySelector />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="text-stone-600">
+                        <Globe className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {languages.map((lang) => (
+                        <DropdownMenuItem
+                          key={lang.code}
+                          onClick={() => setLanguage(lang.code)}
+                          className={language === lang.code ? "bg-[#FFF0E8] text-[#FF6B35] font-medium" : ""}
+                        >
+                          <Globe className="w-4 h-4 mr-2" />
+                          {lang.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <CartIconNav />
+                  <Button variant="ghost" onClick={() => window.location.href = "/Login"} className="text-[#2C2C2C] hover:text-[#FF6B35]">
+                    {t("nav.signIn")}
+                  </Button>
+                  <Button onClick={() => window.location.href = "/Login"} className="bg-[#FF6B35] hover:bg-[#e05a2b] text-white rounded-full px-6 font-medium shadow-md hover:shadow-lg transition-all">
+                    {t("nav.joinPlanner")}
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center gap-4">
+               {/* Language Switcher Mobile */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-stone-600">
+                    <Globe className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {languages.map((lang) => (
+                    <DropdownMenuItem 
+                      key={lang.code} 
+                      onClick={() => setLanguage(lang.code)}
+                      className={language === lang.code ? "bg-rose-50 text-rose-600 font-medium" : ""}
+                    >
+                      {lang.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label={isMenuOpen ? t('layout.closeMenu') : t('layout.openMenu')}
+                aria-expanded={isMenuOpen}
+                className="text-stone-600 hover:text-rose-600 focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Nav */}
+            {isMenuOpen && (
+              <div className="md:hidden bg-white border-b border-[#F4C542]/20 animate-in slide-in-from-top-5">
+                <div className="px-4 pt-2 pb-6 space-y-2">
+                  {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={createPageUrl(link.path.replace('/', ''))}
+                  className="block px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              ))}
+               {user ? (
+                <>
+                  {hasVendorProfile && (

@@ -1,0 +1,66 @@
+﻿                  {link.name}
+                </Link>
+              ))}
+               {user ? (
+                <>
+                  {hasVendorProfile && (
+                    <Link 
+                      to={createPageUrl('VendorDashboard')}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      {t('layout.vendorDashboard')}
+                    </Link>
+                  )}
+                  {hasVendorProfile && (
+                    <Link 
+                      to={createPageUrl('VendorProfile')}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      {t('layout.myProfile')}
+                    </Link>
+                  )}
+                  {hasClientProfile && (
+                    <Link 
+                      to={createPageUrl('ClientDashboard')}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      {t('layout.clientDashboard')}
+                    </Link>
+                  )}
+                  {hasClientProfile && (
+                    <Link 
+                      to={createPageUrl('ClientDashboard') + '?tab=client_profile'}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      {t('layout.myProfile')}
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-3 py-3 text-base font-medium text-[#2C2C2C] hover:text-[#FF6B35] hover:bg-[#FFF0E8] rounded-md"
+                  >
+                    {t("nav.logout")}
+                  </button>
+                </>
+               ) : (
+                <div className="pt-4 flex flex-col gap-3">
+                  <Button onClick={() => window.location.href = "/Login"} variant="outline" className="w-full justify-center">
+                     {t("nav.signIn")}
+                  </Button>
+                  <Button onClick={() => window.location.href = "/Login"} className="w-full justify-center bg-[#FF6B35] hover:bg-[#e05a2b] text-white">
+                     {t("nav.joinPlanner")}
+                  </Button>
+                </div>
+               )}
+            </div>
+          </div>
+        )}
+      </nav>

@@ -1,0 +1,13 @@
+﻿
+  src\Layout.jsx:34:  SelectValue,
+  src\Layout.jsx:35:} from "@/components/ui/select";
+> src\Layout.jsx:36:import NotificationBell from '@/components/NotificationBell';
+  src\Layout.jsx:37:import CartIconNav from '@/components/CartIconNav';
+  src\Layout.jsx:38:import CurrencySelector from '@/components/CurrencySelector';
+  src\Layout.jsx:165:                  <CurrencySelector />
+  src\Layout.jsx:166:                  <CartIconNav />
+> src\Layout.jsx:167:                  <NotificationBell user={user} />
+  src\Layout.jsx:168:
+  src\Layout.jsx:169:                  {(user.role === 'admin' || (user.staff_role && user.staff_role !== 'none')) && (
+
+
