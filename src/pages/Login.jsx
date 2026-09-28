@@ -3,73 +3,52 @@ import { supabase } from '@/api/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, MailCheck, Eye, EyeOff, ArrowLeft } from 'lucide-react';
-import PhoneInput from '@/components/PhoneInput';
-import { useLanguage } from '@/components/LanguageContext';
+import { Loader2 } from 'lucide-react';
 
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^(\+?237)?6\d{8}$/; // mobile camerounais : 6XXXXXXXX
 
 export default function Login() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [isRegister, setIsRegister] = useState(false);
+  const [step, setStep] = useState('form'); // 'form' | 'code'
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [resending, setResending] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState([]);
 
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState('');
-  const [sendingReset, setSendingReset] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
-
-  const validateRegistration = () => {
-    if (!PASSWORD_REGEX.test(password)) {
-      setError(t('auth.passwordRequirement'));
-      return false;
+  // Vérification de la conformité des champs (boucle du diagramme)
+  const validateFields = () => {
+    const errors = [];
+    if (!EMAIL_REGEX.test(email)) errors.push("L'adresse email n'est pas valide.");
+    if (password.length < 8) errors.push('Le mot de passe doit contenir au moins 8 caractères.');
+    if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+      errors.push('Le mot de passe doit contenir au moins une lettre et un chiffre.');
     }
-    return true;
+    if (password !== confirmPassword) errors.push('Les mots de passe ne correspondent pas.');
+    if (!PHONE_REGEX.test(phone.replace(/[\s.-]/g, ''))) {
+      errors.push('Le numéro de téléphone doit être un mobile camerounais valide (ex : 6 70 00 00 00).');
+    }
+    return errors;
   };
 
-  const handleResendConfirmation = async () => {
-    setResending(true);
-    setError('');
-    try {
-      const { error: resendError } = await supabase.auth.resend({
-        type: 'signup',
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/ProfileSelection`,
-        },
-      });
-      if (resendError) throw resendError;
-      setMessage(t('auth.confirmationResent'));
-    } catch (err) {
-      setError(err.message || t('auth.genericError'));
-    } finally {
-      setResending(false);
-    }
-  };
+  const goAfterLogin = async (userId) => {
+    const { data: appUser } = await supabase
+      .from('app_user')
+      .select('role')
+      .eq('id', userId)
+      .maybeSingle();
 
-  const handleForgotPassword = async (e) => {
-    e.preventDefault();
-    setSendingReset(true);
-    setError('');
-    try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-        redirectTo: `${window.location.origin}/ResetPassword`,
-      });
-      if (resetError) throw resetError;
-      setResetSent(true);
-    } catch (err) {
-      setError(err.message || t('auth.genericError'));
-    } finally {
-      setSendingReset(false);
+    if (appUser?.role === 'admin') {
+      navigate('/AdminDashboard');
+    } else {
+      const nextUrl = new URLSearchParams(window.location.search).get('next') || '/';
+      navigate(nextUrl);
     }
   };
 
@@ -77,135 +56,137 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setMessage('');
-    setNeedsConfirmation(false);
+    setFieldErrors([]);
 
-    if (isRegister && !validateRegistration()) {
-      return;
+    if (isRegister) {
+      const errors = validateFields();
+      if (errors.length > 0) {
+        setFieldErrors(errors); // renvoi du formulaire avec les erreurs
+        return;
+      }
     }
 
     setLoading(true);
-
     try {
       if (isRegister) {
-        const cleanedPhone = phone.replace(/\s+/g, ' ').trim();
+        const cleanPhone = phone.replace(/[\s.-]/g, '');
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            data: {
-              phone: cleanedPhone,
-            },
-            emailRedirectTo: `${window.location.origin}/ProfileSelection`,
-          },
+          options: { data: { phone: cleanPhone } },
         });
         if (signUpError) throw signUpError;
 
-        if (data.user && !data.session) {
-          setMessage(t('auth.accountCreated'));
-          setNeedsConfirmation(true);
-        } else {
-          navigate('/ProfileSelection');
-        }
-      } else {
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (signInError) {
-          if (signInError.message?.toLowerCase().includes('email not confirmed')) {
-            setNeedsConfirmation(true);
-            setError(t('auth.emailNotConfirmed'));
-          } else {
-            throw signInError;
-          }
+        // Email déjà utilisé : Supabase renvoie un utilisateur sans identité
+        if (data.user && data.user.identities?.length === 0) {
+          setError('Un compte existe déjà avec cet email.');
           return;
         }
 
-        const userId = data.user.id;
-        const { data: appUser, error: appUserError } = await supabase
-          .from('app_user')
-          .select('role, staff_role')
-          .eq('id', userId)
-          .single();
-
-        const hasStaffAccess = appUser?.staff_role && appUser.staff_role !== 'none';
-
-        if (!appUserError && (appUser?.role === 'admin' || hasStaffAccess)) {
-          navigate('/AdminDashboard');
+        if (data.session) {
+          navigate('/ProfileSelection'); // confirmation email désactivée
         } else {
-          const nextUrl = new URLSearchParams(window.location.search).get('next') || '/';
-          navigate(nextUrl);
+          setStep('code'); // envoi du code de confirmation par email
+          setMessage(`Un code de confirmation a été envoyé à ${email}.`);
         }
+      } else {
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) {
+          if (signInError.message?.toLowerCase().includes('not confirmed')) {
+            await supabase.auth.resend({ type: 'signup', email });
+            setStep('code');
+            setMessage("Votre email n'est pas encore confirmé. Un nouveau code vient de vous être envoyé.");
+            return;
+          }
+          throw signInError;
+        }
+        await goAfterLogin(data.user.id);
       }
     } catch (err) {
-      setError(err.message || t('auth.genericError'));
+      setError(err.message || 'Une erreur est survenue');
     } finally {
       setLoading(false);
     }
   };
 
-  if (showForgotPassword) {
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email,
+        token: code.trim(),
+        type: 'signup',
+      });
+
+      if (verifyError) {
+        // Branche « code incorrect » : code invalide puis renvoi du formulaire
+        setError('Code invalide ou expiré. Vérifiez le code ou demandez-en un nouveau.');
+        setCode('');
+        return;
+      }
+
+      navigate('/ProfileSelection'); // inscription réussie, ouverture de la session
+    } catch (err) {
+      setError(err.message || 'Une erreur est survenue');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setError('');
+    setMessage('');
+    const { error: resendError } = await supabase.auth.resend({ type: 'signup', email });
+    if (resendError) setError(resendError.message);
+    else setMessage('Un nouveau code a été envoyé.');
+  };
+
+  if (step === 'code') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-stone-50">
         <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-          <button
-            type="button"
-            onClick={() => { setShowForgotPassword(false); setResetSent(false); setError(''); }}
-            className="flex items-center gap-1 text-sm text-stone-500 hover:text-stone-700 mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" /> {t('auth.backToLogin')}
-          </button>
+          <h1 className="text-2xl font-bold text-stone-900 mb-2 text-center">Confirmez votre email</h1>
+          <p className="text-stone-500 text-center mb-6">Saisissez le code reçu à l'adresse {email}</p>
 
-          <h1 className="text-2xl font-bold text-stone-900 mb-2 text-center">
-            {t('auth.forgotPasswordTitle')}
-          </h1>
+          <form onSubmit={handleVerifyCode} className="space-y-4">
+            <Input
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+              placeholder="Code à 6 chiffres"
+              inputMode="numeric"
+              maxLength={8}
+              required
+              className="text-center text-2xl tracking-widest"
+            />
 
-          {resetSent ? (
-            <div className="bg-green-50 text-green-700 text-sm p-4 rounded-lg flex items-start gap-2 mt-6">
-              <MailCheck className="w-5 h-5 mt-0.5 flex-shrink-0" />
-              <span>
-                {t('auth.resetSentPrefix')} <strong>{forgotEmail}</strong>, {t('auth.resetSentSuffix')}
-              </span>
-            </div>
-          ) : (
-            <>
-              <p className="text-stone-500 text-center mb-6 text-sm">
-                {t('auth.forgotPasswordSubtitle')}
-              </p>
-              <form onSubmit={handleForgotPassword} className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-stone-700">{t('auth.email')}</label>
-                  <Input
-                    type="email"
-                    value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
-                    placeholder="votre@email.com"
-                    required
-                    className="mt-1"
-                  />
-                </div>
+            {error && <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">{error}</div>}
+            {message && <div className="bg-green-50 text-green-600 text-sm p-3 rounded-lg">{message}</div>}
 
-                {error && (
-                  <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">
-                    {error}
-                  </div>
-                )}
+            <Button
+              type="submit"
+              disabled={loading || code.length < 6}
+              className="w-full bg-rose-600 hover:bg-rose-700 text-white h-12"
+            >
+              {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Vérification...</> : 'Valider le code'}
+            </Button>
+          </form>
 
-                <Button
-                  type="submit"
-                  disabled={sendingReset}
-                  className="w-full bg-rose-600 hover:bg-rose-700 text-white h-12"
-                >
-                  {sendingReset ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('auth.sending')}</>
-                  ) : (
-                    t('auth.sendResetLink')
-                  )}
-                </Button>
-              </form>
-            </>
-          )}
+          <div className="flex justify-between text-sm mt-4">
+            <button type="button" onClick={handleResend} className="text-rose-600 hover:underline">
+              Renvoyer le code
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStep('form'); setCode(''); setError(''); setMessage(''); }}
+              className="text-stone-500 hover:underline"
+            >
+              Modifier l'email
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -215,15 +196,15 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-stone-50">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-stone-900 mb-2 text-center">
-          {isRegister ? t('auth.registerTitle') : t('auth.loginTitle')}
+          {isRegister ? 'Créer un compte' : 'Connexion'}
         </h1>
         <p className="text-stone-500 text-center mb-6">
-          {isRegister ? t('auth.registerSubtitle') : t('auth.loginSubtitle')}
+          {isRegister ? 'Rejoignez EventCrafter' : 'Bienvenue sur EventCrafter'}
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
-            <label className="text-sm font-medium text-stone-700">{t('auth.email')}</label>
+            <label className="text-sm font-medium text-stone-700">Email</label>
             <Input
               type="email"
               value={email}
@@ -236,80 +217,51 @@ export default function Login() {
 
           {isRegister && (
             <div>
-              <label className="text-sm font-medium text-stone-700">{t('auth.phoneOptional')}</label>
-              <div className="mt-1">
-                <PhoneInput value={phone} onChange={setPhone} />
-              </div>
+              <label className="text-sm font-medium text-stone-700">Téléphone</label>
+              <Input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="6 70 00 00 00"
+                required
+                className="mt-1"
+              />
             </div>
           )}
 
           <div>
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-stone-700">{t('auth.password')}</label>
-              {!isRegister && (
-                <button
-                  type="button"
-                  onClick={() => { setShowForgotPassword(true); setForgotEmail(email); }}
-                  className="text-xs text-rose-600 hover:underline"
-                >
-                  {t('auth.forgotPassword')}
-                </button>
-              )}
-            </div>
-            <div className="relative mt-1">
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="********"
-                required
-                minLength={8}
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
-                tabIndex={-1}
-                aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            {isRegister && (
-              <p className="text-xs text-stone-400 mt-1">
-                {t('auth.passwordHint')}
-              </p>
-            )}
+            <label className="text-sm font-medium text-stone-700">Mot de passe</label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              className="mt-1"
+            />
           </div>
 
-          {error && (
-            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">
-              {error}
-            </div>
-          )}
-          {message && (
-            <div className="bg-green-50 text-green-600 text-sm p-3 rounded-lg flex items-start gap-2">
-              <MailCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>{message}</span>
+          {isRegister && (
+            <div>
+              <label className="text-sm font-medium text-stone-700">Confirmer le mot de passe</label>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="mt-1"
+              />
             </div>
           )}
 
-          {needsConfirmation && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleResendConfirmation}
-              disabled={resending || !email}
-              className="w-full"
-            >
-              {resending ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('auth.sending')}</>
-              ) : (
-                t('auth.resendConfirmation')
-              )}
-            </Button>
+          {fieldErrors.length > 0 && (
+            <ul className="bg-red-50 text-red-600 text-sm p-3 rounded-lg list-disc list-inside space-y-1">
+              {fieldErrors.map((msg, i) => <li key={i}>{msg}</li>)}
+            </ul>
           )}
+          {error && <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">{error}</div>}
+          {message && <div className="bg-green-50 text-green-600 text-sm p-3 rounded-lg">{message}</div>}
 
           <Button
             type="submit"
@@ -317,24 +269,19 @@ export default function Login() {
             className="w-full bg-rose-600 hover:bg-rose-700 text-white h-12"
           >
             {loading ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('auth.loading')}</>
-            ) : isRegister ? t('auth.createAccountButton') : t('auth.signInButton')}
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Chargement...</>
+            ) : isRegister ? 'Créer mon compte' : 'Se connecter'}
           </Button>
         </form>
 
         <p className="text-center text-sm text-stone-500 mt-4">
-          {isRegister ? t('auth.alreadyHaveAccount') : t('auth.noAccount')}{' '}
+          {isRegister ? 'Déjà un compte ?' : 'Pas encore de compte ?'}{' '}
           <button
             type="button"
-            onClick={() => {
-              setIsRegister(!isRegister);
-              setError('');
-              setMessage('');
-              setNeedsConfirmation(false);
-            }}
+            onClick={() => { setIsRegister(!isRegister); setError(''); setMessage(''); setFieldErrors([]); }}
             className="text-rose-600 font-medium hover:underline"
           >
-            {isRegister ? t('auth.signInLink') : t('auth.signUpLink')}
+            {isRegister ? 'Se connecter' : "S'inscrire"}
           </button>
         </p>
       </div>
