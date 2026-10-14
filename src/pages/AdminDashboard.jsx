@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { base44, supabase } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -34,6 +34,50 @@ import ServiceModeration from "@/components/admin/ServiceModeration";
 import PlatformReviewModeration from "@/components/admin/PlatformReviewModeration";
 import ServiceTypeModeration from "@/components/admin/ServiceTypeModeration";
 
+// Genere un UUID pour creer un ServiceType via le code
+function generateServiceTypeId() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+const NEW_SERVICE_TYPES = [
+    {
+        name: "Agregateur de service",
+        abbreviation: "AGR",
+        description: "Plateforme ou intermediaire qui regroupe et met en relation plusieurs prestataires de services evenementiels.",
+        code_service: "SRV_AGR",
+        code_typeservice: "CAT_AGREGATEUR",
+        status: "active"
+    },
+    {
+        name: "Evenement Mariage",
+        abbreviation: "MAR",
+        description: "Organisation complete ou partielle d'evenements de mariage (ceremonie, reception, prestations associees).",
+        code_service: "SRV_MAR",
+        code_typeservice: "CAT_EVENEMENT_MARIAGE",
+        status: "active"
+    }
+];
+
+async function ensureNewServiceTypesExist() {
+    try {
+        const existing = await base44.entities.ServiceType.list();
+        const existingNames = (existing || []).map(t => t.name);
+        for (const type of NEW_SERVICE_TYPES) {
+            if (!existingNames.includes(type.name)) {
+                await base44.entities.ServiceType.create({ id: generateServiceTypeId(), ...type });
+            }
+        }
+    } catch (e) {
+        console.error("Echec de la creation des nouvelles categories de service", e);
+    }
+}
 export default function AdminDashboard() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -79,6 +123,9 @@ export default function AdminDashboard() {
                     return;
                 }
                 setUser({ ...session.user, ...appUser });
+                if (appUser.role === 'admin') {
+                    ensureNewServiceTypesExist();
+                }
             } catch (e) {
                 console.error('Auth error:', e);
                 window.location.href = '/';
