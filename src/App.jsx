@@ -13,6 +13,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AfrikpayChecklist from './pages/AfrikpayChecklist';
 import AIAssistant from './pages/AIAssistant';
 import ResetPassword from './pages/ResetPassword';
+import ForgotPassword from './pages/ForgotPassword';
 import PaymentReturn from './pages/PaymentReturn';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -89,6 +90,14 @@ const AuthenticatedApp = () => {
           element={
             <LayoutWrapper currentPageName="ResetPassword">
               <ResetPassword />
+            </LayoutWrapper>
+          }
+        />
+        <Route
+          path="/ForgotPassword"
+          element={
+            <LayoutWrapper currentPageName="ForgotPassword">
+              <ForgotPassword />
             </LayoutWrapper>
           }
         />
