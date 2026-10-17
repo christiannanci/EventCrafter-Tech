@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '@/api/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -18,19 +18,23 @@ export default function ForgotPassword() {
     e.preventDefault();
     setError('');
 
-    if (!email) {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       setError(t('auth.emailRequired'));
       return;
     }
 
     setLoading(true);
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
         redirectTo: `${window.location.origin}/ResetPassword`
       });
       if (resetError) throw resetError;
       setSent(true);
     } catch (err) {
+      // On ne revele jamais si l'email existe ou non (securite) :
+      // on affiche le message de succes meme en cas d'erreur silencieuse de l'API,
+      // sauf erreur reseau/technique reelle.
       if (err?.status && err.status >= 500) {
         setError(err.message || t('auth.genericError'));
       } else {

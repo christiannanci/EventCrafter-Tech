@@ -17,6 +17,7 @@ export default function PaymentProofValidation() {
   const [memberships, setMemberships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProof, setSelectedProof] = useState(null);
+  const [proofImageError, setProofImageError] = useState(false);
   const [adminNotes, setAdminNotes] = useState("");
   const [processing, setProcessing] = useState(false);
   const [notifyingUser, setNotifyingUser] = useState(false);
@@ -476,7 +477,7 @@ L'équipe EventCrafter`
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <ImageIcon className="w-5 h-5" />
               Validation des preuves de paiement
@@ -503,7 +504,7 @@ L'équipe EventCrafter`
                 const vendorName = getVendorName(proof);
                 return (
                   <div key={proof.id} className="border rounded-lg p-4 hover:bg-stone-50">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex items-start justify-between gap-4">
                       <div className="flex-grow space-y-2">
                         <div className="flex items-center gap-3 flex-wrap">
                           <h4 className="font-semibold">{proof.proof_code}</h4>
@@ -530,7 +531,7 @@ L'équipe EventCrafter`
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setSelectedProof(proof)}
+                          onClick={() => { setSelectedProof(proof); setProofImageError(false); }}
                         >
                           Voir détails
                         </Button>
@@ -589,17 +590,21 @@ L'équipe EventCrafter`
 
               <div>
                 <h4 className="font-semibold mb-2">Preuve de paiement:</h4>
-                {selectedProof.proof_image_url ? (
+                {selectedProof.proof_image_url && !proofImageError ? (
                   <img
                     src={selectedProof.proof_image_url}
                     alt="Payment proof"
                     className="w-full rounded-lg border max-h-[500px] object-contain bg-stone-50"
-                    onError={(e) => {
+                    onError={() => {
                       console.error("Failed to load image:", selectedProof.proof_image_url);
-                      e.target.style.display = 'none';
-                      e.target.parentElement.innerHTML += '<div class="p-8 text-center text-red-500 border border-red-200 rounded-lg bg-red-50"><p>⚠️ Impossible de charger l\'image</p><p class="text-sm mt-2">' + selectedProof.proof_image_url + '</p></div>';
+                      setProofImageError(true);
                     }}
                   />
+                ) : selectedProof.proof_image_url && proofImageError ? (
+                  <div className="p-8 text-center text-red-500 border border-red-200 rounded-lg bg-red-50">
+                    <p>⚠️ Impossible de charger l'image</p>
+                    <p className="text-sm mt-2 break-all">{selectedProof.proof_image_url}</p>
+                  </div>
                 ) : (
                   <div className="p-8 text-center text-stone-400 border rounded-lg bg-stone-50">
                     Aucune image disponible
