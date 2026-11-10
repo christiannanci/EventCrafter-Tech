@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -308,7 +308,7 @@ export default function LeadManagement() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-purple-700 font-medium">Conversion Free->Payant</p>
+                <p className="text-sm text-purple-700 font-medium">Conversion Free vers Payant</p>
                 <h3 className="text-3xl font-bold text-purple-600 mt-1">{analytics.freeToPayingConversionRate}%</h3>
                 <p className="text-xs text-purple-600 mt-1">{analytics.totalFreeConverted}/{analytics.freeVendors} convertis</p>
               </div>

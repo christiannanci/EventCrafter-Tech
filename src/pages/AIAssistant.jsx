@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,7 +47,7 @@ function OptionButtons({ options, onSelect }) {
   );
 }
 
-export default function AIAssistantPage() {
+function ClientAssistant() {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
   const { t } = useLanguage();
@@ -578,4 +578,23 @@ export default function AIAssistantPage() {
       </div>
     </div>
   );
+}
+
+
+import EvenIAVendorChat from '@/components/evenia/EvenIAVendorChat';
+
+export default function AIAssistantPage() {
+  const [st, setSt] = useState({ loading: true, user: null, isVendor: false });
+  useEffect(() => {
+    (async () => {
+      try {
+        const u = await base44.auth.me();
+        const vp = await base44.entities.VendorProfile.filter({ user_id: u.id });
+        setSt({ loading: false, user: u, isVendor: vp.length > 0 });
+      } catch { setSt({ loading: false, user: null, isVendor: false }); }
+    })();
+  }, []);
+  if (st.loading) return <div className="p-12 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>;
+  if (st.isVendor) return <div className="min-h-[calc(100vh-80px)] bg-[#F9F7F3] py-4"><EvenIAVendorChat user={st.user} /></div>;
+  return <ClientAssistant />;
 }
