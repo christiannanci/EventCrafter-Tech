@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { compressImage, isImage } from "@/components/ImageCompressor";
 import * as E from "./evenEngine";
 import * as T from "./evenTasks";
+import * as A from "./evenAdvisor";
 
 const Md = ({ text }) => (
   <div className="text-sm whitespace-pre-line">
@@ -20,6 +21,8 @@ export default function EvenIAVendorChat({ user }) {
   const [busy, setBusy] = useState(false);
   const [flow, setFlow] = useState(null); // { steps, i, draft, phase }
   const [pending, setPending] = useState(null); // action en attente de confirmation
+  const [useAI, setUseAI] = useState(() => { try { return localStorage.getItem("evenia_llm") === "1"; } catch { return false; } });
+  const toggleAI = () => { const v = !useAI; setUseAI(v); try { localStorage.setItem("evenia_llm", v ? "1" : "0"); } catch {} bot(v ? "IA avancee activee : je peux maintenant repondre a des questions libres. Vos donnees d'activite (services, prix, demandes, sans noms ni contacts de clients) sont envoyees a un modele de langage pour formuler la reponse." : "IA avancee desactivee : je reste 100 % autonome."); };
   const endRef = useRef(null);
   const fileRef = useRef(null);
 
@@ -32,7 +35,11 @@ export default function EvenIAVendorChat({ user }) {
     (async () => {
       const c = await reload();
       bot(`Bonjour ${c.vendorProfile?.business_name || ""} 👋 Je suis EVEN IA. Je peux lire votre activite et agir **sur votre demande** : creer un service, modifier prix/description, masquer/reactiver, bloquer des dates, debloquer un lead avec un credit, ecrire a un client. Je peux enchainer plusieurs actions en un plan. Je ne touche jamais aux paiements, retraits ni contrats.`,
-        { chips: ["Creer un service", "Mes services", "Mes prospects", "Mes dossiers", "Mon solde", "Conseils croissance"] });
+        { chips: ["Creer un service", "Mes services", "Mes prospects", "Mes dossiers", "Mon solde", "Analyse mon activite"] });
+      try {
+        const fx = A.formatFindings(await A.diagnose(c), 3);
+        if (fx.chips.length || fx.text) bot("J'ai analyse votre activite :\n\n" + fx.text + (fx.more > 0 ? `\n\n(+${fx.more} autre(s) point(s) : dites « analyse mon activite »)` : ""), { chips: fx.chips });
+      } catch {}
     })();
   }, []);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, busy]);
@@ -157,14 +164,30 @@ export default function EvenIAVendorChat({ user }) {
           out.push(a.enough ? `**${s.title}** : votre prix ${E.fcfa(a.mine)} ; median categorie ${E.fcfa(a.median)} (${E.fcfa(a.min)} - ${E.fcfa(a.max)}), ${a.n} offres comparees.` : `**${s.title}** : pas assez d'offres comparables pour conclure.`); }
         return bot(out.join("\n"));
       }
-      case "growth": {
+      case "advice": case "growth": {
+        const fx = A.formatFindings(await A.diagnose(c), 5);
+        return bot(fx.text, { chips: fx.chips });
+      }
+      case "growth_old": {
         const tips = [];
         sv.forEach(s => { const sc = E.serviceScore(s); if (sc.missing.length) tips.push(`Completez "${s.title}" : ${sc.missing.join(", ")}.`); });
         if (!c.vendorProfile?.verification_status || c.vendorProfile.verification_status === "unverified") tips.push("Faites verifier votre profil : les clients font plus confiance aux profils verifies.");
         if (sv.length < 2) tips.push("Ajoutez un second service pour elargir votre visibilite.");
         return bot(tips.length ? tips.map(t => "• " + t).join("\n") : "Votre profil est bien optimise. Continuez a repondre vite aux demandes !");
       }
-      default: return bot("Je n'ai pas bien compris. Essayez : « creer un service », « mes services », « mon solde », « mes prospects ».", { chips: ["Creer un service", "Mes services", "Aide"] });
+      default: {
+        if (useAI) {
+          try {
+            const hist = [...msgs.filter(x => x.text && !x.plan).slice(-8).map(x => ({ role: x.from === "me" ? "user" : "assistant", content: x.text })), { role: "user", content: text }];
+            const r = await A.askLLM(hist, c);
+            return bot(r.text || "Je n'ai pas de reponse pour le moment.", { chips: r.chips });
+          } catch (e) { bot("L'IA avancee est indisponible (" + (e.message || "erreur") + "). Je continue en mode autonome."); }
+        }
+        const g = A.guess(text);
+        if (g.length) return bot("Je ne suis pas sur d'avoir compris. Vouliez-vous dire :", { chips: g });
+      }
+      // eslint-disable-next-line no-fallthrough
+      case "__fallback": return bot("Je n'ai pas bien compris. Essayez : « creer un service », « mes services », « mon solde », « mes prospects ».", { chips: ["Creer un service", "Mes services", "Aide"] });
     }
   };
 
@@ -216,7 +239,7 @@ export default function EvenIAVendorChat({ user }) {
 
   return (
     <div className="flex flex-col h-[calc(100vh-160px)] max-w-3xl mx-auto bg-[#F9F7F3]">
-      <div className="flex items-center gap-2 p-3 border-b bg-white"><Sparkles className="w-5 h-5 text-[#FF6B35]" /><b>EVEN IA</b><span className="text-xs text-stone-500">assistant vendeur</span></div>
+      <div className="flex items-center gap-2 p-3 border-b bg-white"><Sparkles className="w-5 h-5 text-[#FF6B35]" /><b>EVEN IA</b><span className="text-xs text-stone-500">assistant vendeur</span><button onClick={toggleAI} className={`ml-auto text-xs px-3 py-1 rounded-full border ${useAI ? "bg-[#FF6B35] text-white border-[#FF6B35]" : "bg-white text-stone-600"}`}>IA avancee : {useAI ? "ON" : "OFF"}</button></div>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {msgs.map((m, i) => (
           <div key={i} className={m.from === "me" ? "flex justify-end" : "flex justify-start"}>
@@ -226,7 +249,7 @@ export default function EvenIAVendorChat({ user }) {
                 <div key={k} className="text-xs flex gap-2"><span>{a.status === "done" ? "✅" : a.status === "error" ? "❌" : a.status === "running" ? "⏳" : "⬜"}</span>
                   <span>{a.label}{a.result ? " - " + a.result : ""}{a.error ? " - " + a.error : ""}</span></div>))}</div>}
               {m.link && <Link to={m.link.to} className="text-xs text-[#FF6B35] underline mt-2 inline-block">{m.link.label}</Link>}
-              {m.chips && i === msgs.length - 1 && <div className="flex flex-wrap gap-2 mt-3">{m.chips.map(c => <button key={c} onClick={() => send(c)} className="text-xs px-3 py-1.5 rounded-full bg-[#FFF0E8] hover:bg-[#FF6B35] hover:text-white">{c}</button>)}</div>}
+              {m.chips && i === msgs.length - 1 && <div className="flex flex-wrap gap-2 mt-3">{m.chips.map(c => { const lb = typeof c === "string" ? c : c.label, sd = typeof c === "string" ? c : c.send; return <button key={lb} onClick={() => send(sd)} className="text-xs px-3 py-1.5 rounded-full bg-[#FFF0E8] hover:bg-[#FF6B35] hover:text-white">{lb}</button>; })}</div>}
             </div>
           </div>
         ))}

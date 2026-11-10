@@ -29,6 +29,7 @@ const INTENTS = [
   { id: "bookings", re: /dossier|reservation|booking|commande|contrat/ },
   { id: "balance", re: /solde|portefeuille|wallet|argent|paiement|retrait|gain/ },
   { id: "profile", re: /profil|verifi|badge|entreprise.*nom|mon compte/ },
+  { id: "advice", re: /analyse|diagnostic|probleme|que dois.?je|solution|conseille|aide.?moi|recommand/ },
   { id: "growth", re: /croissance|conseil|boost|augmenter|plus de clients|visibilite|statistique|stats/ },
   { id: "price", re: /prix|tarif|combien.*(faire payer|facturer)|position/ },
   { id: "help", re: /aide|help|que peux|quoi faire|capacite|fonction/ },
