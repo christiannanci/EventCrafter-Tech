@@ -5,6 +5,7 @@ import { Loader2, Send, Sparkles, Image as ImageIcon, Video, CheckCircle2 } from
 import { Link } from "react-router-dom";
 import { compressImage, isImage } from "@/components/ImageCompressor";
 import * as E from "./evenEngine";
+import * as T from "./evenTasks";
 
 const Md = ({ text }) => (
   <div className="text-sm whitespace-pre-line">
@@ -30,8 +31,8 @@ export default function EvenIAVendorChat({ user }) {
   useEffect(() => {
     (async () => {
       const c = await reload();
-      bot(`Bonjour ${c.vendorProfile?.business_name || ""} 👋 Je suis EVEN IA. Je peux lire votre activite (prospects, dossiers, solde, services) et agir **sur votre demande** : creer un service, masquer/reactiver une offre. Je ne touche jamais aux paiements, retraits ni contrats.`,
-        { chips: ["Creer un service", "Mes services", "Mes prospects", "Mon solde", "Conseils croissance"] });
+      bot(`Bonjour ${c.vendorProfile?.business_name || ""} 👋 Je suis EVEN IA. Je peux lire votre activite et agir **sur votre demande** : creer un service, modifier prix/description, masquer/reactiver, bloquer des dates, debloquer un lead avec un credit, ecrire a un client. Je peux enchainer plusieurs actions en un plan. Je ne touche jamais aux paiements, retraits ni contrats.`,
+        { chips: ["Creer un service", "Mes services", "Mes prospects", "Mes dossiers", "Mon solde", "Conseils croissance"] });
     })();
   }, []);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, busy]);
@@ -138,13 +139,10 @@ export default function EvenIAVendorChat({ user }) {
         return bot(`${hide ? "Masquer" : "Reactiver"} **${target.title}** ?`, { chips: ["Confirmer", "Annuler"] });
       }
       case "leads": {
-        const n = c.leads.length; const cat = new Set(sv.map(s => E.norm(s.category)));
-        const match = c.leads.filter(l => cat.has(E.norm(l.service_category)));
-        return bot(`${n} demande(s) client(s) au total, dont ${match.length} dans vos categories. Details et deblocage dans l'onglet Prospects.`);
+        return bot(T.listLeads(c));
       }
       case "bookings": {
-        const by = {}; c.bookings.forEach(b => { by[b.status] = (by[b.status] || 0) + 1; });
-        return bot(c.bookings.length ? "Vos dossiers :\n" + Object.entries(by).map(([k, v]) => `• ${k} : ${v}`).join("\n") : "Aucun dossier pour le moment.");
+        return bot(T.summarizeBookings(c));
       }
       case "balance": return bot(`Solde disponible : **${E.fcfa(c.vendorProfile?.account_balance)}**. Pour un retrait, rendez-vous dans l'onglet Paiement (je ne peux pas lancer de retrait).`);
       case "profile": {
@@ -170,20 +168,47 @@ export default function EvenIAVendorChat({ user }) {
     }
   };
 
+  const runPlan = async (p, c) => {
+    setBusy(true);
+    const upd = (i, patch) => setMsgs(m => m.map(x => x.pid === p.pid ? { ...x, plan: x.plan.map((a, k) => k === i ? { ...a, ...patch } : a) } : x));
+    let ok = 0;
+    for (let i = 0; i < p.actions.length; i++) {
+      upd(i, { status: "running" });
+      try { const r = await p.actions[i].run(c); upd(i, { status: "done", result: r }); ok++; }
+      catch (e) { upd(i, { status: "error", error: e.message || "echec" }); }
+    }
+    bot(`Termine : ${ok}/${p.actions.length} action(s) reussie(s).`);
+    await reload(); setBusy(false);
+  };
+
   const send = async (raw) => {
     const text = (raw ?? input).trim(); if (!text || busy) return;
     setInput(""); me(text); const t = E.norm(text);
     if (E.FORBIDDEN.test(t)) return bot("Pour votre securite, je ne peux pas effectuer cette action (paiements, retraits, contrats, compte). Faites-la depuis votre tableau de bord.");
     if (pending) {
-      if (/^(publier|confirmer|oui)$/.test(t)) {
+      if (/^(publier|confirmer|oui|executer)$/.test(t)) {
         const p = pending; setPending(null);
+        if (p.type === "plan") return runPlan(p, ctx);
         if (p.type === "publish") return publish();
         if (p.type === "toggle") { setBusy(true); try { await E.setServiceHidden(p.service, p.hide); bot(`✅ "${p.service.title}" ${p.hide ? "masque" : "reactive"}.`); await reload(); } catch { bot("Action refusee ou impossible."); } setBusy(false); return; }
       }
       if (/^(annuler|non)$/.test(t)) { setPending(null); setFlow(null); return bot("D'accord, rien n'a ete modifie."); }
     }
     if (flow) return handleFlowInput(text);
-    setBusy(true); try { await answer(E.detectIntent(text), text); } catch (e) { bot("Une erreur est survenue en lisant vos donnees."); } setBusy(false);
+    setBusy(true);
+    try {
+      const c = await reload();
+      const plan = T.buildPlan(text, c);
+      if (plan) {
+        plan.errors.forEach(e => bot(e));
+        if (plan.actions.length) {
+          const pid = Date.now();
+          setMsgs(m => [...m, { from: "bot", text: `Voici mon plan (${plan.actions.length} action${plan.actions.length > 1 ? "s" : ""}). Rien n'est execute avant votre accord :`, pid, plan: plan.actions.map(a => ({ label: a.label, status: "todo" })), chips: ["Executer", "Annuler"] }]);
+          setPending({ type: "plan", pid, actions: plan.actions });
+        }
+        setBusy(false); return;
+      }
+      await answer(E.detectIntent(text), text); } catch (e) { bot("Une erreur est survenue en lisant vos donnees."); } setBusy(false);
   };
 
   const last = msgs[msgs.length - 1];
@@ -197,6 +222,9 @@ export default function EvenIAVendorChat({ user }) {
           <div key={i} className={m.from === "me" ? "flex justify-end" : "flex justify-start"}>
             <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${m.from === "me" ? "bg-[#FF6B35] text-white" : "bg-white border"}`}>
               <Md text={m.text} />
+              {m.plan && <div className="mt-3 space-y-1">{m.plan.map((a, k) => (
+                <div key={k} className="text-xs flex gap-2"><span>{a.status === "done" ? "✅" : a.status === "error" ? "❌" : a.status === "running" ? "⏳" : "⬜"}</span>
+                  <span>{a.label}{a.result ? " - " + a.result : ""}{a.error ? " - " + a.error : ""}</span></div>))}</div>}
               {m.link && <Link to={m.link.to} className="text-xs text-[#FF6B35] underline mt-2 inline-block">{m.link.label}</Link>}
               {m.chips && i === msgs.length - 1 && <div className="flex flex-wrap gap-2 mt-3">{m.chips.map(c => <button key={c} onClick={() => send(c)} className="text-xs px-3 py-1.5 rounded-full bg-[#FFF0E8] hover:bg-[#FF6B35] hover:text-white">{c}</button>)}</div>}
             </div>
