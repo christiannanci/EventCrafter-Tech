@@ -1100,7 +1100,7 @@ export const translations = {
       "Garantie d'IntÃ©gritÃ© Spirituelle (audit de crÃ©dibilitÃ© par l'admin)": "Spiritual Integrity Guarantee (credibility audit by admin)"
     },
     aiAssistant: {
-      greetingLine1: "Hello \uD83D\uDC4B I'm the EventCrafter Assistant.",
+      greetingLine1: "Hello \uD83D\uDC4B I'm EVEN IA, the EventCrafter assistant.",
       greetingLine2: "Answer a few questions and I'll suggest the best vendors for your event. You can also type directly what you're looking for in the text box below.",
       askEventType: "What type of event are you organizing?",
       askCategory: "What category of vendor are you looking for?",
@@ -1139,7 +1139,7 @@ export const translations = {
       noResultsFor: "I couldn't find any vendor matching",
       tryOtherKeywords: "Try other keywords, or post a request so vendors can contact you directly.",
       searchErrorMessage: "An error occurred during the search. Try again.",
-      assistantTitle: "EventCrafter Assistant",
+      assistantTitle: "EVEN IA",
       assistantSubtitle: "Find the right vendor in a few questions, or ask directly"
     },
     mobileNav: {
@@ -2266,7 +2266,7 @@ export const translations = {
       "Garantie d'IntÃ©gritÃ© Spirituelle (audit de crÃ©dibilitÃ© par l'admin)": "Garantie d'Integrite Spirituelle (audit de credibilite par l'admin)"
     },
     aiAssistant: {
-      greetingLine1: "Bonjour \uD83D\uDC4B Je suis l'Assistant EventCrafter.",
+      greetingLine1: "Bonjour \uD83D\uDC4B Je suis EVEN IA, l'assistant EventCrafter.",
       greetingLine2: "Repondez a quelques questions et je vous proposerai les meilleurs prestataires pour votre evenement. Vous pouvez aussi taper directement ce que vous cherchez dans la zone de texte en bas.",
       askEventType: "Quel type d'evenement organisez-vous ?",
       askCategory: "Quelle categorie de prestataire recherchez-vous ?",
@@ -2305,7 +2305,7 @@ export const translations = {
       noResultsFor: "Je n'ai trouve aucun prestataire correspondant a",
       tryOtherKeywords: "Essayez avec d'autres mots-cles, ou publiez une demande pour que les prestataires vous contactent directement.",
       searchErrorMessage: "Une erreur est survenue pendant la recherche. Reessayez.",
-      assistantTitle: "Assistant EventCrafter",
+      assistantTitle: "EVEN IA",
       assistantSubtitle: "Trouvez le bon prestataire en quelques questions, ou posez directement votre question"
     },
     mobileNav: {

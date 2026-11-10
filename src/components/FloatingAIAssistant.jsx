@@ -19,7 +19,7 @@ export default function FloatingAIAssistant() {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={() => navigate('/AIAssistant')}
-      aria-label="Ouvrir l'assistant IA EventCrafter"
+      aria-label="Ouvrir EVEN IA, l'assistant EventCrafter"
       className="fixed bottom-20 md:bottom-6 right-4 z-50 flex items-center gap-2 bg-gradient-to-r from-[#FF6B35] to-[#F4C542] text-white rounded-full shadow-lg hover:shadow-xl transition-shadow pl-3 pr-4 h-14 min-h-[44px] min-w-[56px]"
     >
       <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
@@ -30,7 +30,7 @@ export default function FloatingAIAssistant() {
         animate={{ opacity: hovered ? 1 : 0, width: hovered ? 'auto' : 0 }}
         className="text-sm font-medium whitespace-nowrap overflow-hidden"
       >
-        Assistant IA
+        EVEN IA
       </motion.span>
     </motion.button>
   );
