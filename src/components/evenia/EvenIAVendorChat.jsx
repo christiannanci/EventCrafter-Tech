@@ -231,7 +231,9 @@ export default function EvenIAVendorChat({ user }) {
         }
         setBusy(false); return;
       }
-      await answer(E.detectIntent(text), text); } catch (e) { bot("Une erreur est survenue en lisant vos donnees."); } setBusy(false);
+      const intent = E.detectIntent(text);
+      // IA avancee ON : le modele de langage repond a tout, sauf au lancement du formulaire de creation
+      await answer(useAI && intent !== "create_service" ? "unknown" : intent, text); } catch (e) { bot("Une erreur est survenue en lisant vos donnees."); } setBusy(false);
   };
 
   const last = msgs[msgs.length - 1];
