@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import LocationSelector from "@/components/LocationSelector";
+import AnnouncementCarousel from '@/components/banners/AnnouncementCarousel';
 
 export default function Marketplace() {
   const [page, setPage] = useState(1);
@@ -652,6 +653,9 @@ export default function Marketplace() {
             setSelectedSubCategory('all');
             setPage(1);
         }} />
+
+        {/* Annonces (carrousel) */}
+        <AnnouncementCarousel className="mb-8" />
 
         {/* Recommended Section */}
         {currentUser && sortBy === "recommended" && recommendedServices.length > 0 && (

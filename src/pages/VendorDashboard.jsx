@@ -11,10 +11,8 @@ import {
   AlertCircle,
   Crown,
   Eye,
-  EyeOff,
   TrendingUp,
   ShieldCheck,
-  ShieldAlert,
   Store,
   FileSignature,
   Pencil,
@@ -54,7 +52,6 @@ import { checkAndGrantAutoRewards } from '@/components/RewardSystem';
 import VerificationGuard from '@/components/VerificationGuard';
 import CulturalBadgeManager from '@/components/dashboard/CulturalBadgeManager';
 import LeadCreditPacks from '@/components/dashboard/LeadCreditPacks';
-import VendorPayments from '@/components/dashboard/VendorPayments';
 import SmartMatchBoost from '@/components/dashboard/SmartMatchBoost';
 import { checkPerformanceReward } from '@/components/PerformanceRewardSystem';
 import DeleteAccountDialog from '@/components/DeleteAccountDialog';
@@ -108,15 +105,12 @@ export default function VendorDashboard() {
 
   const [newService, setNewService] = useState({
     title: "",
-    title_en: "",
     description: "",
-    description_en: "",
     category: "",
     service_type_code: "",
     function_codes: [],
     supported_event_types: [],
     price_min: "",
-    price_max: "",
     availability_level: "ville",
     availability_code: "",
     location: "",
@@ -127,7 +121,6 @@ export default function VendorDashboard() {
     image_url: "",
     description_details: "",
     description_terms: "",
-    description_terms_en: "",
     cultural_zones: [],
     cultural_compliance_details: "",
     spoken_languages: [],
@@ -138,7 +131,6 @@ export default function VendorDashboard() {
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [verifMessage, setVerifMessage] = useState("");
   const [sendingVerif, setSendingVerif] = useState(false);
-  const [togglingVisibility, setTogglingVisibility] = useState(null);
 
   const getVerifStatusInfo = (status) => {
     const info = {
@@ -366,7 +358,6 @@ export default function VendorDashboard() {
         description: newService.description,
         category: newService.category,
         price_min: parseFloat(newService.price_min),
-        price_max: newService.price_max ? parseFloat(newService.price_max) : null,
         availability_level: newService.availability_level,
         availability_code: newService.availability_code,
         city: newService.city,
@@ -398,7 +389,6 @@ export default function VendorDashboard() {
           service_code: generateEntityCode('SERVICE'),
           slug: generateSlug(newService.title),
           price_min: parseFloat(newService.price_min),
-        price_max: newService.price_max ? parseFloat(newService.price_max) : null,
           planner_id: user.id
         });
         toast({ title: "Service cree avec succes" });
@@ -408,9 +398,7 @@ export default function VendorDashboard() {
       setEditingService(null);
       setNewService({ 
           title: "", description: "", description_details: "", description_terms: "",
-    description_terms_en: "",
-          category: "", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "",
-    price_max: "", 
+          category: "", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "", 
           availability_level: "ville", availability_code: "",
           location: "", city: "", region: "", neighborhood_code: "", 
           address_details: "", image_url: "",
@@ -432,15 +420,12 @@ export default function VendorDashboard() {
     setEditingService(service);
     setNewService({
       title: service.title || "",
-      title_en: service.title_en || "",
       description: service.description || "",
-      description_en: service.description_en || "",
       category: service.category || "",
       service_type_code: service.service_type_code || "",
       function_codes: service.function_codes || [],
       supported_event_types: service.supported_event_types || [],
       price_min: service.price_min || "",
-      price_max: service.price_max || "",
       availability_level: service.availability_level || "ville",
       availability_code: service.availability_code || "",
       location: service.location || "",
@@ -451,7 +436,6 @@ export default function VendorDashboard() {
       image_url: service.image_url || "",
       description_details: service.description_details || "",
       description_terms: service.description_terms || "",
-      description_terms_en: service.description_terms_en || "",
       cultural_zones: service.cultural_zones || [],
       cultural_compliance_details: service.cultural_compliance_details || "",
       spoken_languages: service.spoken_languages || [],
@@ -531,27 +515,6 @@ export default function VendorDashboard() {
     }
   };
 
-  // Masquer / afficher une offre (controle vendeur, independant de la suspension admin)
-  const toggleServiceVisibility = async (service) => {
-    setTogglingVisibility(service.id);
-    try {
-      const newHiddenState = !service.is_hidden;
-      await base44.entities.Service.update(service.id, { is_hidden: newHiddenState });
-      toast({
-        title: newHiddenState ? "Offre masquée" : "Offre affichée",
-        description: newHiddenState
-          ? "Cette offre n'apparaît plus dans le marché."
-          : "Cette offre est de nouveau visible sur le marché."
-      });
-      refetch();
-    } catch (error) {
-      console.error("Toggle visibility error", error);
-      toast({ title: "Erreur", description: "Impossible de modifier la visibilité.", variant: "destructive" });
-    } finally {
-      setTogglingVisibility(null);
-    }
-  };
-
   const StatusBadge = ({ status }) => {
     const styles = {
       pending: "bg-stone-100 text-stone-800",
@@ -617,7 +580,7 @@ export default function VendorDashboard() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-6">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl sm:text-3xl font-bold text-stone-900">{t('vendorHeader.dashboardTitle')}</h1>
+            <h1 className="text-xl sm:text-3xl font-bold text-stone-900">Tableau de Bord Fournisseur</h1>
             <Badge 
               className={`cursor-pointer hover:opacity-80 transition-opacity shrink-0 ${
                 membershipStatus === 'premium' ? 'bg-rose-600 text-white' :
@@ -630,13 +593,13 @@ export default function VendorDashboard() {
               {membershipStatus.charAt(0).toUpperCase() + membershipStatus.slice(1)}
             </Badge>
           </div>
-          <p className="text-stone-500 text-sm">{t('vendorHeader.welcomePrefix')} {user.first_name || user.email}</p>
+          <p className="text-stone-500 text-sm">Bienvenue, {user.first_name || user.email}</p>
           
           {membershipStatus === 'free' && (
             <div className="mt-4 max-w-md">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-stone-600">
-                  {t('vendorHeader.requestsThisMonth')}
+                  Demandes prospects ce mois
                 </span>
                 <span className={`text-sm font-bold ${notificationCount >= 10 ? 'text-red-600' : 'text-green-600'}`}>
                   {notificationCount}/10
@@ -659,7 +622,7 @@ export default function VendorDashboard() {
               )}
               {notificationCount >= 10 && (
                 <p className="text-xs text-red-600 mt-1">
-                  {t('vendorHeader.limitReachedShort')}
+                  Limite atteinte. Passez a Premium pour des demandes illimites.
                 </p>
               )}
             </div>
@@ -673,46 +636,42 @@ export default function VendorDashboard() {
             onClick={() => setIsMembershipDialogOpen(true)}
           >
             <Crown className="w-4 h-4 mr-2 text-amber-500" />
-            {membershipStatus === 'premium' ? t('vendor.premiumPlan') : membershipStatus === 'gold' ? t('vendor.goldPlan') : t('vendor.upgradeShort')}
+            {membershipStatus === 'premium' ? 'Plan Premium' : membershipStatus === 'gold' ? 'Plan Gold' : 'Ameliorer'}
           </Button>
           <Dialog open={isNewServiceOpen} onOpenChange={setIsNewServiceOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="bg-rose-600 hover:bg-rose-700">
                 <Plus className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">{t('vendor.listNewService')}</span>
-                <span className="sm:hidden">{t('vendor.createOfferShort')}</span>
+                <span className="hidden sm:inline">Creer une Offre</span>
+                <span className="sm:hidden">Creer</span>
               </Button>
             </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh]">
             <DialogHeader>
-              <DialogTitle>{editingService ? t('vendor.editService') : t('vendor.createServiceTitle')}</DialogTitle>
+              <DialogTitle>{editingService ? "Modifier le Service" : "Creer une Offre de Service"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4 overflow-y-auto max-h-[70vh] px-1">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-stone-600">{t('vendor.serviceTitleLabel')} (Francais)</label>
-                <Input placeholder={t('vendor.serviceTitlePlaceholder')} value={newService.title} onChange={e => setNewService({...newService, title: e.target.value})} />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-stone-600">{t('vendor.serviceTitleLabel')} (English - optional)</label>
-                <Input placeholder="ex. Luxury Wedding Planning" value={newService.title_en} onChange={e => setNewService({...newService, title_en: e.target.value})} />
+                <label className="text-xs font-medium text-stone-600">Titre du Service</label>
+                <Input placeholder="ex. Organisation de Mariage de Luxe" value={newService.title} onChange={e => setNewService({...newService, title: e.target.value})} />
               </div>
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">{t('vendor.categoryLabel')}</label>
+                  <label className="text-xs font-medium text-stone-600">Categorie</label>
                   <Select value={newService.category} onValueChange={val => {
                     const selectedType = serviceTypes.find(t => t.name === val);
                     setNewService({...newService, category: val, service_type_code: selectedType ? selectedType.code_service : ""});
                     if (selectedType) setAvailableFunctions(allFunctions.filter(f => f.service_type_code === selectedType.code_service));
                     else setAvailableFunctions([]);
                   }}>
-                    <SelectTrigger><SelectValue placeholder={t('vendor.chooseCategoryPlaceholder')} /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Choisir categorie" /></SelectTrigger>
                     <SelectContent>
                       {serviceTypes.length > 0 ? serviceTypes.map(t => (<SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>)) : (<SelectItem value="Event Planner">Event Planner</SelectItem>)}
                     </SelectContent>
                   </Select>
                   {availableFunctions.length > 0 && (
                     <div className="mt-2 space-y-2 border rounded-md p-2 max-h-40 overflow-y-auto">
-                      <label className="text-xs font-medium text-stone-500 block mb-1">{t('vendor.specialties')}</label>
+                      <label className="text-xs font-medium text-stone-500 block mb-1">Specialites</label>
                       {availableFunctions.map(func => (
                         <div key={func.id} className="flex items-center space-x-2">
                           <input type="checkbox" id={`func-${func.code}`} checked={newService.function_codes?.includes(func.code)} onChange={(e) => { const checked = e.target.checked; setNewService(prev => { const current = prev.function_codes || []; if (checked) return {...prev, function_codes: [...current, func.code]}; return {...prev, function_codes: current.filter(c => c !== func.code)}; }); }} className="h-4 w-4 rounded border-gray-300 text-rose-600" />
@@ -722,11 +681,11 @@ export default function VendorDashboard() {
                     </div>
                   )}
                   <div className="flex justify-end mt-1">
-                    <SuggestServiceTypeDialog onSubmitted={() => toast({ title: t('vendor.submitted') })} />
+                    <SuggestServiceTypeDialog onSubmitted={() => toast({ title: "Submitted" })} />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">{t('vendor.supportedEventTypes')}</label>
+                  <label className="text-xs font-medium text-stone-600">Types d'evenements Supportes</label>
                   <div className="grid grid-cols-2 gap-2 border rounded-md p-3 max-h-48 overflow-y-auto">
                     {["Wedding","Birthday","Corporate","Conference","Baby Shower","Graduation","Religious","Funeral","Concert","Other"].map(eventType => (
                       <div key={eventType} className="flex items-center space-x-2">
@@ -737,17 +696,13 @@ export default function VendorDashboard() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">{t('vendor.minPriceLabel')}</label>
+                  <label className="text-xs font-medium text-stone-600">Prix Minimum (FCFA)</label>
                   <Input type="number" placeholder="50000" value={newService.price_min} onChange={e => setNewService({...newService, price_min: e.target.value})} />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">Prix Maximum (FCFA) - optionnel</label>
-                  <Input type="number" placeholder="ex. 150000" value={newService.price_max} onChange={e => setNewService({...newService, price_max: e.target.value})} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">{t('vendor.availabilityZone')}</label>
+                  <label className="text-xs font-medium text-stone-600">Zone de Disponibilite</label>
                   <Select value={newService.availability_level} onValueChange={val => setNewService({...newService, availability_level: val})}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -762,63 +717,50 @@ export default function VendorDashboard() {
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-stone-600">{t('vendor.zoneCode')}</label>
+                  <label className="text-xs font-medium text-stone-600">Code Zone</label>
                   <Input placeholder="ex. LT, DLA, CM" value={newService.availability_code} onChange={e => setNewService({...newService, availability_code: e.target.value})} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Input placeholder={t('location.city')} value={newService.city} onChange={e => setNewService({...newService, city: e.target.value})} />
-                <Input placeholder={t('location.region')} value={newService.region} onChange={e => setNewService({...newService, region: e.target.value})} />
+                <Input placeholder="Ville" value={newService.city} onChange={e => setNewService({...newService, city: e.target.value})} />
+                <Input placeholder="Region" value={newService.region} onChange={e => setNewService({...newService, region: e.target.value})} />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Input placeholder={t('location.neighborhood')} value={newService.neighborhood_code} onChange={e => setNewService({...newService, neighborhood_code: e.target.value})} />
-                <Input placeholder={t('vendor.preciseAddress')} value={newService.address_details} onChange={e => setNewService({...newService, address_details: e.target.value})} />
+                <Input placeholder="Quartier" value={newService.neighborhood_code} onChange={e => setNewService({...newService, neighborhood_code: e.target.value})} />
+                <Input placeholder="Adresse precise" value={newService.address_details} onChange={e => setNewService({...newService, address_details: e.target.value})} />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-stone-600">{t('vendor.coverImage')}</label>
+                <label className="text-sm font-medium text-stone-600">Image de Couverture</label>
                 <input type="file" id="media-upload" accept="image/*" onChange={handleMediaUpload} className="hidden" />
                 <Button type="button" variant="outline" className="w-full" onClick={() => document.getElementById('media-upload').click()} disabled={uploadingMedia}>
-                  {uploadingMedia ? t('vendor.uploadingShort') : newService.image_url ? t('vendor.changeImage') : t('vendor.uploadImage')}
+                  {uploadingMedia ? "Telechargement..." : newService.image_url ? "Changer l'image" : "Telecharger une image"}
                 </Button>
-                {newService.image_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {t('vendor.imageUploaded')}</div>}
+                {newService.image_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Image telechargee</div>}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-stone-600">{t('vendor.presentationVideo')}</label>
+                <label className="text-sm font-medium text-stone-600">Video de Presentation</label>
                 <input type="file" id="video-upload" accept="video/*" onChange={handleVideoUpload} className="hidden" />
                 <Button type="button" variant="outline" className="w-full" onClick={() => document.getElementById('video-upload').click()} disabled={uploadingVideo}>
-                  {uploadingVideo ? t('vendor.uploadingShort') : newService.video_url ? t('vendor.changeVideo') : t('vendor.uploadVideo')}
+                  {uploadingVideo ? "Telechargement..." : newService.video_url ? "Changer la video" : "Telecharger une video"}
                 </Button>
-                {newService.video_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {t('vendor.videoUploaded')}</div>}
+                {newService.video_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Video telecharge</div>}
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')} (Francais)</label>
-                  <Textarea placeholder={t('vendor.presentServicePlaceholder')} className="h-24" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} maxLength={1000} />
-                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description || '').length}/1000 caracteres</p>
+                  <label className="text-sm font-medium mb-1 block text-stone-600">Description Generale</label>
+                  <Textarea placeholder="Presentez votre service..." className="h-24" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.generalDescription')} (English - optional)</label>
-                  <Textarea placeholder="Present your service in English..." className="h-24" value={newService.description_en} onChange={e => setNewService({...newService, description_en: e.target.value})} maxLength={1000} />
-                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_en || '').length}/1000 caracteres</p>
+                  <label className="text-sm font-medium mb-1 block text-stone-600">Details & Prestations Incluses</label>
+                  <Textarea placeholder="Detaillez ce qui est inclus..." className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.detailsIncluded')}</label>
-                  <Textarea placeholder={t('vendor.detailPlaceholder')} className="h-24" value={newService.description_details} onChange={e => setNewService({...newService, description_details: e.target.value})} maxLength={1500} />
-                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_details || '').length}/1500 caracteres</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')} (Francais)</label>
-                  <Textarea placeholder={t('vendor.termsPlaceholder')} className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} maxLength={800} />
-                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_terms || '').length}/800 caracteres</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1 block text-stone-600">{t('vendor.termsConditions')} (English - optional)</label>
-                  <Textarea placeholder="Important terms in English..." className="h-24" value={newService.description_terms_en} onChange={e => setNewService({...newService, description_terms_en: e.target.value})} maxLength={800} />
-                  <p className="text-xs text-stone-400 text-right mt-1">{(newService.description_terms_en || '').length}/800 caracteres</p>
+                  <label className="text-sm font-medium mb-1 block text-stone-600">Conditions & Prerequis</label>
+                  <Textarea placeholder="Conditions importantes..." className="h-24" value={newService.description_terms} onChange={e => setNewService({...newService, description_terms: e.target.value})} />
                 </div>
               </div>
               <Button onClick={handleCreateService} className="w-full bg-rose-600">
-                {editingService ? t('vendor.saveModifications') : t('vendor.createOfferButton')}
+                {editingService ? "Enregistrer les modifications" : "Creer l'Offre"}
               </Button>
             </div>
           </DialogContent>
@@ -848,7 +790,6 @@ export default function VendorDashboard() {
           <TabsTrigger value="listings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabCatalogue')}</TabsTrigger>
           <TabsTrigger value="leads" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabProspects')}</TabsTrigger>
           <TabsTrigger value="growth" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabCroissance')}</TabsTrigger>
-          <TabsTrigger value="payments" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">Paiement</TabsTrigger>
           <TabsTrigger value="availability" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabCalendrier')}</TabsTrigger>
           <TabsTrigger value="settings" className="px-3 sm:px-6 text-xs sm:text-sm whitespace-nowrap">{t('vendor.tabParametres')}</TabsTrigger>
         </TabsList>
@@ -891,10 +832,6 @@ export default function VendorDashboard() {
           </div>
         </TabsContent>
 
-        <TabsContent value="payments">
-          <VendorPayments user={user} vendorProfile={vendorProfile} onUpdate={refetch} />
-        </TabsContent>
-
         <TabsContent value="dossiers">
           <MesDossiers 
             vendorId={user?.id}
@@ -922,7 +859,7 @@ export default function VendorDashboard() {
                       <div>
                         <CardTitle className="flex items-center gap-2">
                           <ShieldCheck className="w-5 h-5 text-amber-600" />
-                          {t('vendor.verificationDocs')}
+                          Documents de Verification
                         </CardTitle>
                       </div>
                       <Badge className={`${statusInfo.bg} ${statusInfo.color}`}>
@@ -935,9 +872,9 @@ export default function VendorDashboard() {
                     {canRequest ? (
                       <>
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">{t('vendor.explainRequest')}</label>
+                          <label className="text-sm font-medium">Expliquez votre demande</label>
                           <Textarea
-                            placeholder={t('vendor.explainPlaceholder')}
+                            placeholder="Bonjour, je souhaite faire verifier mon entreprise..."
                             value={verifMessage}
                             onChange={(e) => setVerifMessage(e.target.value)}
                             rows={3}
@@ -974,7 +911,7 @@ export default function VendorDashboard() {
                           onClick={() => document.getElementById('settings-verification-docs').click()}
                         >
                           <FileSignature className="w-4 h-4 mr-2" />
-                          {t('vendor.uploadDocument')}
+                          Telecharger Document
                         </Button>
                         {vendorProfile.verification_docs?.length > 0 && (
                           <div className="space-y-1">
@@ -992,7 +929,7 @@ export default function VendorDashboard() {
                           disabled={sendingVerif}
                           onClick={handleSendVerifRequest}
                         >
-                          {sendingVerif ? t('vendor.sendingRequest') : (<><Send className="w-4 h-4 mr-2" />{t('vendor.sendRequestButton')}</>)}
+                          {sendingVerif ? "Envoi en cours..." : (<><Send className="w-4 h-4 mr-2" />Envoyer la demande</>)}
                         </Button>
                       </>
                     ) : (
@@ -1024,13 +961,13 @@ export default function VendorDashboard() {
                    <div className="flex-1">
                      <h3 className="font-semibold text-stone-900 mb-2 flex items-center gap-2">
                        <TrendingUp className="w-4 h-4 text-blue-600" />
-                       {t('vendor.creditsTitle')}
+                       Credits Demandes Prospects
                      </h3>
                      <div className="space-y-2">
                        <div className="flex items-center justify-between text-sm">
-                         <span className="text-stone-600">{t('vendor.thisMonth')}</span>
+                         <span className="text-stone-600">Ce mois</span>
                          <span className={`font-bold ${notificationCount >= 10 ? 'text-red-600' : 'text-stone-900'}`}>
-                           {notificationCount}/10 {t('vendor.notificationsReceived')}
+                           {notificationCount}/10 notifications recues
                          </span>
                        </div>
                        <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
@@ -1045,7 +982,7 @@ export default function VendorDashboard() {
                        </div>
                        {notificationCount < 10 && (
                          <p className="text-xs text-stone-500">
-                           {10 - notificationCount} {t('vendor.moreAvailableThisMonth')}
+                           Encore {10 - notificationCount} demande{10 - notificationCount > 1 ? 's' : ''} disponible{10 - notificationCount > 1 ? 's' : ''} ce mois
                          </p>
                        )}
                      </div>
@@ -1097,10 +1034,10 @@ export default function VendorDashboard() {
                  <div>
                    <h3 className="text-lg font-bold flex items-center gap-2">
                      <CheckCircle2 className="w-5 h-5" /> 
-                     {t('vendor.freePlanUsage').replace('{count}', notificationCount)}
+                     Plan Free: {notificationCount}/10 notifications utilisées ce mois
                    </h3>
                    <p className="text-blue-100 mt-1">
-                     {t('vendor.freePlanCTA')}
+                     Passez à Premium ou Gold pour des notifications illimitées et plus d'avantages.
                    </p>
                  </div>
                  <Button 
@@ -1108,20 +1045,20 @@ export default function VendorDashboard() {
                    onClick={() => setIsMembershipDialogOpen(true)}
                  >
                    <Crown className="w-4 h-4 mr-2" />
-                   {t('vendor.viewPlans')}
+                   Voir les Plans
                  </Button>
                </div>
              </div>
            )}
 
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <StatCard icon={Eye} label={t('vendor.totalViews')} value={analytics.views} className="text-rose-400" />
-              <StatCard icon={TrendingUp} label={t('vendor.totalLeads')} value={analytics.leads} className="text-green-400" />
+              <StatCard icon={Eye} label="Vues Totales" value={analytics.views} className="text-rose-400" />
+              <StatCard icon={TrendingUp} label="Prospects Totaux" value={analytics.leads} className="text-green-400" />
            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {myServices.length > 0 ? myServices.map(service => (
-              <Card key={service.id} className={`group relative ${service.is_suspended ? 'border-2 border-amber-400' : ''} ${service.is_hidden ? 'opacity-60' : ''}`}>
+              <Card key={service.id} className="group relative">
                 <div className="aspect-video bg-stone-100 relative overflow-hidden rounded-t-lg">
                   {service.image_url && (service.image_url.endsWith('.mp4') || service.image_url.endsWith('.webm') || service.image_url.includes('video')) ? (
                     <video src={service.image_url} className="object-cover w-full h-full opacity-90 group-hover:opacity-100 transition-opacity" muted loop playsInline />
@@ -1140,47 +1077,22 @@ export default function VendorDashboard() {
                     </div>
                   )}
                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold">
-                    {service.price_min?.toLocaleString()}{service.price_max ? ` - ${service.price_max.toLocaleString()}` : ''} FCFA
+                    {service.price_min?.toLocaleString()} FCFA
                   </div>
                   <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs text-white flex items-center gap-1">
                     <Eye className="w-3 h-3" /> {service.views || 0}
                   </div>
-                  {service.is_hidden && (
-                    <div className="absolute top-2 left-2 bg-stone-800/90 backdrop-blur px-2 py-1 rounded text-xs text-white flex items-center gap-1">
-                      <EyeOff className="w-3 h-3" /> Masquée
-                    </div>
-                  )}
                 </div>
                 <CardHeader>
-                  <CardTitle className="flex justify-between items-start gap-2">
+                  <CardTitle className="flex justify-between items-start">
                     <span className="truncate">{service.title}</span>
-                    {service.is_suspended && (
-                      <Badge className="bg-amber-500 text-white flex-shrink-0 text-[10px]">
-                        <ShieldAlert className="w-3 h-3 mr-1" /> Suspendue
-                      </Badge>
-                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {service.is_suspended && service.suspension_note && (
-                    <div className="mb-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
-                      <strong>Motif de suspension :</strong> {service.suspension_note}
-                    </div>
-                  )}
                   <p className="text-stone-500 text-sm line-clamp-2 mb-4">{service.description}</p>
                   <div className="flex justify-between items-center mt-4">
                     <Badge variant="outline">{service.category}</Badge>
                     <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={service.is_hidden ? "text-stone-400 hover:text-stone-600 hover:bg-stone-100" : "text-stone-500 hover:text-stone-700 hover:bg-stone-100"}
-                        onClick={() => toggleServiceVisibility(service)}
-                        disabled={togglingVisibility === service.id || service.is_suspended}
-                        title={service.is_suspended ? "Suspendue par l'administration" : (service.is_hidden ? "Afficher l'offre" : "Masquer l'offre")}
-                      >
-                        {service.is_hidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </Button>
                       <Button variant="ghost" size="icon" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => openEditService(service)}>
                         <Pencil className="w-4 h-4" />
                       </Button>
