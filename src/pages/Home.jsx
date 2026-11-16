@@ -10,6 +10,7 @@ import LocationSelector from '@/components/LocationSelector';
 import { createPageUrl } from '../utils';
 import { useLanguage } from '@/components/LanguageContext';
 import { useLocationContext } from '@/components/LocationContext';
+import AnnouncementCarousel from '@/components/banners/AnnouncementCarousel';
 import {
     Select,
     SelectContent,
@@ -273,6 +274,13 @@ export default function Home() {
                 </Button>
               </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Annonces (carrousel) */}
+      <section className="bg-[#F9F7F3] pt-6 sm:pt-10 px-4 empty:hidden">
+        <div className="max-w-6xl mx-auto">
+          <AnnouncementCarousel />
         </div>
       </section>
 
