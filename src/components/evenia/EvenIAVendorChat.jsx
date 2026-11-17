@@ -7,12 +7,17 @@ import { compressImage, isImage } from "@/components/ImageCompressor";
 import * as E from "./evenEngine";
 import * as T from "./evenTasks";
 import * as A from "./evenAdvisor";
+import * as G from "./evenAgent";
 
-const Md = ({ text }) => (
-  <div className="text-sm whitespace-pre-line">
-    {text.split(/(\*\*[^*]+\*\*)/g).map((p, i) => p.startsWith("**") ? <strong key={i}>{p.slice(2, -2)}</strong> : <span key={i}>{p}</span>)}
-  </div>
-);
+const Md = ({ text }) => {
+  const clean = (text || "").replace(/^\s*#{1,6}\s*/gm, "").replace(/^\s*[-*]\s+/gm, "\u2022 ");
+  return (
+    <div className="text-sm whitespace-pre-line">
+      {clean.split(/(\*\*[^*]+\*\*)/g).map((p, i) => p.startsWith("**") && p.endsWith("**") && p.length > 4 ? <strong key={i}>{p.slice(2, -2)}</strong> : <span key={i}>{p}</span>)}
+    </div>
+  );
+};
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 export default function EvenIAVendorChat({ user }) {
   const [ctx, setCtx] = useState(null);
@@ -21,8 +26,19 @@ export default function EvenIAVendorChat({ user }) {
   const [busy, setBusy] = useState(false);
   const [flow, setFlow] = useState(null); // { steps, i, draft, phase }
   const [pending, setPending] = useState(null); // action en attente de confirmation
-  const [useAI, setUseAI] = useState(() => { try { return localStorage.getItem("evenia_llm") === "1"; } catch { return false; } });
-  const toggleAI = () => { const v = !useAI; setUseAI(v); try { localStorage.setItem("evenia_llm", v ? "1" : "0"); } catch {} bot(v ? "IA avancee activee : je peux maintenant repondre a des questions libres. Vos donnees d'activite (services, prix, demandes, sans noms ni contacts de clients) sont envoyees a un modele de langage pour formuler la reponse." : "IA avancee desactivee : je reste 100 % autonome."); };
+  // IA avancee : llm = serveur configure ? (null = en cours de verification) ; pref = choix du vendeur (ON par defaut)
+  const [llm, setLlm] = useState(null);
+  const [pref, setPref] = useState(() => { try { return localStorage.getItem("evenia_llm") !== "0"; } catch { return true; } });
+  const useAI = llm === true && pref;
+  const [agentBusy, setAgentBusy] = useState(false);
+  const apiRef = useRef([]);      // historique au format du modele (messages + appels d'outils)
+  const abortRef = useRef(null);
+  const confirmRef = useRef(null);
+  const toggleAI = () => {
+    const v = !pref; setPref(v); try { localStorage.setItem("evenia_llm", v ? "1" : "0"); } catch {}
+    bot(v ? "IA avancée activée : écrivez-moi naturellement, je réfléchis, je consulte vos données et je propose ou exécute des actions avec votre accord. Seules vos données d'activité (sans noms ni contacts de clients) sont transmises au modèle de langage."
+          : "IA avancée désactivée : je reste en mode autonome (commandes simples).");
+  };
   const endRef = useRef(null);
   const fileRef = useRef(null);
 
@@ -33,8 +49,11 @@ export default function EvenIAVendorChat({ user }) {
 
   useEffect(() => {
     (async () => {
+      const ok = await G.checkLLM(); setLlm(ok);
       const c = await reload();
-      bot(`Bonjour ${c.vendorProfile?.business_name || ""} 👋 Je suis EVEN IA. Je peux lire votre activite et agir **sur votre demande** : creer un service, modifier prix/description, masquer/reactiver, bloquer des dates, debloquer un lead avec un credit, ecrire a un client. Je peux enchainer plusieurs actions en un plan. Je ne touche jamais aux paiements, retraits ni contrats.`,
+      if (ok && pref) bot(`Bonjour ${c.vendorProfile?.business_name || ""} 👋 Je suis EVEN IA. Écrivez-moi naturellement, comme à un conseiller : je peux analyser votre activité, vous proposer des solutions et agir sur demande (créer ou modifier un service, bloquer des dates, débloquer une demande avec un crédit, écrire à un client), toujours avec votre confirmation. Je ne touche jamais aux paiements, retraits ni contrats.`,
+        { chips: ["Analyse mon activité", "Je veux créer un service", "Comment avoir plus de clients ?", "Quelles demandes sont ouvertes ?"] });
+      else bot(`Bonjour ${c.vendorProfile?.business_name || ""} 👋 Je suis EVEN IA. Je peux lire votre activite et agir **sur votre demande** : creer un service, modifier prix/description, masquer/reactiver, bloquer des dates, debloquer un lead avec un credit, ecrire a un client. Je peux enchainer plusieurs actions en un plan. Je ne touche jamais aux paiements, retraits ni contrats.`,
         { chips: ["Creer un service", "Mes services", "Mes prospects", "Mes dossiers", "Mon solde", "Analyse mon activite"] });
       try {
         const fx = A.formatFindings(await A.diagnose(c), 3);
@@ -42,7 +61,7 @@ export default function EvenIAVendorChat({ user }) {
       } catch {}
     })();
   }, []);
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, busy]);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: msgs[msgs.length - 1]?.streaming ? "auto" : "smooth" }); }, [msgs, busy]);
 
   // ----- flux de creation -----
   const startCreate = () => {
@@ -61,7 +80,8 @@ export default function EvenIAVendorChat({ user }) {
       const t = (ctx.serviceTypes || []).find(x => x.name === value);
       draft.service_type_code = t?.code_service || "";
     }
-    const i = flowState.i + 1;
+    let i = flowState.i + 1;
+    while (i < flowState.steps.length && draft[flowState.steps[i].key] !== undefined) i++; // etapes deja remplies (brouillon de l'agent)
     if (i >= flowState.steps.length) {
       setFlow({ ...flowState, draft, i, phase: "confirm" });
       bot("Voici le recapitulatif :\n\n" + E.draftRecap(draft), { chips: ["Publier", "Annuler"] });
@@ -74,7 +94,7 @@ export default function EvenIAVendorChat({ user }) {
   const handleFlowInput = (text) => {
     const t = E.norm(text);
     if (t === "annuler") { setFlow(null); setPending(null); return bot("Creation annulee. Rien n'a ete enregistre."); }
-    if (flow.phase === "confirm") return;
+    if (flow.phase === "confirm") return bot("Écrivez « Publier » pour confirmer, ou « Annuler ».", { chips: ["Publier", "Annuler"] });
     const s = flow.steps[flow.i];
     if (s.media) {
       if (s.optional && /passer|non|aucune/.test(t)) return advance(flow, s.key, "");
@@ -119,6 +139,60 @@ export default function EvenIAVendorChat({ user }) {
       bot("❌ La creation a echoue : " + (err.message || "erreur inconnue") + ". Rien n'est perdu, dites 'creer un service' pour recommencer.");
     }
     setBusy(false);
+  };
+
+  // ----- brouillon propose par l'agent : on continue avec l'image / video puis la confirmation -----
+  const startCreateFromDraft = (draft, c) => {
+    const steps = E.buildServiceSteps(c);
+    const d = { ...draft };
+    steps.forEach(st => { if (!st.media && st.optional && d[st.key] === undefined) d[st.key] = ""; });
+    const i = steps.findIndex(st => d[st.key] === undefined);
+    if (i === -1) {
+      setFlow({ steps, i: steps.length, draft: d, phase: "confirm" });
+      bot("Voici le récapitulatif :\n\n" + E.draftRecap(d), { chips: ["Publier", "Annuler"] });
+      setPending({ type: "publish", draft: d });
+      return;
+    }
+    setFlow({ steps, i, draft: d, phase: "ask" });
+    askStep(steps, i);
+  };
+
+  // ----- agent (IA avancee) -----
+  const resolveConfirm = (ok) => {
+    const c = confirmRef.current; if (!c) return; confirmRef.current = null;
+    setMsgs(m => m.map(x => x.cid === c.cid ? { ...x, open: false, decision: ok ? "approved" : "refused" } : x));
+    c.resolve(ok);
+  };
+  const stopAgent = () => { abortRef.current?.abort(); resolveConfirm(false); };
+
+  const agentTurn = async (text) => {
+    const ac = new AbortController(); abortRef.current = ac; setAgentBusy(true);
+    let sid = null, curCid = null, acted = false;
+    const cb = {
+      onTurnStart: () => { sid = null; },
+      onText: (d) => {
+        if (!sid) { sid = newId(); const id = sid; setMsgs(m => [...m, { from: "bot", text: d, sid: id, streaming: true }]); }
+        else { const id = sid; setMsgs(m => m.map(x => x.sid === id ? { ...x, text: x.text + d } : x)); }
+      },
+      onTurnEnd: () => { const id = sid; if (id) setMsgs(m => m.map(x => x.sid === id ? { ...x, streaming: false } : x)); sid = null; },
+      confirm: (labels) => new Promise(resolve => {
+        const cid = newId(); curCid = cid; confirmRef.current = { cid, resolve };
+        setMsgs(m => [...m, { from: "bot", text: labels.length > 1 ? "Je souhaite effectuer ces actions :" : "Je souhaite effectuer cette action :", cid, open: true, plan: labels.map(l => ({ label: l, status: "todo" })) }]);
+      }),
+      progress: (idx, patch) => { if (patch.status === "done") acted = true; const id = curCid; setMsgs(m => m.map(x => x.cid === id ? { ...x, plan: x.plan.map((a, k) => k === idx ? { ...a, ...patch } : a) } : x)); },
+    };
+    try {
+      const out = await G.runAgent({ messages: [...apiRef.current, { role: "user", content: text }], user, callbacks: cb, signal: ac.signal });
+      apiRef.current = G.trimHistory(out.messages);
+      const fresh = await reload();
+      if (out.draft) startCreateFromDraft(out.draft, fresh);
+    } catch (e) {
+      cb.onTurnEnd(); confirmRef.current = null;
+      if (e.name === "AbortError") { bot("Réponse interrompue."); await reload(); }
+      else if (e.status === 429) bot(e.message);
+      else if (acted) { bot("La connexion avec l'IA s'est interrompue après l'exécution de l'action ci-dessus. Vérifiez le résultat dans votre tableau de bord."); await reload(); }
+      else { bot("L'IA avancée est indisponible (" + (e.message || "erreur") + "). Je continue en mode autonome."); await answer(E.detectIntent(text), text); }
+    } finally { abortRef.current = null; setAgentBusy(false); }
   };
 
   // ----- lecture -----
@@ -176,13 +250,6 @@ export default function EvenIAVendorChat({ user }) {
         return bot(tips.length ? tips.map(t => "• " + t).join("\n") : "Votre profil est bien optimise. Continuez a repondre vite aux demandes !");
       }
       default: {
-        if (useAI) {
-          try {
-            const hist = [...msgs.filter(x => x.text && !x.plan).slice(-8).map(x => ({ role: x.from === "me" ? "user" : "assistant", content: x.text })), { role: "user", content: text }];
-            const r = await A.askLLM(hist, c);
-            return bot(r.text || "Je n'ai pas de reponse pour le moment.", { chips: r.chips });
-          } catch (e) { bot("L'IA avancee est indisponible (" + (e.message || "erreur") + "). Je continue en mode autonome."); }
-        }
         const g = A.guess(text);
         if (g.length) return bot("Je ne suis pas sur d'avoir compris. Vouliez-vous dire :", { chips: g });
       }
@@ -221,6 +288,7 @@ export default function EvenIAVendorChat({ user }) {
     setBusy(true);
     try {
       const c = await reload();
+      if (useAI) { await agentTurn(text); setBusy(false); return; }
       const plan = T.buildPlan(text, c);
       if (plan) {
         plan.errors.forEach(e => bot(e));
@@ -231,9 +299,7 @@ export default function EvenIAVendorChat({ user }) {
         }
         setBusy(false); return;
       }
-      const intent = E.detectIntent(text);
-      // IA avancee ON : le modele de langage repond a tout, sauf au lancement du formulaire de creation
-      await answer(useAI && intent !== "create_service" ? "unknown" : intent, text); } catch (e) { bot("Une erreur est survenue en lisant vos donnees."); } setBusy(false);
+      await answer(E.detectIntent(text), text); } catch (e) { bot("Une erreur est survenue en lisant vos donnees."); } setBusy(false);
   };
 
   const last = msgs[msgs.length - 1];
@@ -241,21 +307,23 @@ export default function EvenIAVendorChat({ user }) {
 
   return (
     <div className="flex flex-col h-[calc(100vh-160px)] max-w-3xl mx-auto bg-[#F9F7F3]">
-      <div className="flex items-center gap-2 p-3 border-b bg-white"><Sparkles className="w-5 h-5 text-[#FF6B35]" /><b>EVEN IA</b><span className="text-xs text-stone-500">assistant vendeur</span><button onClick={toggleAI} className={`ml-auto text-xs px-3 py-1 rounded-full border ${useAI ? "bg-[#FF6B35] text-white border-[#FF6B35]" : "bg-white text-stone-600"}`}>IA avancee : {useAI ? "ON" : "OFF"}</button></div>
+      <div className="flex items-center gap-2 p-3 border-b bg-white"><Sparkles className="w-5 h-5 text-[#FF6B35]" /><b>EVEN IA</b><span className="text-xs text-stone-500">assistant vendeur</span><button onClick={toggleAI} disabled={llm !== true} title={llm === false ? "Ajoutez la clé ANTHROPIC_API_KEY dans Vercel pour activer l'IA avancée" : ""} className={`ml-auto text-xs px-3 py-1 rounded-full border disabled:opacity-60 ${useAI ? "bg-[#FF6B35] text-white border-[#FF6B35]" : "bg-white text-stone-600"}`}>{llm === null ? "IA avancée..." : llm === false ? "IA avancée : non configurée" : `IA avancée : ${pref ? "ON" : "OFF"}`}</button></div>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {msgs.map((m, i) => (
           <div key={i} className={m.from === "me" ? "flex justify-end" : "flex justify-start"}>
             <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${m.from === "me" ? "bg-[#FF6B35] text-white" : "bg-white border"}`}>
-              <Md text={m.text} />
+              <Md text={m.text} />{m.streaming && <span className="animate-pulse text-[#FF6B35]">▍</span>}
               {m.plan && <div className="mt-3 space-y-1">{m.plan.map((a, k) => (
                 <div key={k} className="text-xs flex gap-2"><span>{a.status === "done" ? "✅" : a.status === "error" ? "❌" : a.status === "running" ? "⏳" : "⬜"}</span>
                   <span>{a.label}{a.result ? " - " + a.result : ""}{a.error ? " - " + a.error : ""}</span></div>))}</div>}
+              {m.cid && m.open && <div className="flex gap-2 mt-3"><button onClick={() => resolveConfirm(true)} className="text-xs px-4 py-1.5 rounded-full bg-[#FF6B35] text-white hover:bg-[#e05a2b]">Confirmer</button><button onClick={() => resolveConfirm(false)} className="text-xs px-4 py-1.5 rounded-full border hover:bg-stone-50">Refuser</button></div>}
+              {m.cid && m.decision === "refused" && <div className="text-xs text-stone-500 mt-2">Annulé : rien n'a été modifié.</div>}
               {m.link && <Link to={m.link.to} className="text-xs text-[#FF6B35] underline mt-2 inline-block">{m.link.label}</Link>}
               {m.chips && i === msgs.length - 1 && <div className="flex flex-wrap gap-2 mt-3">{m.chips.map(c => { const lb = typeof c === "string" ? c : c.label, sd = typeof c === "string" ? c : c.send; return <button key={lb} onClick={() => send(sd)} className="text-xs px-3 py-1.5 rounded-full bg-[#FFF0E8] hover:bg-[#FF6B35] hover:text-white">{lb}</button>; })}</div>}
             </div>
           </div>
         ))}
-        {busy && <div className="flex items-center gap-2 text-stone-500 text-sm"><Loader2 className="w-4 h-4 animate-spin" /> EVEN IA travaille...</div>}
+        {busy && !last?.streaming && !last?.open && <div className="flex items-center gap-2 text-stone-500 text-sm"><Loader2 className="w-4 h-4 animate-spin" /> {agentBusy ? "EVEN IA réfléchit…" : "EVEN IA travaille..."}</div>}
         <div ref={endRef} />
       </div>
       {step?.media && (
@@ -265,7 +333,9 @@ export default function EvenIAVendorChat({ user }) {
       )}
       <div className="p-3 border-t bg-white flex gap-2">
         <Input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} placeholder="Ecrivez a EVEN IA..." disabled={busy} />
-        <Button onClick={() => send()} disabled={busy || !input.trim()} className="bg-[#FF6B35] hover:bg-[#e05a2b]"><Send className="w-4 h-4" /></Button>
+        {agentBusy
+          ? <Button onClick={stopAgent} variant="outline">Arrêter</Button>
+          : <Button onClick={() => send()} disabled={busy || !input.trim()} className="bg-[#FF6B35] hover:bg-[#e05a2b]"><Send className="w-4 h-4" /></Button>}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
-// EVEN IA - conseiller : diagnostic autonome + passerelle optionnelle vers un modele de langage.
-import { supabase } from "@/api/apiClient";
+// EVEN IA - conseiller autonome (sans modele de langage) : diagnostic + comprehension approximative.
+// L'agent avec modele de langage est dans evenAgent.js.
 import { norm, serviceScore, serviceVisibility, priceAdvice, fcfa } from "./evenEngine";
 import { matchingLeads } from "./evenTasks";
 
@@ -73,30 +73,4 @@ export function guess(text) {
   const toks = norm(text).split(/[^a-z0-9]+/).filter(w => w.length > 3);
   const scored = HINTS.map(h => ({ label: h.label, s: toks.filter(t => h.words.some(w => w === t || (w.length > 4 && lev(w, t) <= 2))).length })).filter(x => x.s > 0).sort((a, b) => b.s - a.s);
   return scored.slice(0, 3).map(x => x.label);
-}
-
-// ---------- Modele de langage (optionnel, via /api/even-ai) ----------
-export function buildLLMContext(ctx) {
-  const vp = ctx.vendorProfile || {};
-  return {
-    plan: vp.plan || "free", verification: vp.verification_status || "unverified", reward_credits: vp.reward_credits || 0,
-    services: (ctx.services || []).map(s => ({ titre: s.title, categorie: s.category, prix_min: s.price_min, prix_max: s.price_max || null, ville: s.city, visible: serviceVisibility(s).visible, suspendu: !!s.is_suspended, qualite_pct: serviceScore(s).score, manque: serviceScore(s).missing })),
-    demandes_ouvertes: matchingLeads(ctx).slice(0, 10).map((l, i) => ({ n: i + 1, evenement: l.event_type, categorie: l.service_category, lieu: l.location, budget: l.budget })),
-    dossiers_par_statut: (ctx.bookings || []).reduce((a, x) => (a[x.status] = (a[x.status] || 0) + 1, a), {}),
-  };
-}
-
-export async function askLLM(history, ctx) {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error("Session expiree");
-  const r = await fetch("/api/even-ai", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-    body: JSON.stringify({ messages: history, context: buildLLMContext(ctx) }),
-  });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.error || "IA indisponible");
-  const cmds = [...(j.text || "").matchAll(/\[\[CMD:\s*([^\]]+?)\s*\]\]/g)].map(m => m[1]);
-  const text = (j.text || "").replace(/\[\[CMD:[^\]]*\]\]/g, "").trim();
-  return { text, chips: cmds.slice(0, 3).map(c => ({ label: c, send: c })) };
 }
