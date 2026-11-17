@@ -1,0 +1,10 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    { "name": "VITE_SUPABASE_URL", "description": "Supabase project URL (Project Settings > API)", "requiredAtBoot": true },
+    { "name": "VITE_SUPABASE_ANON_KEY", "description": "Supabase anon/public key (Project Settings > API)", "requiredAtBoot": true },
+    { "name": "VITE_VAPID_PUBLIC_KEY", "description": "Optional Web Push VAPID public key; push notifications stay off without it", "requiredAtBoot": false }
+  ]
+}
