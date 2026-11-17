@@ -299,8 +299,17 @@ function LayoutContent({ children }) {
             </div>
 
             {/* Mobile menu button */}
-            <div className="md:hidden flex items-center gap-4">
+            <div className="md:hidden flex items-center gap-2">
               {user && <NotificationBell user={user} />}
+              {!user && (
+                <Button
+                  onClick={() => window.location.href = "/Login"}
+                  size="sm"
+                  className="h-9 px-3 text-xs font-semibold whitespace-nowrap bg-[#FF6B35] hover:bg-[#e05a2b] text-white rounded-full"
+                >
+                  {t("nav.joinPlanner")}
+                </Button>
+              )}
                {/* Language Switcher Mobile */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -418,9 +427,6 @@ function LayoutContent({ children }) {
                 <div className="pt-4 flex flex-col gap-3">
                   <Button onClick={() => window.location.href = "/Login"} variant="outline" className="w-full justify-center">
                      {t("nav.signIn")}
-                  </Button>
-                  <Button onClick={() => window.location.href = "/Login"} className="w-full justify-center bg-[#FF6B35] hover:bg-[#e05a2b] text-white">
-                     {t("nav.joinPlanner")}
                   </Button>
                 </div>
                )}
