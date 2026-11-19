@@ -3,10 +3,10 @@ import { supabase } from '@/api/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import PhoneInput, { isValidPhone, toE164 } from '@/components/PhoneInput';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_REGEX = /^(\+?237)?6\d{8}$/; // mobile camerounais : 6XXXXXXXX
 
 export default function Login() {
   const navigate = useNavigate();
@@ -33,8 +33,8 @@ export default function Login() {
       errors.push('Le mot de passe doit contenir au moins une lettre et un chiffre.');
     }
     if (password !== confirmPassword) errors.push('Les mots de passe ne correspondent pas.');
-    if (!PHONE_REGEX.test(phone.replace(/[\s.-]/g, ''))) {
-      errors.push('Le numéro de téléphone doit être un mobile camerounais valide (ex : 6 70 00 00 00).');
+    if (!isValidPhone(phone)) {
+      errors.push("Le numéro de téléphone n'est pas valide pour le pays choisi. Vérifiez l'indicatif et le numéro.");
     }
     return errors;
   };
@@ -71,7 +71,7 @@ export default function Login() {
     setLoading(true);
     try {
       if (isRegister) {
-        const cleanPhone = phone.replace(/[\s.-]/g, '');
+        const cleanPhone = toE164(phone); // format international, ex. +237670000000
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -220,10 +220,9 @@ export default function Login() {
           {isRegister && (
             <div>
               <label className="text-sm font-medium text-stone-700">Téléphone</label>
-              <Input
-                type="tel"
+              <PhoneInput
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={setPhone}
                 placeholder="6 70 00 00 00"
                 required
                 className="mt-1"
