@@ -58,7 +58,7 @@ export default function SEOCameroun() {
         title="EventCrafter Cameroun - Organisation d'Événements à Douala, Yaoundé | Prestataires Mariages & Fêtes"
         description="🎉 Trouvez les meilleurs prestataires d'événements au Cameroun. Organisation de mariages traditionnels, anniversaires, corporate à Douala, Yaoundé, Bafoussam. 500+ prestataires vérifiés. Devis gratuit en 24h."
         keywords="organisation mariage Cameroun, prestataire événement Douala, traiteur mariage Yaoundé, photographe mariage Bafoussam, DJ événement Cameroun, wedding planner Douala, décoration mariage traditionnel, dot mariage camerounais, organisateur anniversaire Yaoundé, location salle réception Douala, sonorisation événement Cameroun, vidéaste mariage, fleuriste Douala, traiteur buffet Yaoundé, animation événement enfant, corporate event Cameroun"
-        url="https://eventcrafter.cm"
+        url="https://www.eventcraftercm.com"
       />
       
       <StructuredData data={generateOrganizationSchema()} />
