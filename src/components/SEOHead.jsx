@@ -5,7 +5,7 @@ export default function SEOHead({
   description = "Plateforme N°1 d'organisation d'événements au Cameroun. Trouvez les meilleurs prestataires à Douala, Yaoundé, Bafoussam pour mariages, anniversaires, événements corporate.",
   keywords = "organisation événement Cameroun, prestataire mariage Douala, traiteur Yaoundé, photographe Bafoussam, DJ Cameroun, décorateur événement, planificateur mariage",
   ogImage = "/og-image.jpg",
-  url = "https://eventcrafter.cm",
+  url = "https://www.eventcraftercm.com",
   type = "website"
 }) {
   useEffect(() => {
@@ -115,8 +115,8 @@ export function generateOrganizationSchema() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "EventCrafter",
-    "url": "https://eventcrafter.cm",
-    "logo": "https://eventcrafter.cm/logo.png",
+    "url": "https://www.eventcraftercm.com",
+    "logo": "https://www.eventcraftercm.com/logo.png",
     "description": "Plateforme de mise en relation pour l'organisation d'événements au Cameroun",
     "address": {
       "@type": "PostalAddress",
