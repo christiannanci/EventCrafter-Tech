@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useLanguage } from '@/components/LanguageContext';
+import ArticleCards from '@/components/articles/ArticleCards';
 
 export default function Inspiration() {
   const { t, language } = useLanguage();
@@ -78,6 +79,8 @@ export default function Inspiration() {
           </div>
         </div>
 
+        {/* Les 25 articles : chaque carte ouvre /articles/article-NN */}
+        <ArticleCards filter={filter} />
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredArticles.map(article => (

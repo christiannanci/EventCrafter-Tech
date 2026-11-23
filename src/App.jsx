@@ -15,6 +15,8 @@ import AIAssistant from './pages/AIAssistant';
 import ResetPassword from './pages/ResetPassword';
 import ForgotPassword from './pages/ForgotPassword';
 import PaymentReturn from './pages/PaymentReturn';
+import ArticlePage from './pages/ArticlePage';
+import Waitlist from './pages/Waitlist';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -106,6 +108,22 @@ const AuthenticatedApp = () => {
           element={
             <LayoutWrapper currentPageName="PaymentReturn">
               <PaymentReturn />
+            </LayoutWrapper>
+          }
+        />
+        <Route
+          path="/articles/:slug"
+          element={
+            <LayoutWrapper currentPageName="Inspiration">
+              <ArticlePage />
+            </LayoutWrapper>
+          }
+        />
+        <Route
+          path="/liste-attente"
+          element={
+            <LayoutWrapper currentPageName="Waitlist">
+              <Waitlist />
             </LayoutWrapper>
           }
         />

@@ -4,17 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PhoneInput, { isValidPhone, toE164 } from '@/components/PhoneInput';
+import { captureRecruitmentParams } from '@/config/recruitment';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Login() {
   const navigate = useNavigate();
+  // Lien venant d'un article (?role=vendor&categories=…) : on garde le choix jusqu'à la création du profil
+  React.useEffect(() => { captureRecruitmentParams(window.location.search); }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(() => new URLSearchParams(window.location.search).get('mode') === 'register');
   const [step, setStep] = useState('form'); // 'form' | 'code'
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);

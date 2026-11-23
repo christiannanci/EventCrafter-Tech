@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import PhoneInput, { isValidPhone, toE164 } from "@/components/PhoneInput";
 import { User, Store, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import PendingVendorCategories from '@/components/articles/PendingVendorCategories';
+import { getPendingRole, getPendingCategories, clearPending } from '@/config/recruitment';
 
 export default function ProfileSelection() {
   const [selectedType, setSelectedType] = useState(null);
@@ -40,6 +42,8 @@ export default function ProfileSelection() {
         }
 
         // Sinon, continuer avec la sélection
+        // Arrivée depuis un article « prestataire » : on ouvre directement le formulaire prestataire
+        if (getPendingRole() === 'vendor') { setSelectedType('vendor'); setStep(2); }
         setChecking(false);
       } catch (e) {
         console.error('Error checking profiles:', e);
@@ -102,6 +106,12 @@ export default function ProfileSelection() {
           created_by: user.email,
         });
 
+        // Catégories venant de l'article : enregistrées avec le compte (aucune colonne à ajouter en base)
+        try {
+          const cats = getPendingCategories();
+          if (cats.length) await supabase.auth.updateUser({ data: { vendor_categories: cats } });
+        } catch (e) { console.warn('vendor_categories', e); }
+        clearPending();
         toast({ title: "Profil Vendeur créé !", description: "Commencez à lister vos services" });
         window.location.href = '/VendorDashboard';
       }
@@ -300,6 +310,9 @@ export default function ProfileSelection() {
             </div>
           )}
 
+          {selectedType === 'vendor' && (
+            <div className="mt-4"><PendingVendorCategories /></div>
+          )}
           <div className="flex gap-3 mt-6">
             <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
               Retour
