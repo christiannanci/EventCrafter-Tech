@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PhoneInput, { isValidPhone, toE164 } from '@/components/PhoneInput';
 import { captureRecruitmentParams } from '@/config/recruitment';
+import SocialAuthButtons from '@/components/SocialAuthButtons';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -311,6 +312,8 @@ export default function Login() {
             ) : isRegister ? 'Créer mon compte' : 'Se connecter'}
           </Button>
         </form>
+
+        <SocialAuthButtons next={new URLSearchParams(window.location.search).get('next') || '/'} />
 
         <p className="text-center text-sm text-stone-500 mt-4">
           {isRegister ? 'Déjà un compte ?' : 'Pas encore de compte ?'}{' '}
