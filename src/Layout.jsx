@@ -12,7 +12,9 @@ import {
   LayoutDashboard,
   Globe,
   Shield,
-  MessageSquare
+  MessageSquare,
+  Mail,
+  Phone
 } from "lucide-react";
 import { base44 } from "@/api/apiClient";
 import { LanguageProvider, useLanguage } from '@/components/LanguageContext';
@@ -470,57 +472,124 @@ function LayoutContent({ children }) {
       <FloatingAIAssistant />
 
       {/* Footer */}
-      <footer className="bg-white border-t border-stone-200 py-12">
+      <footer className="bg-white border-t border-stone-200 pt-12 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl font-['Poppins'] font-bold tracking-tight text-[#2C2C2C]">
-                  Event<span className="text-[#FF6B35]">Crafter</span>
-                </span>
-              </div>
-              <p className="text-stone-500 max-w-sm">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-x-8 gap-y-10">
+            {/* Marque + réseaux sociaux */}
+            <div className="col-span-2 md:col-span-4 lg:col-span-3">
+              <span className="text-xl font-['Poppins'] font-bold tracking-tight text-[#2C2C2C]">
+                Event<span className="text-[#FF6B35]">Crafter</span>
+              </span>
+              <p className="mt-4 text-sm leading-relaxed text-stone-500 max-w-sm">
                 {t('layout.tagline')}
               </p>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <a
+                  href="https://www.facebook.com/eventcraftercameroun"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Suivre EventCrafter sur Facebook"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#1877F2] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#145DBF] hover:shadow-md"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+                    <path d="M14 8h3V4h-3c-2.76 0-5 2.24-5 5v2H7v4h2v7h4v-7h3l1-4h-4V9c0-.55.45-1 1-1z" />
+                  </svg>
+                  Facebook
+                </a>
+                <a
+                  href="https://www.instagram.com/eventcraftercm/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Suivre EventCrafter sur Instagram"
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 hover:shadow-md"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                  </svg>
+                  Instagram
+                </a>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">{t('layout.platformHeading')}</h3>
-              <ul className="space-y-2 text-stone-500">
+
+            {/* Plateforme */}
+            <div className="lg:col-span-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-[#2C2C2C] mb-4">{t('layout.platformHeading')}</h3>
+              <ul className="space-y-3 text-sm text-stone-500">
                 <li><Link to={createPageUrl("Marketplace")} className="hover:text-[#FF6B35]">{t("nav.marketplace")}</Link></li>
                 <li><Link to={createPageUrl("About")} className="hover:text-[#FF6B35]">{t("nav.howItWorks")}</Link></li>
                 <li><Link to={createPageUrl("FAQ")} className="hover:text-[#FF6B35]">FAQ</Link></li>
               </ul>
             </div>
-            <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">{t('layout.supportHeading')}</h3>
-              <ul className="space-y-2 text-stone-500">
+
+            {/* Support */}
+            <div className="lg:col-span-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-[#2C2C2C] mb-4">{t('layout.supportHeading')}</h3>
+              <ul className="space-y-3 text-sm text-stone-500">
                 <li><Link to={createPageUrl("Support")} className="hover:text-[#FF6B35]">{t('layout.helpCenter')}</Link></li>
                 <li><a href="https://wa.me/237670934378" target="_blank" rel="noopener noreferrer" className="hover:text-[#FF6B35]">WhatsApp</a></li>
               </ul>
             </div>
-            <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">{t('layout.legalHeading')}</h3>
-              <ul className="space-y-2 text-stone-500">
+
+            {/* Juridique */}
+            <div className="lg:col-span-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-[#2C2C2C] mb-4">{t('layout.legalHeading')}</h3>
+              <ul className="space-y-3 text-sm text-stone-500">
                 <li><Link to={createPageUrl("TermsOfService")} className="hover:text-[#FF6B35]">{t('layout.cgu')}</Link></li>
                 <li><Link to={createPageUrl("PrivacyPolicy")} className="hover:text-[#FF6B35]">{t('layout.confidentiality')}</Link></li>
                 <li><Link to={createPageUrl("LegalNotice")} className="hover:text-[#FF6B35]">{t('layout.legalNotice')}</Link></li>
               </ul>
             </div>
-            <div>
-              <h3 className="font-semibold text-[#2C2C2C] mb-4">{t('layout.contactsHeading')}</h3>
-              <ul className="space-y-2 text-stone-500">
-                <li>founder@eventcraftercm.com</li>
-                <li>hello@eventcraftercm.com</li>
-                <li>support@eventcraftercm.com</li>
-                <li>vendor@eventcraftercm.com</li>
-                <li className="mt-3 pt-3 border-t border-stone-200">+237 670 93 43 78</li>
-                <li>+237 690 17 31 93</li>
+
+            {/* Contacts */}
+            <div className="col-span-2 md:col-span-1 lg:col-span-3">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-[#2C2C2C] mb-4">{t('layout.contactsHeading')}</h3>
+              <ul className="space-y-1 md:space-y-3 text-sm text-stone-500">
+                <li>
+                  <a href="tel:+237670934378" className="inline-flex items-center gap-2 hover:text-[#FF6B35] whitespace-nowrap">
+                    <Phone className="h-4 w-4 flex-shrink-0 text-[#FF6B35]" />
+                    +237 670 93 43 78
+                  </a>
+                </li>
+                <li>
+                  <a href="tel:+237690173193" className="inline-flex items-center gap-2 hover:text-[#FF6B35] whitespace-nowrap">
+                    <Phone className="h-4 w-4 flex-shrink-0 text-[#FF6B35]" />
+                    +237 690 17 31 93
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:hello@eventcraftercm.com" className="inline-flex items-center gap-2 hover:text-[#FF6B35] break-all">
+                    <Mail className="h-4 w-4 flex-shrink-0 text-[#FF6B35]" />
+                    hello@eventcraftercm.com
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:support@eventcraftercm.com" className="inline-flex items-center gap-2 hover:text-[#FF6B35] break-all">
+                    <Mail className="h-4 w-4 flex-shrink-0 text-[#FF6B35]" />
+                    support@eventcraftercm.com
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:vendor@eventcraftercm.com" className="inline-flex items-center gap-2 hover:text-[#FF6B35] break-all">
+                    <Mail className="h-4 w-4 flex-shrink-0 text-[#FF6B35]" />
+                    vendor@eventcraftercm.com
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:founder@eventcraftercm.com" className="inline-flex items-center gap-2 hover:text-[#FF6B35] break-all">
+                    <Mail className="h-4 w-4 flex-shrink-0 text-[#FF6B35]" />
+                    founder@eventcraftercm.com
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
-          <div className="mt-12 pt-8 border-t border-stone-100 text-center text-stone-400 text-sm">
-          <p className="mb-2">{t('about.legalInfo')}</p>
-          (c) 2026 {t('layout.copyright')}
+
+          {/* Bas de page */}
+          <div className="mt-12 pt-6 border-t border-stone-100 flex flex-col-reverse gap-3 text-sm text-stone-400 md:flex-row md:items-center md:justify-between">
+            <p>&copy; 2026 {t('layout.copyright')}</p>
+            <p className="md:text-right">{t('about.legalInfo')}</p>
           </div>
         </div>
       </footer>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import PhoneInput, { isValidPhone, toE164 } from "@/components/PhoneInput";
 import { User, Store, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -75,8 +76,8 @@ export default function ProfileSelection() {
           user_id: user.id,
           first_name: clientData.first_name,
           last_name: clientData.last_name,
-          phone: clientData.phone,
-          whatsapp: clientData.whatsapp || clientData.phone,
+          phone: toE164(clientData.phone),
+          whatsapp: toE164(clientData.whatsapp || clientData.phone),
           contact_email: user.email,
           verification_status: 'unverified',
           account_balance: 0,
@@ -91,7 +92,7 @@ export default function ProfileSelection() {
           id: crypto.randomUUID(),
           user_id: user.id,
           business_name: vendorData.business_name,
-          phone: vendorData.phone,
+          phone: toE164(vendorData.phone),
           city: vendorData.city,
           plan: 'free',
           subscription_status: 'active',
@@ -250,21 +251,19 @@ export default function ProfileSelection() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Téléphone *</Label>
-                <Input
+                <PhoneInput
                   id="phone"
-                  placeholder="+237 6..."
                   value={clientData.phone}
-                  onChange={(e) => setClientData({...clientData, phone: e.target.value})}
+                  onChange={(val) => setClientData(prev => ({...prev, phone: val}))}
                   required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="whatsapp">WhatsApp (optionnel)</Label>
-                <Input
+                <PhoneInput
                   id="whatsapp"
-                  placeholder="+237 6..."
                   value={clientData.whatsapp}
-                  onChange={(e) => setClientData({...clientData, whatsapp: e.target.value})}
+                  onChange={(val) => setClientData(prev => ({...prev, whatsapp: val}))}
                 />
               </div>
             </div>
@@ -281,11 +280,10 @@ export default function ProfileSelection() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Téléphone *</Label>
-                <Input
+                <PhoneInput
                   id="phone"
-                  placeholder="+237 6..."
                   value={vendorData.phone}
-                  onChange={(e) => setVendorData({...vendorData, phone: e.target.value})}
+                  onChange={(val) => setVendorData(prev => ({...prev, phone: val}))}
                   required
                 />
               </div>
@@ -309,8 +307,8 @@ export default function ProfileSelection() {
             <Button
               onClick={handleCreateProfile}
               disabled={loading || (selectedType === 'client'
-                ? !clientData.first_name || !clientData.last_name || !clientData.phone
-                : !vendorData.business_name || !vendorData.phone || !vendorData.city
+                ? !clientData.first_name || !clientData.last_name || !isValidPhone(clientData.phone) || (clientData.whatsapp && !isValidPhone(clientData.whatsapp))
+                : !vendorData.business_name || !isValidPhone(vendorData.phone) || !vendorData.city
               )}
               className="flex-1 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700"
             >
