@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PhoneInput, { isValidPhone, toE164 } from '@/components/PhoneInput';
+import SocialAuthButtons from '@/components/SocialAuthButtons';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -308,6 +309,8 @@ export default function Login() {
             ) : isRegister ? 'Créer mon compte' : 'Se connecter'}
           </Button>
         </form>
+
+        {isRegister && <SocialAuthButtons onError={setError} />}
 
         <p className="text-center text-sm text-stone-500 mt-4">
           {isRegister ? 'Déjà un compte ?' : 'Pas encore de compte ?'}{' '}
