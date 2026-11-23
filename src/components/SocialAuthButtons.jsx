@@ -15,7 +15,9 @@ const FacebookIcon = () => (
 
 // Connexion / inscription avec Google ou Facebook (Supabase OAuth).
 // Les fournisseurs doivent être activés dans Supabase > Authentication > Providers.
-export default function SocialAuthButtons({ next = '/' }) {
+// Après le retour du fournisseur, on arrive sur /ProfileSelection : sans profil, l'utilisateur crée son compte
+// (client ou prestataire) ; avec un profil, la page l'envoie directement vers son tableau de bord.
+export default function SocialAuthButtons({ next = '/ProfileSelection' }) {
   const [busy, setBusy] = useState('');
   const [err, setErr] = useState('');
 
@@ -25,7 +27,7 @@ export default function SocialAuthButtons({ next = '/' }) {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: `${window.location.origin}${next.startsWith('/') ? next : '/'}` },
+        options: { redirectTo: `${window.location.origin}${next.startsWith('/') ? next : '/ProfileSelection'}` },
       });
       if (error) throw error;
       // la page est quittée vers le fournisseur
