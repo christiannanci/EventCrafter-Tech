@@ -1,20 +1,23 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronDown, Link2, MessageCircle, Share2, Check } from 'lucide-react';
+import { ChevronDown, Link2, MessageCircle, Share2, Check, Bookmark, BookmarkCheck } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
 import { useLanguage } from '@/components/LanguageContext';
-import { SITE_URL, ROUTES } from '@/config/recruitment';
+import { SITE_URL, ROUTES, RECRUITMENT_MODE, waitlistUrl } from '@/config/recruitment';
 import ArticleMarkdown from '@/components/articles/ArticleMarkdown';
 import RecruitBlock from '@/components/articles/RecruitBlock';
+import VisualBoard, { isVisualSection } from '@/components/articles/VisualBoard';
 import { useArticles, findWidget, imageUrl, pad2 } from '@/components/articles/useArticles';
 
 const UI = {
   fr: { home: 'Accueil', insp: 'Inspiration', read: 'min de lecture', by: 'Par la rédaction EventCrafter', insight: 'En bref',
         dyk: 'Le saviez-vous ?', check: 'Votre checklist', done: 'faits', share: 'Partager', copy: 'Copier le lien', copied: 'Lien copié',
-        toc: 'Dans cet article', related: 'À lire aussi', loading: 'Chargement…', missing: "Cet article n'existe pas.", back: "Retour à l'inspiration" },
+        toc: 'Dans cet article', related: 'À lire aussi', save: 'Enregistrer', saved: 'Enregistré ✓', ask: 'Demander à un organisateur',
+        helpH: "Besoin d'aide ?", helpP: 'Vous organisez cet événement ? Nos organisateurs vous accompagnent.', join: 'Rejoindre EventCrafter', findVendor: 'Trouver un prestataire', loading: 'Chargement…', missing: "Cet article n'existe pas.", back: "Retour à l'inspiration" },
   en: { home: 'Home', insp: 'Inspiration', read: 'min read', by: 'By EventCrafter Editorial', insight: 'In short',
         dyk: 'Did you know?', check: 'Your checklist', done: 'done', share: 'Share', copy: 'Copy link', copied: 'Link copied',
-        toc: 'In this article', related: 'Keep reading', loading: 'Loading…', missing: 'This article does not exist.', back: 'Back to inspiration' },
+        toc: 'In this article', related: 'Keep reading', save: 'Save', saved: 'Saved ✓', ask: 'Ask a planner',
+        helpH: 'Need help?', helpP: 'Planning this event? Our planners can help.', join: 'Join EventCrafter', findVendor: 'Find a vendor', loading: 'Loading…', missing: 'This article does not exist.', back: 'Back to inspiration' },
 };
 
 const lsGet = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
@@ -79,6 +82,7 @@ export default function ArticlePage() {
   const w = useMemo(() => findWidget(data, slug), [data, slug]);
   const [open, setOpen] = useState(() => new Set([0]));
   const [copied, setCopied] = useState(false);
+  const [savedList, setSavedList] = useState(() => lsGet('ec-saved-articles') || []);
 
   useEffect(() => { setOpen(new Set([0])); window.scrollTo?.({ top: 0 }); }, [slug]);
 
@@ -105,12 +109,20 @@ export default function ArticlePage() {
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
+  const isSaved = savedList.includes(w.number);
+  const toggleSave = () => {
+    const next = isSaved ? savedList.filter((n) => n !== w.number) : [...savedList, w.number];
+    setSavedList(next);
+    lsSet('ec-saved-articles', next);
+  };
+  const askUrl = RECRUITMENT_MODE ? waitlistUrl(w.number) : '/PostRequest';
+  const scrollToBlock = () => document.querySelector('[data-testid=recruit-block],[data-testid=vendors-block]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   const wa = `https://wa.me/?text=${encodeURIComponent(`${L.title} ${url}`)}`;
   const fb = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
   const q = lang === 'fr' ? ['« ', ' »'] : ['“', '”'];
 
   return (
-    <div className="bg-[#FBF7F0] text-[#2B1D14] pb-16" style={{ '--cat': cat.color, '--acc': cat.accent, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div className="bg-[#FBF7F0] text-[#2B1D14] pb-32 md:pb-16" style={{ '--cat': cat.color, '--acc': cat.accent, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <SEOHead
         title={`${L.title} — EventCrafter`}
         description={description}
@@ -151,6 +163,9 @@ export default function ArticlePage() {
               <span className="text-sm text-stone-500 mr-1">{t.share}</span>
               <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] text-white text-sm font-semibold px-3.5 py-2"><MessageCircle className="w-4 h-4" />WhatsApp</a>
               <a href={fb} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full bg-[#1877F2] text-white text-sm font-semibold px-3.5 py-2"><Share2 className="w-4 h-4" />Facebook</a>
+              <button type="button" onClick={toggleSave} aria-pressed={isSaved} data-testid="save-btn" className="inline-flex items-center gap-1.5 rounded-full bg-[#2B1D14] text-white text-sm font-semibold px-3.5 py-2">
+                {isSaved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}{isSaved ? t.saved : t.save}
+              </button>
               <button type="button" onClick={copy} className="inline-flex items-center gap-1.5 rounded-full border border-[#E8DFD0] bg-white text-sm font-semibold px-3.5 py-2">
                 {copied ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}{copied ? t.copied : t.copy}
               </button>
@@ -164,7 +179,7 @@ export default function ArticlePage() {
                       <h2 className="text-2xl" style={{ fontFamily: 'Lora, serif', color: cat.color }}><span className="mr-2">{s.emoji}</span>{s.title}</h2>
                       <ChevronDown className={`w-5 h-5 shrink-0 md:hidden transition-transform ${open.has(i) ? 'rotate-180' : ''}`} />
                     </button>
-                    <div className={`${open.has(i) ? 'block' : 'hidden'} md:block mt-2 text-[17px]`}><ArticleMarkdown src={s.content} /></div>
+                    <div className={`${open.has(i) ? 'block' : 'hidden'} md:block mt-2 text-[17px]`}>{isVisualSection(s) ? <VisualBoard content={s.content} category={w.category} color={cat.color} /> : <ArticleMarkdown src={s.content} />}</div>
                   </section>
                   {s.emoji === '📜' && L.callouts.didYouKnow && (
                     <div className="my-6 rounded-2xl p-5 text-white" style={{ background: cat.color }} data-testid="did-you-know">
@@ -197,6 +212,11 @@ export default function ArticlePage() {
                 ))}
               </nav>
             </div>
+            <div className="mt-4 rounded-2xl p-5" style={{ background: cat.accent }} data-testid="ask-planner">
+              <h4 className="font-bold mb-1">{t.helpH}</h4>
+              <p className="text-sm mb-3">{t.helpP}</p>
+              <Link to={askUrl} className="block text-center rounded-full bg-[#2B1D14] text-white font-semibold text-sm px-4 py-2.5">💬 {t.ask}</Link>
+            </div>
           </aside>
         </div>
 
@@ -208,6 +228,20 @@ export default function ArticlePage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Barre fixe mobile, au-dessus de la navigation du bas (64 px) */}
+      <div
+        className="md:hidden fixed left-0 right-0 z-40 flex gap-2 px-3 py-2 bg-white/95 border-t border-[#E8DFD0] backdrop-blur"
+        style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom))' }}
+        data-testid="mobile-bar"
+      >
+        <button type="button" onClick={toggleSave} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-[#2B1D14] text-white text-sm font-semibold py-3">
+          {isSaved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}{isSaved ? t.saved : t.save}
+        </button>
+        <button type="button" onClick={scrollToBlock} className="flex-1 rounded-full text-sm font-semibold py-3 text-[#2B1D14]" style={{ background: cat.accent }}>
+          {RECRUITMENT_MODE ? t.join : t.findVendor}
+        </button>
       </div>
     </div>
   );
