@@ -313,7 +313,7 @@ export default function Login() {
           </Button>
         </form>
 
-        <SocialAuthButtons next={new URLSearchParams(window.location.search).get('next') || '/'} />
+        <SocialAuthButtons />
 
         <p className="text-center text-sm text-stone-500 mt-4">
           {isRegister ? 'Déjà un compte ?' : 'Pas encore de compte ?'}{' '}
