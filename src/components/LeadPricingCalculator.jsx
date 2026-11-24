@@ -1,4 +1,5 @@
 import { base44 } from '@/api/apiClient';
+import { LEAD_PRICES_FCFA } from '@/config/plans';
 
 /**
  * Determine la categorie d'un lead basee sur le budget, le nombre d'invites et le type d'evenement
@@ -40,10 +41,12 @@ export async function getLeadPrice(budgetCategory) {
     const config = configs[0];
 
     if (config) {
+      // Les valeurs en base sont des FCFA. Une valeur < 100 est un ancien reglage en USD (2 / 4 / 10) : on l'ignore.
+      const pick = (v, fallback) => (Number(v) >= 100 ? Number(v) : fallback);
       const prices = {
-        small: config.small_price_usd || 1200,
-        medium: config.medium_price_usd || 2400,
-        large: config.large_price_usd || 6000
+        small: pick(config.small_price_usd, LEAD_PRICES_FCFA.small),
+        medium: pick(config.medium_price_usd, LEAD_PRICES_FCFA.medium),
+        large: pick(config.large_price_usd, LEAD_PRICES_FCFA.large)
       };
 
       let basePrice = prices[budgetCategory] || prices.medium;
@@ -58,13 +61,7 @@ export async function getLeadPrice(budgetCategory) {
     console.warn('Could not load pricing config, using defaults');
   }
 
-  const defaultPricing = {
-    small: 1200,
-    medium: 2400,
-    large: 6000
-  };
-
-  return defaultPricing[budgetCategory] || defaultPricing.medium;
+  return LEAD_PRICES_FCFA[budgetCategory] || LEAD_PRICES_FCFA.medium;
 }
 
 /**
