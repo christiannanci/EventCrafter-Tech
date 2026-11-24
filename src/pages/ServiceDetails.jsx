@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { base44, supabase } from "@/api/apiClient";
 import { SendEmail } from "@/api/integrations";
 import { Button } from "@/components/ui/button";
+import ShareServiceDialog from "@/components/ShareServiceDialog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
@@ -34,6 +35,7 @@ import { useCurrency } from '@/components/CurrencyContext';
 
 export default function ServiceDetails() {
   const [service, setService] = useState(null);
+  const [shareOpen, setShareOpen] = useState(false);
   const [serviceUnavailable, setServiceUnavailable] = useState(false);
   const { t } = useLanguage();
   const { formatPrice } = useCurrency();
@@ -595,7 +597,7 @@ export default function ServiceDetails() {
                    {isInCart ? t('serviceDetails.inCart') : t('serviceDetails.addToCart')}
                  </Button>
                  <div className="flex gap-2 justify-center">
-                  <Button variant="ghost" size="sm" className="text-stone-500 flex-1">
+                  <Button variant="ghost" size="sm" className="text-stone-500 flex-1" onClick={() => setShareOpen(true)}>
                     <Share2 className="w-4 h-4 mr-2" /> {t('serviceDetails.share')}
                   </Button>
                   <Button variant="ghost" size="sm" className="text-stone-500 flex-1">
@@ -608,6 +610,7 @@ export default function ServiceDetails() {
 
         </div>
       </div>
+      <ShareServiceDialog service={service} open={shareOpen} onOpenChange={setShareOpen} />
     </div>
   );
 }
