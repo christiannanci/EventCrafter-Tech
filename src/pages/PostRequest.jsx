@@ -1,5 +1,6 @@
 import { Service, VendorProfile, ClientProfile, Booking, Event, Conversation, Message, Review, Notification, Membership, Invoice, Region, Departement, Ville, Quartier, Fonction, PlatformFeedback, Contract, Dispute, Lead, Transaction, Payout, Refund, AppUser, Country, ServiceType } from '@/api/entities';
 import { base44, supabase } from '@/api/apiClient';
+import { SendEmail } from '@/api/integrations';
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -83,6 +84,14 @@ export default function PostRequest() {
       // Obtenir les IDs uniques des fournisseurs
       const vendorIds = [...new Set(matchingServices.map(s => s.planner_id))];
 
+      // E-mails des prestataires (alerte e-mail en plus de la notification et du push)
+      let emailByUser = new Map();
+      try {
+        const allUsers = await base44.entities.User.list();
+        emailByUser = new Map((allUsers || []).map(u => [u.id, u.email]));
+      } catch (e) { console.error('Erreur lecture e-mails prestataires:', e); }
+      const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
       // Notifier chaque fournisseur en respectant les limites
       for (const vendorId of vendorIds) {
         const vendorProfile = allVendorProfiles.find(vp => vp.user_id === vendorId);
@@ -147,6 +156,28 @@ export default function PostRequest() {
               url: '/VendorDashboard'
             }
           }).catch((e) => console.error('Erreur envoi push:', e));
+
+          // Alerte e-mail (non bloquante) - sans coordonnees du client
+          const vendorEmail = emailByUser.get(vendorId);
+          if (vendorEmail) {
+            SendEmail({
+              to: vendorEmail,
+              subject: `Nouvelle demande client : ${data.event_type} - ${data.service_category}`,
+              body: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto">
+<h2 style="color:#FF6B35">Nouvelle demande sur EventCrafter</h2>
+<p>Un client recherche un prestataire correspondant à vos services.</p>
+<ul>
+<li><b>Événement :</b> ${esc(data.event_type)}</li>
+<li><b>Service recherché :</b> ${esc(data.service_category)}</li>
+<li><b>Date :</b> ${date ? format(date, 'dd/MM/yyyy') : 'à définir'}</li>
+<li><b>Lieu :</b> ${esc(data.location)}</li>
+${data.budget ? `<li><b>Budget :</b> ${esc(data.budget)}</li>` : ''}
+</ul>
+<p><a href="https://www.eventcraftercm.com/VendorDashboard" style="background:#FF6B35;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none">Voir la demande</a></p>
+<p style="color:#888;font-size:12px">Répondez au client sous 48 heures. EventCrafter - info@eventcraftercm.com</p>
+</div>`
+            }).catch((e) => console.error('Erreur envoi e-mail:', e));
+          }
         }
       }
       

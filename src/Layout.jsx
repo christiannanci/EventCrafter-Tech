@@ -560,9 +560,9 @@ function LayoutContent({ children }) {
                   </a>
                 </li>
                 <li>
-                  <a href="mailto:hello@eventcraftercm.com" className="inline-flex items-center gap-2 hover:text-[#FF6B35] break-all">
+                  <a href="mailto:info@eventcraftercm.com" className="inline-flex items-center gap-2 hover:text-[#FF6B35] break-all">
                     <Mail className="h-4 w-4 flex-shrink-0 text-[#FF6B35]" />
-                    hello@eventcraftercm.com
+                    info@eventcraftercm.com
                   </a>
                 </li>
                 <li>
@@ -575,12 +575,6 @@ function LayoutContent({ children }) {
                   <a href="mailto:vendor@eventcraftercm.com" className="inline-flex items-center gap-2 hover:text-[#FF6B35] break-all">
                     <Mail className="h-4 w-4 flex-shrink-0 text-[#FF6B35]" />
                     vendor@eventcraftercm.com
-                  </a>
-                </li>
-                <li>
-                  <a href="mailto:founder@eventcraftercm.com" className="inline-flex items-center gap-2 hover:text-[#FF6B35] break-all">
-                    <Mail className="h-4 w-4 flex-shrink-0 text-[#FF6B35]" />
-                    founder@eventcraftercm.com
                   </a>
                 </li>
               </ul>

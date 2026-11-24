@@ -8,6 +8,12 @@ export const PLAN_PRICES = {
 // Mise en avant sur la page d'accueil : reservee au plan Gold (voir le guide d'accueil des prestataires)
 export const PLAN_RANK = { gold: 1 };
 
+// Option publicite hebdomadaire (guide d'accueil) : 10 000 FCFA par semaine.
+// Pendant la semaine payee : badge "Acces verifie" + mise en avant sur la page d'accueil.
+export const BOOST_PRICE_WEEKLY = 10000;
+export const isBoostActive = (vp) =>
+  !!(vp && vp.smart_match_boost_active && vp.smart_match_boost_expiry && new Date(vp.smart_match_boost_expiry) > new Date());
+
 // Prix de deblocage d'un prospect pour un prestataire en plan Basic (FCFA),
 // conformes au guide d'accueil : 500 a 2 000 FCFA par client qui contacte le prestataire.
 export const LEAD_PRICES_FCFA = { small: 500, medium: 1000, large: 2000 };
