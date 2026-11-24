@@ -16,6 +16,7 @@ import {
   Store,
   FileSignature,
   Pencil,
+  Share2,
   Package,
   Wallet,
   Clock,
@@ -23,6 +24,7 @@ import {
   Send
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import ShareServiceDialog from "@/components/ShareServiceDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -66,6 +68,7 @@ export default function VendorDashboard() {
   const [isMembershipDialogOpen, setIsMembershipDialogOpen] = useState(false);
   const [isNewServiceOpen, setIsNewServiceOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
+  const [sharingService, setSharingService] = useState(null);
   const [availableFunctions, setAvailableFunctions] = useState([]);
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -1093,6 +1096,9 @@ export default function VendorDashboard() {
                   <div className="flex justify-between items-center mt-4">
                     <Badge variant="outline">{service.category}</Badge>
                     <div className="flex gap-2">
+                      <Button variant="ghost" size="icon" className="text-[#1877F2] hover:text-[#1877F2] hover:bg-blue-50" title="Partager" aria-label="Partager ce service" onClick={() => setSharingService(service)}>
+                        <Share2 className="w-4 h-4" />
+                      </Button>
                       <Button variant="ghost" size="icon" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => openEditService(service)}>
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -1181,6 +1187,7 @@ export default function VendorDashboard() {
         </TabsContent>
 
       </Tabs>
+      <ShareServiceDialog service={sharingService} open={!!sharingService} onOpenChange={(o) => { if (!o) setSharingService(null); }} />
     </div>
   );
 }
