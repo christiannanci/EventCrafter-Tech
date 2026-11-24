@@ -132,6 +132,19 @@ export default function Marketplace() {
     staleTime: 3 * 60 * 1000,
   });
 
+  // Options de filtre : uniquement celles qui correspondent a au moins un service publie
+  const filterOptions = React.useMemo(() => {
+    const visible = (allServices || []).filter(s => s && !s.is_hidden && !s.is_suspended);
+    const collect = (field, list) => {
+      const present = new Set();
+      visible.forEach(s => { if (Array.isArray(s[field])) s[field].forEach(v => present.add(v)); });
+      return list.filter(v => present.has(v));
+    };
+    const categories = [...new Set(visible.map(s => s.category).filter(Boolean))];
+    const inCategory = (cat) => visible.filter(s => cat === 'all' || s.category === cat);
+    return { visible, categories, collect, inCategory };
+  }, [allServices]);
+
   const { data: vendorProfiles = [] } = useQuery({
     queryKey: ['vendor-profiles'],
     queryFn: () => VendorProfile.list(),
@@ -356,6 +369,18 @@ export default function Marketplace() {
                     if (q && q.ville_code === locCode) return true;
                 }
                 
+                if (locLevel === 'region' && s.availability_level === 'departement' && s.availability_code && geoData.depts.length > 0) {
+                    const d = geoData.depts.find(dp => dp && dp.code === s.availability_code);
+                    if (d && d.region_code === locCode) return true;
+                }
+
+                if (locLevel === 'region' && s.availability_level === 'quartier' && s.availability_code && geoData.neighborhoods.length > 0 && geoData.cities.length > 0 && geoData.depts.length > 0) {
+                    const q = geoData.neighborhoods.find(n => n && n.code === s.availability_code);
+                    const v = q && geoData.cities.find(n => n && n.code === q.ville_code);
+                    const d = v && geoData.depts.find(dp => dp && dp.code === v.departement_code);
+                    if (d && d.region_code === locCode) return true;
+                }
+
                 if (locLevel === 'region' && s.availability_level === 'ville' && s.availability_code && geoData.cities.length > 0) {
                     const v = geoData.cities.find(n => n && n.code === s.availability_code);
                     if (v && v.departement_code && geoData.depts.length > 0) {
@@ -560,7 +585,9 @@ export default function Marketplace() {
                                   {functions
                                       .filter(f => {
                                           const cat = serviceTypes.find(t2 => t2.name === selectedCategory);
-                                          return cat && f.service_type_code === cat.code_service;
+                                          if (!(cat && f.service_type_code === cat.code_service)) return false;
+                                          if (f.code === selectedSubCategory) return true;
+                                          return filterOptions.inCategory(selectedCategory).some(s => Array.isArray(s.function_codes) && s.function_codes.includes(f.code));
                                       })
                                       .map(f => (
                                           <SelectItem key={f.id} value={f.code}>{tr(f.name)}</SelectItem>
@@ -579,7 +606,7 @@ export default function Marketplace() {
                           </SelectTrigger>
                           <SelectContent>
                               <SelectItem value="all">{t('marketplace.anyCulture')}</SelectItem>
-                              {["Aire Sawa", "Aire Grassfields", "Aire Fang-Béti", "Grand Nord (Soudano-Sahélien)", "Bamiléké", "Bamoun", "Bakweri"].map(z => (
+                              {filterOptions.collect("cultural_zones", ["Aire Sawa", "Aire Grassfields", "Aire Fang-Béti", "Grand Nord (Soudano-Sahélien)", "Bamiléké", "Bamoun", "Bakweri"]).concat(filterCultural !== "all" && !filterOptions.collect("cultural_zones", [filterCultural]).length ? [filterCultural] : []).map(z => (
                                   <SelectItem key={z} value={z}>{tr(z)}</SelectItem>
                               ))}
                           </SelectContent>
@@ -594,7 +621,7 @@ export default function Marketplace() {
                           </SelectTrigger>
                           <SelectContent>
                               <SelectItem value="all">{t('marketplace.anyLanguage')}</SelectItem>
-                              {["Français", "Anglais", "Pidgin", "Dialectes Locaux"].map(l => (
+                              {filterOptions.collect("spoken_languages", ["Français", "Anglais", "Pidgin", "Dialectes Locaux"]).concat(filterLanguage !== "all" && !filterOptions.collect("spoken_languages", [filterLanguage]).length ? [filterLanguage] : []).map(l => (
                                   <SelectItem key={l} value={l}>{tr(l)}</SelectItem>
                               ))}
                           </SelectContent>
@@ -609,7 +636,7 @@ export default function Marketplace() {
                           </SelectTrigger>
                           <SelectContent>
                               <SelectItem value="all">{t('marketplace.anyPreference')}</SelectItem>
-                              {["Chrétien", "Musulman", "Traditionnel/Ancestral", "Laïc"].map(r => (
+                              {filterOptions.collect("religious_compatibility", ["Chrétien", "Musulman", "Traditionnel/Ancestral", "Laïc"]).concat(filterReligion !== "all" && !filterOptions.collect("religious_compatibility", [filterReligion]).length ? [filterReligion] : []).map(r => (
                                   <SelectItem key={r} value={r}>{tr(r)}</SelectItem>
                               ))}
                           </SelectContent>
@@ -649,7 +676,7 @@ export default function Marketplace() {
         </div>
 
         {/* Category Filters */}
-        <CategoryFilter selected={selectedCategory} onSelect={(cat) => {
+        <CategoryFilter selected={selectedCategory} availableCategories={filterOptions.visible.length > 0 ? filterOptions.categories : undefined} onSelect={(cat) => {
             setSelectedCategory(cat);
             setSelectedSubCategory('all');
             setPage(1);
