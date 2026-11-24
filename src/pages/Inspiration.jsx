@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useLanguage } from '@/components/LanguageContext';
 import ArticleCards from '@/components/articles/ArticleCards';
+import AnnouncementCarousel from '@/components/banners/AnnouncementCarousel';
 
 export default function Inspiration() {
   const { t, language } = useLanguage();
@@ -60,6 +61,11 @@ export default function Inspiration() {
       </div>
 
       <div className="container mx-auto px-4 py-12">
+        {/* Annonces (carrousel) */}
+        <div className="max-w-6xl mx-auto mb-10 empty:hidden">
+          <AnnouncementCarousel />
+        </div>
+
         {/* Filters */}
         <div className="flex justify-center mb-12 overflow-x-auto pb-4">
           <div className="flex gap-2 p-1 bg-white rounded-full border border-stone-200 shadow-sm">
