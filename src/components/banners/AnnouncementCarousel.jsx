@@ -35,19 +35,21 @@ const SLIDES = [
 ];
 
 const INTERVAL_MS = 6000;
-const ARTICLES_INTERVAL_MS = 16000; // le defile d'articles reste plus longtemps a l'ecran
+const ARTICLES_INTERVAL_MS = 8000; // duree de la 4e diapositive (3 articles par cycle)
+const ARTICLES_PER_CYCLE = 3;
 const ARTICLES_SLIDE = { id: "articles" };
 const STORAGE_KEY = "ec_banner_closed";
 
-// 4e diapositive : defile continu des articles d'Inspiration (chaque vignette ouvre l'article).
-function ArticlesParade({ widgets, lang, active }) {
-  const list = [...widgets, ...widgets];
+// 4e diapositive : 3 articles d'Inspiration qui defilent a chaque cycle (les 3 suivants au cycle d'apres).
+function ArticlesParade({ widgets, lang, active, cycle }) {
+  const n = widgets.length;
+  const start = (Math.max(cycle - 1, 0) * ARTICLES_PER_CYCLE) % n;
+  const picks = Array.from({ length: Math.min(ARTICLES_PER_CYCLE, n) }, (_, k) => widgets[(start + k) % n]);
   return (
     <div className="w-full shrink-0 bg-gradient-to-r from-[#7F1D1D] to-[#E11D48] text-white py-4 md:py-5">
-      <style>{`@keyframes ec-parade{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.ec-parade-track{animation:ec-parade 70s linear infinite}
-.ec-parade:hover .ec-parade-track{animation-play-state:paused}
-@media (prefers-reduced-motion: reduce){.ec-parade-track{animation:none}.ec-parade{overflow-x:auto!important}}`}</style>
+      <style>{`@keyframes ec-in{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+.ec-in{animation:ec-in .7s ease-out both}
+@media (prefers-reduced-motion: reduce){.ec-in{animation:none}}`}</style>
       <div className="flex items-center justify-between gap-3 px-5 pr-14 md:px-6 md:pr-16 mb-3">
         <div className="flex items-center gap-2">
           <BookOpen className="w-5 h-5" />
@@ -64,25 +66,24 @@ function ArticlesParade({ widgets, lang, active }) {
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
-      <div className="ec-parade overflow-hidden">
-        <div className="ec-parade-track flex gap-3 w-max px-5">
-          {list.map((w, i) => (
-            <Link
-              key={i}
-              to={ROUTES.article(w.number)}
-              tabIndex={active && i < widgets.length ? 0 : -1}
-              className="group flex items-center gap-3 w-64 shrink-0 bg-white/10 hover:bg-white/20 rounded-xl p-2 transition"
-            >
-              <img
-                src={imageUrl("thumbnails", lang, w.number)}
-                alt=""
-                loading="lazy"
-                className="w-16 h-16 rounded-lg object-cover shrink-0 bg-white/20"
-              />
-              <span className="text-sm font-semibold leading-snug line-clamp-3">{w[lang]?.title}</span>
-            </Link>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 px-5 md:px-6">
+        {picks.map((w, k) => (
+          <Link
+            key={w.number}
+            to={ROUTES.article(w.number)}
+            tabIndex={active ? 0 : -1}
+            style={active ? { animationDelay: `${k * 250}ms` } : undefined}
+            className={`${active ? "ec-in" : ""} group flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-xl p-2 transition ${k > 0 ? "hidden md:flex" : ""}`}
+          >
+            <img
+              src={imageUrl("thumbnails", lang, w.number)}
+              alt=""
+              loading="lazy"
+              className="w-16 h-16 rounded-lg object-cover shrink-0 bg-white/20"
+            />
+            <span className="text-sm font-semibold leading-snug line-clamp-3">{w[lang]?.title}</span>
+          </Link>
+        ))}
       </div>
     </div>
   );
@@ -98,6 +99,7 @@ export default function AnnouncementCarousel({ className = "" }) {
   const { data: articlesData } = useArticles();
   const widgets = articlesData?.widgets || [];
   const slides = widgets.length > 0 ? [...SLIDES, ARTICLES_SLIDE] : SLIDES;
+  const [cycle, setCycle] = useState(0); // +1 juste avant chaque arrivee sur la 4e diapositive
   const touchX = useRef(null);
 
   const reduceMotion = typeof window !== "undefined" && window.matchMedia
@@ -108,7 +110,10 @@ export default function AnnouncementCarousel({ className = "" }) {
   useEffect(() => {
     if (closed || paused || reduceMotion) return;
     const delay = slides[index]?.id === "articles" ? ARTICLES_INTERVAL_MS : INTERVAL_MS;
-    const t = setTimeout(() => go(index + 1), delay);
+    const t = setTimeout(() => {
+      if (slides[(index + 1) % slides.length]?.id === "articles") setCycle((c) => c + 1);
+      go(index + 1);
+    }, delay);
     return () => clearTimeout(t);
   }, [index, paused, closed, reduceMotion, go, slides]);
 
@@ -149,7 +154,7 @@ export default function AnnouncementCarousel({ className = "" }) {
               return (
                 <div key={s.id} role="group" aria-roledescription="diapositive"
                   aria-label={`${i + 1} sur ${slides.length}`} aria-hidden={i !== index} className="w-full shrink-0">
-                  <ArticlesParade widgets={widgets} lang={lang} active={i === index} />
+                  <ArticlesParade widgets={widgets} lang={lang} active={i === index} cycle={cycle} />
                 </div>
               );
             }
