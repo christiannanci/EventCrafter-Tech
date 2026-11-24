@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Shield, Briefcase, Gavel, Wrench, Users, LogOut, DollarSign, Eye, AlertTriangle, Menu, ChevronDown, ShieldOff } from "lucide-react";
+import { Shield, Briefcase, Gavel, Wrench, Users, LogOut, DollarSign, Eye, AlertTriangle, Menu, ChevronDown, ShieldOff, Gift } from "lucide-react";
 
 import UserManagement from "@/components/admin/UserManagement";
 import LegalDashboard from "@/components/admin/LegalDashboard";
@@ -25,6 +25,7 @@ import TechDashboard from "@/components/admin/TechDashboard";
 import AdminPayouts from "@/pages/AdminPayouts";
 import VerificationRequests from "@/components/admin/VerificationRequests";
 import PaymentProofValidation from "@/components/admin/PaymentProofValidation";
+import LaunchOfferManager from "@/components/admin/LaunchOfferManager";
 import ReviewModeration from "@/components/admin/ReviewModeration";
 import RankingDashboard from "@/components/admin/RankingDashboard";
 import LeadManagement from "@/components/admin/LeadManagement";
@@ -183,6 +184,7 @@ export default function AdminDashboard() {
         { value: "users", label: "User Roles", icon: Users, show: isSuperAdmin },
         { value: "verifications", label: "Vérifications", icon: Shield, show: isSuperAdmin },
         { value: "payment_proofs", label: "Preuves Paiement", icon: Shield, show: isSuperAdmin },
+        { value: "launch_offer", label: "Offre de lancement", icon: Gift, show: isSuperAdmin },
         { value: "payouts", label: "Payouts", icon: DollarSign, show: isSuperAdmin },
         { value: "reviews", label: "Modération Avis", icon: Shield, show: isSuperAdmin },
         { value: "services", label: "Modération Services", icon: ShieldOff, show: isSuperAdmin },
@@ -318,6 +320,9 @@ export default function AdminDashboard() {
                                 </TabsContent>
                                 <TabsContent value="payment_proofs" className="mt-0">
                                     <PaymentProofValidation />
+                                </TabsContent>
+                                <TabsContent value="launch_offer" className="mt-0">
+                                    <LaunchOfferManager />
                                 </TabsContent>
                                 <TabsContent value="payouts" className="mt-0">
                                     <AdminPayouts />
