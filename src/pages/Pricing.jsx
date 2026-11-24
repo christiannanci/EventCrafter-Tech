@@ -1,3 +1,4 @@
+import { PLAN_PRICES } from '@/config/plans';
 import { Service, VendorProfile, ClientProfile, Booking, Event, Conversation, Message, Review, Notification, Membership, Invoice, Region, Departement, Ville, Quartier, Fonction, PlatformFeedback, Contract, Dispute, Lead, Transaction, Payout, Refund, AppUser, Country, ServiceType } from '@/api/entities';
 import { base44 } from '@/api/apiClient';
 import React, { useState, useEffect } from 'react';
@@ -28,8 +29,8 @@ export default function Pricing() {
         // Plans statiques (pas d'entite MembershipType dans ce projet - Supabase)
         setPlans([
             { id: "free", name: t('pricing.fallbackBasicName'), price: 0, description: t('pricing.fallbackBasicDesc'), features: [t('pricing.fallbackBasicFeature')], icon: Shield },
-            { id: "premium", name: t('pricing.fallbackPremiumName'), price: 10000, description: t('pricing.fallbackPremiumDesc'), features: [t('pricing.fallbackPremiumFeature')], icon: Star, popular: true },
-            { id: "gold", name: t('pricing.fallbackGoldName'), price: 25000, description: t('pricing.fallbackGoldDesc'), features: [t('pricing.fallbackGoldFeature')], icon: Zap }
+            { id: "premium", name: t('pricing.fallbackPremiumName'), price: PLAN_PRICES.premium_monthly, description: t('pricing.fallbackPremiumDesc'), features: [t('pricing.fallbackPremiumFeature')], icon: Star, popular: true },
+            { id: "gold", name: t('pricing.fallbackGoldName'), price: PLAN_PRICES.gold_monthly, description: t('pricing.fallbackGoldDesc'), features: [t('pricing.fallbackGoldFeature')], icon: Zap }
         ]);
 
         // Fetch vendor profile

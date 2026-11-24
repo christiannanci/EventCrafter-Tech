@@ -1,5 +1,5 @@
 import { Service, VendorProfile, ClientProfile, Booking, Event, Conversation, Message, Review, Notification, Membership, Invoice, Region, Departement, Ville, Quartier, Fonction, PlatformFeedback, Contract, Dispute, Lead, Transaction, Payout, Refund, AppUser, Country, ServiceType } from '@/api/entities';
-import { base44 } from '@/api/apiClient';
+import { base44, supabase } from '@/api/apiClient';
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -95,7 +95,8 @@ export default function PostRequest() {
           new Date(m.end_date) > new Date()
         );
 
-        let membershipStatus = 'free';
+        // Le plan du profil prestataire (ex. offre de lancement attribuee) compte aussi
+        let membershipStatus = ['premium', 'gold'].includes(vendorProfile.plan) ? vendorProfile.plan : 'free';
         if (activeMemberships.length > 0) {
           const membershipTypeCode = activeMemberships[0].membership_type_code?.toLowerCase() || '';
           if (membershipTypeCode.includes('premium')) {
@@ -136,6 +137,16 @@ export default function PostRequest() {
             link: '/VendorDashboard',
             is_read: false
           });
+
+          // Vraie notification push (telephone, meme app fermee) - non bloquante
+          supabase.functions.invoke('send-push', {
+            body: {
+              user_id: vendorId,
+              title: `Nouvelle demande: ${data.event_type}`,
+              body: `${data.service_category} - ${data.location}`,
+              url: '/VendorDashboard'
+            }
+          }).catch((e) => console.error('Erreur envoi push:', e));
         }
       }
       
