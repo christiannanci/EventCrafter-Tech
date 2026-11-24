@@ -246,6 +246,11 @@ export default function ServiceCard({ service, eventId, isTopRated, position }) 
                 <Star className="w-3 h-3 fill-current" /> {t('marketplace.sort.featured')}
               </Badge>
             )}
+            {(vendorPlan === 'premium' || vendorPlan === 'gold' || service._hasSmartMatchBoost) && (
+              <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white border-0 shadow-sm flex items-center gap-1 font-semibold">
+                {t('serviceCard.accessVerifiedBadge')}
+              </Badge>
+            )}
             {service.vendor_verified ? (
               <Badge className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-sm flex items-center gap-1 font-semibold">
                 {t('serviceCard.verifiedBadge')}

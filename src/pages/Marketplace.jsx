@@ -226,6 +226,7 @@ export default function Marketplace() {
         return {
           ...service,
           _vendorPlan: vendorProfile?.plan || 'free',
+          _hasSmartMatchBoost: !!(vendorProfile?.smart_match_boost_active && vendorProfile?.smart_match_boost_expiry && new Date(vendorProfile.smart_match_boost_expiry) > new Date()),
           _isActiveVendor: isActiveVendor,
         };
       } catch {

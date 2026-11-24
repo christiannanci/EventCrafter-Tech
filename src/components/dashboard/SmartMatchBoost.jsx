@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BOOST_PRICE_WEEKLY } from "@/config/plans";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { format, addWeeks } from "date-fns";
 import { useLanguage } from '@/components/LanguageContext';
 
-const BOOST_PRICE = 2400; // 2400 FCFA/semaine
+const BOOST_PRICE = BOOST_PRICE_WEEKLY; // 10 000 FCFA/semaine (guide d'accueil)
 const BOOST_DURATION_DAYS = 7;
 
 const SERVICE_CATEGORIES = [
@@ -101,6 +102,9 @@ export default function SmartMatchBoost({ vendorProfile, onUpdate }) {
         </CardTitle>
         <p className="text-sm text-stone-500">
           {t('vendor.boostSubtitle')}
+        </p>
+        <p className="text-xs text-blue-700">
+          Pendant la semaine : badge « Accès vérifié » et mise en avant sur la page d'accueil.
         </p>
       </CardHeader>
       <CardContent>

@@ -1,4 +1,4 @@
-import { PLAN_RANK } from '@/config/plans';
+import { PLAN_RANK, isBoostActive } from '@/config/plans';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -67,7 +67,9 @@ export default function Home() {
         // Mise en avant automatique : les services Gold d'abord, puis les plus recents.
         // Sans prestataire Gold, l'ordre reste celui des plus recents.
         const planByVendor = new Map((vendorsData || []).map(v => [v.user_id, v.plan]));
-        const rank = (s) => PLAN_RANK[planByVendor.get(s.planner_id)] || 0;
+        const boosted = new Set((vendorsData || []).filter(isBoostActive).map(v => v.user_id));
+        // Gold, ou publicite hebdomadaire active : mis en avant sur l'accueil
+        const rank = (s) => (PLAN_RANK[planByVendor.get(s.planner_id)] || (boosted.has(s.planner_id) ? 1 : 0));
         const sorted = visibleServices
           .map((s, i) => ({ s, i }))
           .sort((a, b) => (rank(b.s) - rank(a.s)) || (a.i - b.i))
