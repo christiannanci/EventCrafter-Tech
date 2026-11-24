@@ -1,3 +1,4 @@
+import { PLAN_PRICES } from '@/config/plans';
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/apiClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,8 +15,8 @@ export default function LeadUpsellConfigManager() {
   const queryClient = useQueryClient();
   
   const [config, setConfig] = useState({
-    premium_monthly_price: 18000,
-    gold_monthly_price: 36000,
+    premium_monthly_price: PLAN_PRICES.premium_monthly,
+    gold_monthly_price: PLAN_PRICES.gold_monthly,
     pack_10_leads_price: 10800,
     pack_25_leads_price: 24000,
     pack_50_leads_price: 45000,
@@ -37,7 +38,7 @@ export default function LeadUpsellConfigManager() {
 
   useEffect(() => {
     if (configs && configs[0]) {
-      setConfig(configs[0]);
+      setConfig({ ...configs[0], premium_monthly_price: PLAN_PRICES.premium_monthly, gold_monthly_price: PLAN_PRICES.gold_monthly });
     }
   }, [configs]);
 
@@ -107,7 +108,7 @@ export default function LeadUpsellConfigManager() {
                 type="number"
                 value={config.premium_monthly_price}
                 onChange={(e) => setConfig({...config, premium_monthly_price: parseInt(e.target.value)})}
-                placeholder="18000"
+                placeholder="10000"
               />
               <p className="text-xs text-stone-500 mt-1">
                 Quota leads eleve + Badge Premium
@@ -119,7 +120,7 @@ export default function LeadUpsellConfigManager() {
                 type="number"
                 value={config.gold_monthly_price}
                 onChange={(e) => setConfig({...config, gold_monthly_price: parseInt(e.target.value)})}
-                placeholder="36000"
+                placeholder="25000"
               />
               <p className="text-xs text-stone-500 mt-1">
                 Leads illimites + Priorite maximale + Badge Gold

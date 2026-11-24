@@ -1,3 +1,4 @@
+import { PLAN_RANK } from '@/config/plans';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -55,14 +56,23 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [servicesData, types, funcs, feedbacks] = await Promise.all([
-          Service.list('-created_date', 20),
+        const [servicesData, types, funcs, feedbacks, vendorsData] = await Promise.all([
+          Service.list('-created_date', 100),
           ServiceType.list(),
           Fonction.list(),
-          PlatformFeedback.list()
+          PlatformFeedback.list(),
+          VendorProfile.list().catch(() => [])
         ]);
         const visibleServices = servicesData.filter(s => !s.is_hidden && !s.is_suspended);
-        setFeaturedServices(visibleServices.slice(0, 6));
+        // Mise en avant automatique : Gold d'abord, puis Premium, puis les plus recents.
+        // Sans prestataire Gold/Premium, l'ordre reste celui des plus recents.
+        const planByVendor = new Map((vendorsData || []).map(v => [v.user_id, v.plan]));
+        const rank = (s) => PLAN_RANK[planByVendor.get(s.planner_id)] || 0;
+        const sorted = visibleServices
+          .map((s, i) => ({ s, i }))
+          .sort((a, b) => (rank(b.s) - rank(a.s)) || (a.i - b.i))
+          .map(x => x.s);
+        setFeaturedServices(sorted.slice(0, 6));
         setServiceTypes(types.filter(t => !t.status || t.status === 'active'));
         setFunctions(funcs.filter(f => f.status === 'active'));
 

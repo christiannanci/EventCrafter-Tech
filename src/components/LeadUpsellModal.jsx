@@ -1,3 +1,4 @@
+import { PLAN_PRICES } from '@/config/plans';
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -38,12 +39,13 @@ export default function LeadUpsellModal({
     try {
       const configs = await base44.entities.LeadPackConfig.filter({ config_key: 'default' });
       if (configs[0]) {
-        setConfig(configs[0]);
+        // Les prix mensuels viennent toujours de la source unique (evite 18 000 / 36 000 residuels en base)
+        setConfig({ ...configs[0], premium_monthly_price: PLAN_PRICES.premium_monthly, gold_monthly_price: PLAN_PRICES.gold_monthly });
       } else {
         // Config par défaut (FCFA)
         setConfig({
-          premium_monthly_price: 18000,
-          gold_monthly_price: 36000,
+          premium_monthly_price: PLAN_PRICES.premium_monthly,
+          gold_monthly_price: PLAN_PRICES.gold_monthly,
           pack_10_leads_price: 10800,
           pack_25_leads_price: 24000,
           pack_50_leads_price: 45000,
