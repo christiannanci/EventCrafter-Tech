@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/apiClient';
+import { LEAD_PRICES_FCFA } from '@/config/plans';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,9 +17,9 @@ export default function LeadPricingConfigManager() {
   const [config, setConfig] = useState({
     small_threshold_max: 300000,
     medium_threshold_max: 1500000,
-    small_price_usd: 2,
-    medium_price_usd: 4,
-    large_price_usd: 10,
+    small_price_usd: LEAD_PRICES_FCFA.small,
+    medium_price_usd: LEAD_PRICES_FCFA.medium,
+    large_price_usd: LEAD_PRICES_FCFA.large,
     seasonal_multiplier: 1.0,
     premium_event_multiplier: 1.0,
   });
@@ -119,12 +120,12 @@ export default function LeadPricingConfigManager() {
               </p>
             </div>
             <div>
-              <Label>Prix du Lead (USD)</Label>
+              <Label>Prix du Lead (FCFA)</Label>
               <Input
                 type="number"
                 value={config.small_price_usd}
                 onChange={(e) => setConfig({...config, small_price_usd: parseInt(e.target.value)})}
-                placeholder="2"
+                placeholder="500"
               />
             </div>
             <div className="pt-2 border-t">
@@ -158,12 +159,12 @@ export default function LeadPricingConfigManager() {
               </p>
             </div>
             <div>
-              <Label>Prix du Lead (USD)</Label>
+              <Label>Prix du Lead (FCFA)</Label>
               <Input
                 type="number"
                 value={config.medium_price_usd}
                 onChange={(e) => setConfig({...config, medium_price_usd: parseInt(e.target.value)})}
-                placeholder="4"
+                placeholder="1000"
               />
             </div>
             <div className="pt-2 border-t">
@@ -185,12 +186,12 @@ export default function LeadPricingConfigManager() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <Label>Prix du Lead (USD)</Label>
+              <Label>Prix du Lead (FCFA)</Label>
               <Input
                 type="number"
                 value={config.large_price_usd}
                 onChange={(e) => setConfig({...config, large_price_usd: parseInt(e.target.value)})}
-                placeholder="10"
+                placeholder="2000"
               />
               <p className="text-xs text-stone-500 mt-1">
                 Prix entre $8-$10 recommandé
@@ -267,19 +268,19 @@ export default function LeadPricingConfigManager() {
               <div>
                 <p className="text-stone-600">Lead Faible</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  ${(config.small_price_usd * config.seasonal_multiplier).toFixed(2)}
+                  {Math.round(config.small_price_usd * config.seasonal_multiplier).toLocaleString()} FCFA
                 </p>
               </div>
               <div>
                 <p className="text-stone-600">Lead Moyen</p>
                 <p className="text-2xl font-bold text-amber-600">
-                  ${(config.medium_price_usd * config.seasonal_multiplier).toFixed(2)}
+                  {Math.round(config.medium_price_usd * config.seasonal_multiplier).toLocaleString()} FCFA
                 </p>
               </div>
               <div>
                 <p className="text-stone-600">Lead Haute</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  ${(config.large_price_usd * config.seasonal_multiplier).toFixed(2)}
+                  {Math.round(config.large_price_usd * config.seasonal_multiplier).toLocaleString()} FCFA
                 </p>
               </div>
             </div>

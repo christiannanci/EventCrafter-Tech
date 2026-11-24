@@ -216,7 +216,7 @@ export default function LeadQualificationForm({ isOpen, onClose, onSubmit, servi
                 </div>
                 {estimatedPrice && (
                   <Badge variant="outline" className="bg-white/50">
-                    Coût déblocage: ${estimatedPrice}
+                    Coût déblocage: {Number(estimatedPrice).toLocaleString()} FCFA
                   </Badge>
                 )}
               </div>
