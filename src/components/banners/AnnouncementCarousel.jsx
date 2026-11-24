@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
-import { X, Sparkles, Crown, PartyPopper, ArrowRight } from "lucide-react";
+import { X, Sparkles, Crown, PartyPopper, ArrowRight, BookOpen } from "lucide-react";
+import { useLanguage } from "@/components/LanguageContext";
+import { ROUTES } from "@/config/recruitment";
+import { useArticles, imageUrl } from "@/components/articles/useArticles";
 
 // Trois bannieres d'annonce qui defilent seules (6 s), avec points de pagination,
 // pause au survol / au toucher, et bouton X pour masquer (memorise pour la session).
@@ -32,7 +35,58 @@ const SLIDES = [
 ];
 
 const INTERVAL_MS = 6000;
+const ARTICLES_INTERVAL_MS = 16000; // le defile d'articles reste plus longtemps a l'ecran
+const ARTICLES_SLIDE = { id: "articles" };
 const STORAGE_KEY = "ec_banner_closed";
+
+// 4e diapositive : defile continu des articles d'Inspiration (chaque vignette ouvre l'article).
+function ArticlesParade({ widgets, lang, active }) {
+  const list = [...widgets, ...widgets];
+  return (
+    <div className="w-full shrink-0 bg-gradient-to-r from-[#7F1D1D] to-[#E11D48] text-white py-4 md:py-5">
+      <style>{`@keyframes ec-parade{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ec-parade-track{animation:ec-parade 70s linear infinite}
+.ec-parade:hover .ec-parade-track{animation-play-state:paused}
+@media (prefers-reduced-motion: reduce){.ec-parade-track{animation:none}.ec-parade{overflow-x:auto!important}}`}</style>
+      <div className="flex items-center justify-between gap-3 px-5 pr-14 md:px-6 md:pr-16 mb-3">
+        <div className="flex items-center gap-2">
+          <BookOpen className="w-5 h-5" />
+          <h3 className="text-lg md:text-xl font-bold leading-tight">
+            {lang === "fr" ? "Inspiration : nos articles" : "Inspiration: our articles"}
+          </h3>
+        </div>
+        <Link
+          to="/Inspiration"
+          tabIndex={active ? 0 : -1}
+          className="shrink-0 inline-flex items-center gap-1.5 bg-white text-stone-900 font-semibold text-xs md:text-sm px-3 py-1.5 rounded-full shadow hover:bg-stone-100 transition"
+        >
+          {lang === "fr" ? "Tout voir" : "See all"}
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+      <div className="ec-parade overflow-hidden">
+        <div className="ec-parade-track flex gap-3 w-max px-5">
+          {list.map((w, i) => (
+            <Link
+              key={i}
+              to={ROUTES.article(w.number)}
+              tabIndex={active && i < widgets.length ? 0 : -1}
+              className="group flex items-center gap-3 w-64 shrink-0 bg-white/10 hover:bg-white/20 rounded-xl p-2 transition"
+            >
+              <img
+                src={imageUrl("thumbnails", lang, w.number)}
+                alt=""
+                loading="lazy"
+                className="w-16 h-16 rounded-lg object-cover shrink-0 bg-white/20"
+              />
+              <span className="text-sm font-semibold leading-snug line-clamp-3">{w[lang]?.title}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AnnouncementCarousel({ className = "" }) {
   const [index, setIndex] = useState(0);
@@ -40,18 +94,23 @@ export default function AnnouncementCarousel({ className = "" }) {
     try { return sessionStorage.getItem(STORAGE_KEY) === "1"; } catch { return false; }
   });
   const [paused, setPaused] = useState(false);
+  const lang = useLanguage()?.language === "en" ? "en" : "fr";
+  const { data: articlesData } = useArticles();
+  const widgets = articlesData?.widgets || [];
+  const slides = widgets.length > 0 ? [...SLIDES, ARTICLES_SLIDE] : SLIDES;
   const touchX = useRef(null);
 
   const reduceMotion = typeof window !== "undefined" && window.matchMedia
     ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false;
 
-  const go = useCallback((i) => setIndex((i + SLIDES.length) % SLIDES.length), []);
+  const go = useCallback((i) => setIndex((i + slides.length) % slides.length), [slides.length]);
 
   useEffect(() => {
     if (closed || paused || reduceMotion) return;
-    const t = setTimeout(() => go(index + 1), INTERVAL_MS);
+    const delay = slides[index]?.id === "articles" ? ARTICLES_INTERVAL_MS : INTERVAL_MS;
+    const t = setTimeout(() => go(index + 1), delay);
     return () => clearTimeout(t);
-  }, [index, paused, closed, reduceMotion, go]);
+  }, [index, paused, closed, reduceMotion, go, slides]);
 
   const close = () => {
     setClosed(true);
@@ -85,14 +144,22 @@ export default function AnnouncementCarousel({ className = "" }) {
           className="flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${index * 100}%)` }}
         >
-          {SLIDES.map((s, i) => {
+          {slides.map((s, i) => {
+            if (s.id === "articles") {
+              return (
+                <div key={s.id} role="group" aria-roledescription="diapositive"
+                  aria-label={`${i + 1} sur ${slides.length}`} aria-hidden={i !== index} className="w-full shrink-0">
+                  <ArticlesParade widgets={widgets} lang={lang} active={i === index} />
+                </div>
+              );
+            }
             const Icon = s.icon;
             return (
               <div
                 key={s.id}
                 role="group"
                 aria-roledescription="diapositive"
-                aria-label={`${i + 1} sur ${SLIDES.length}`}
+                aria-label={`${i + 1} sur ${slides.length}`}
                 aria-hidden={i !== index}
                 className={`w-full shrink-0 bg-gradient-to-r ${s.bg} text-white p-5 pr-12 md:p-6 md:pr-14`}
               >
@@ -131,7 +198,7 @@ export default function AnnouncementCarousel({ className = "" }) {
       </div>
 
       <div className="flex justify-center gap-2 mt-3" role="tablist" aria-label="Choisir une annonce">
-        {SLIDES.map((s, i) => (
+        {slides.map((s, i) => (
           <button
             key={s.id}
             type="button"
