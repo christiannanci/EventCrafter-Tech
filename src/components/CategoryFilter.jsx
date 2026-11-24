@@ -53,7 +53,8 @@ async function ensureNewServiceTypesExist(existingTypes) {
   return created;
 }
 
-export default function CategoryFilter({ selected, onSelect }) {
+// availableCategories : liste des categories qui ont au moins un service (les autres sont masquees).
+export default function CategoryFilter({ selected, onSelect, availableCategories }) {
   const { t, language } = useLanguage();
 
   const tr = (val, nameEn) => {
@@ -95,7 +96,9 @@ export default function CategoryFilter({ selected, onSelect }) {
 
   return (
     <div className="flex flex-wrap gap-2 pb-6">
-      {categories.map((cat) => (
+      {categories
+        .filter((cat) => cat.id === 'all' || cat.id === selected || !Array.isArray(availableCategories) || availableCategories.includes(cat.id))
+        .map((cat) => (
         <Button
           key={cat.id}
           variant={selected === cat.id ? "default" : "outline"}

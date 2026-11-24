@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Country, Region, Ville, Quartier, Departement } from '@/api/entities';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Country, Region, Ville, Quartier, Departement, Service } from '@/api/entities';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { MapPin, Loader2, PlusCircle } from "lucide-react";
@@ -104,7 +105,75 @@ export default function LocationSelector({ className, onSearch, minimal }) {
         return cities.filter(c => deptCodes.includes(c.departement_code));
     };
 
-    const filteredCities = getFilteredCities().sort((a, b) => a.name.localeCompare(b.name));
+    // --- Filtrage : on ne propose que les lieux ou au moins un service est propose ---
+    const { data: allServices } = useQuery({
+        queryKey: ['marketplace-services'],
+        queryFn: () => Service.list('-created_date', 1000),
+        staleTime: 3 * 60 * 1000,
+    });
+    const { data: allQuartiers } = useQuery({
+        queryKey: ['all-quartiers'],
+        queryFn: () => Quartier.list(),
+        staleTime: 10 * 60 * 1000,
+    });
+
+    const coverage = useMemo(() => {
+        if (!Array.isArray(allServices) || allServices.length === 0 || departments.length === 0) return null;
+        const norm = (v) => String(v || '').trim().toLowerCase();
+        const visible = allServices.filter(s => s && !s.is_hidden && !s.is_suspended);
+        const regionSet = new Set(), deptSet = new Set(), villeSet = new Set(), quartierSet = new Set();
+        const legacyCities = new Set(), legacyRegions = new Set();
+        const quartierByCode = new Map((allQuartiers || []).map(q => [q.code, q]));
+        const villesFromQuartiers = new Set();
+        for (const s of visible) {
+            const lvl = s.availability_level, code = s.availability_code;
+            if (code) {
+                if (lvl === 'region') regionSet.add(code);
+                else if (lvl === 'departement') deptSet.add(code);
+                else if (lvl === 'ville') villeSet.add(code);
+                else if (lvl === 'quartier') {
+                    quartierSet.add(code);
+                    const q = quartierByCode.get(code);
+                    if (q?.ville_code) villesFromQuartiers.add(q.ville_code);
+                }
+            }
+            if (s.city) legacyCities.add(norm(s.city));
+            if (s.region) legacyRegions.add(norm(s.region));
+        }
+        const regionOfDept = new Map(departments.map(d => [d.code, d.region_code]));
+        // Couverture par un niveau superieur ou egal a la ville (ville, departement, region, ancien champ "city")
+        const widerCity = (c) => villeSet.has(c.code) || deptSet.has(c.departement_code)
+            || regionSet.has(regionOfDept.get(c.departement_code)) || legacyCities.has(norm(c.name));
+        const cityCovered = (c) => widerCity(c) || villesFromQuartiers.has(c.code);
+        const coveredRegionCodes = new Set(regionSet);
+        for (const d of departments) if (deptSet.has(d.code)) coveredRegionCodes.add(d.region_code);
+        for (const c of cities) if (cityCovered(c)) {
+            const rc = regionOfDept.get(c.departement_code);
+            if (rc) coveredRegionCodes.add(rc);
+        }
+        for (const r of regions) if (legacyRegions.has(norm(r.name))) coveredRegionCodes.add(r.code);
+        return { cityCovered, widerCity, coveredRegionCodes, quartierSet };
+    }, [allServices, allQuartiers, departments, cities, regions]);
+
+    // Si rien n'est couvert (donnees de lieu absentes), on ne masque rien plutot que d'afficher des menus vides.
+    const shownRegions = (() => {
+        if (!coverage) return availableRegions;
+        const list = availableRegions.filter(r => coverage.coveredRegionCodes.has(r.code) || r.name === selectedRegion);
+        return list.length > 0 ? list : availableRegions;
+    })();
+    const baseCities = getFilteredCities();
+    const shownCities = (() => {
+        if (!coverage) return baseCities;
+        const list = baseCities.filter(c => coverage.cityCovered(c) || c.name === selectedCity);
+        return list.length > 0 ? list : baseCities;
+    })();
+    const filteredCities = [...shownCities].sort((a, b) => a.name.localeCompare(b.name));
+    const shownNeighborhoods = (() => {
+        if (!coverage) return neighborhoods;
+        const city = cities.find(c => c.name === selectedCity || c.code === selectedCity);
+        const wider = city ? coverage.widerCity(city) : false;
+        return neighborhoods.filter(q => wider || coverage.quartierSet.has(q.code) || q.name === selectedNeighborhood);
+    })();
 
     const handleSearch = () => {
         let level = 'all';
@@ -161,7 +230,7 @@ export default function LocationSelector({ className, onSearch, minimal }) {
                         <SelectValue placeholder={t('location.region')} />
                     </SelectTrigger>
                     <SelectContent>
-                        {availableRegions.map(r => <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>)}
+                        {shownRegions.map(r => <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>)}
                     </SelectContent>
                 </Select>
 
@@ -179,10 +248,10 @@ export default function LocationSelector({ className, onSearch, minimal }) {
                         <SelectValue placeholder={t('location.neighborhood')} />
                     </SelectTrigger>
                     <SelectContent>
-                         {neighborhoods.length === 0 ? (
+                         {shownNeighborhoods.length === 0 ? (
                              <SelectItem value="none" disabled>{t('location.noNeighborhoodLoaded')}</SelectItem>
                          ) : (
-                             neighborhoods.map(q => <SelectItem key={q.id} value={q.name}>{q.name}</SelectItem>)
+                             shownNeighborhoods.map(q => <SelectItem key={q.id} value={q.name}>{q.name}</SelectItem>)
                          )}
                     </SelectContent>
                 </Select>
