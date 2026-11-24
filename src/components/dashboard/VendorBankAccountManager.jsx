@@ -21,7 +21,7 @@ export default function VendorBankAccountManager({ user }) {
     // Form State
     const [newAccount, setNewAccount] = useState({
         account_label: "",
-        account_type: "bank_account",
+        account_type: "orange_money",
         bank_name: "",
         account_number: "",
         associated_phone: "",
@@ -111,7 +111,7 @@ export default function VendorBankAccountManager({ user }) {
     const resetForm = () => {
         setNewAccount({
             account_label: "",
-            account_type: "bank_account",
+            account_type: "orange_money",
             bank_name: "",
             account_number: "",
             associated_phone: "",
@@ -124,7 +124,9 @@ export default function VendorBankAccountManager({ user }) {
 
     const getIcon = (type) => {
         switch (type) {
-            case 'mobile_money': return <Smartphone className="w-5 h-5 text-orange-500" />;
+            case 'mobile_money':
+            case 'orange_money': return <Smartphone className="w-5 h-5 text-orange-500" />;
+            case 'mtn_momo': return <Smartphone className="w-5 h-5 text-yellow-500" />;
             case 'bank_account': return <Landmark className="w-5 h-5 text-blue-500" />;
             default: return <CreditCard className="w-5 h-5 text-gray-500" />;
         }
@@ -168,11 +170,8 @@ export default function VendorBankAccountManager({ user }) {
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="bank_account">{t('bankAccount.typeBankAccount')}</SelectItem>
-                                            <SelectItem value="mobile_money">{t('bankAccount.typeMobileMoney')}</SelectItem>
-                                            <SelectItem value="credit_card">{t('bankAccount.typeCreditCard')}</SelectItem>
-                                            <SelectItem value="paypal">PayPal</SelectItem>
-                                            <SelectItem value="other">{t('bankAccount.typeOther')}</SelectItem>
+                                            <SelectItem value="orange_money">Orange Money</SelectItem>
+                                            <SelectItem value="mtn_momo">MTN Mobile Money</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>

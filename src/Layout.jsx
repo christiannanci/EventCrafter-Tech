@@ -120,6 +120,7 @@ function LayoutContent({ children }) {
   };
 
   const navLinks = React.useMemo(() => [
+    { name: t("nav.home"), path: "/", icon: null },
     { name: t("nav.marketplace"), path: "/Marketplace", icon: Search },
     { name: t("nav.inspiration"), path: "/Inspiration", icon: null },
     { name: t("nav.tools"), path: "/Tools", icon: null },
