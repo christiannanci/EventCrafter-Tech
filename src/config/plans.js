@@ -5,5 +5,5 @@ export const PLAN_PRICES = {
   gold_monthly: 25000,
 };
 
-// Ordre de mise en avant (page d'accueil) : Gold > Premium > les autres
-export const PLAN_RANK = { gold: 2, premium: 1 };
+// Mise en avant sur la page d'accueil : reservee au plan Gold (voir le guide d'accueil des prestataires)
+export const PLAN_RANK = { gold: 1 };

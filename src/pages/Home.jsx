@@ -64,8 +64,8 @@ export default function Home() {
           VendorProfile.list().catch(() => [])
         ]);
         const visibleServices = servicesData.filter(s => !s.is_hidden && !s.is_suspended);
-        // Mise en avant automatique : Gold d'abord, puis Premium, puis les plus recents.
-        // Sans prestataire Gold/Premium, l'ordre reste celui des plus recents.
+        // Mise en avant automatique : les services Gold d'abord, puis les plus recents.
+        // Sans prestataire Gold, l'ordre reste celui des plus recents.
         const planByVendor = new Map((vendorsData || []).map(v => [v.user_id, v.plan]));
         const rank = (s) => PLAN_RANK[planByVendor.get(s.planner_id)] || 0;
         const sorted = visibleServices
