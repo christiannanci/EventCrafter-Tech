@@ -608,8 +608,7 @@
         "Bamileke",
         "Bakweri",
         "Fulani",
-        "Beti",
-        "Bassa"
+        "Beti"
       ],
       "author": "EventCrafter Editorial",
       "defaultLanguage": "fr",
@@ -647,8 +646,7 @@
           "Bamileke",
           "Bakweri",
           "Fulani",
-          "Beti",
-          "Bassa"
+          "Beti"
         ],
         "hook": "In Cameroon, death is not the end — it's a homecoming. This is how we celebrate both.",
         "quickInsight": "Life and death are two halves of one sacred circle, each marked with ritual and community.",
@@ -761,8 +759,7 @@
           "Bamiléké",
           "Bakweri",
           "Peuls",
-          "Beti",
-          "Bassa"
+          "Beti"
         ],
         "hook": "Au Cameroun, la mort n'est pas une fin : c'est un retour à la maison. Voici comment nous célébrons l'une et l'autre.",
         "quickInsight": "La vie et la mort sont les deux moitiés d'un même cercle sacré, chacune marquée par des rites et par la communauté.",
@@ -880,8 +877,8 @@
       "tribes": [
         "Bakossi",
         "Bamileke",
+        "Nso",
         "Beti",
-        "Tikar",
         "Fulani"
       ],
       "author": "EventCrafter Editorial",
@@ -919,8 +916,8 @@
         "tribes": [
           "Bakossi",
           "Bamileke",
+          "Nso",
           "Beti",
-          "Tikar",
           "Fulani"
         ],
         "hook": "Adulthood isn't reached by age — in many Cameroonian cultures, it's earned.",
@@ -1033,8 +1030,8 @@
         "tribes": [
           "Bakossi",
           "Bamiléké",
+          "Nso",
           "Beti",
-          "Tikar",
           "Peuls"
         ],
         "hook": "On ne devient pas adulte à un âge donné : dans bien des cultures camerounaises, cela se mérite.",
@@ -2505,11 +2502,11 @@
       "tribes": [
         "Bamileke",
         "Northwest Grassfields",
-        "Duala & Sawa",
+        "Sawa",
         "Bayangi",
         "Bassa",
         "Beti",
-        "Fulani"
+        "Northern Cameroon"
       ],
       "author": "EventCrafter Editorial",
       "defaultLanguage": "fr",
@@ -2546,11 +2543,11 @@
         "tribes": [
           "Bamileke",
           "Northwest Grassfields",
-          "Duala & Sawa",
+          "Sawa",
           "Bayangi",
           "Bassa",
           "Beti",
-          "Fulani"
+          "Northern Cameroon"
         ],
         "hook": "One country, ten regions, endless flavor: the festive dishes that make every Cameroonian feel at home.",
         "quickInsight": "Every region brings a signature dish — serve one from each family's home and everyone feels honored.",
@@ -2661,11 +2658,11 @@
         "tribes": [
           "Bamiléké",
           "Grassfields du Nord-Ouest",
-          "Douala et Sawa",
+          "Sawa",
           "Bayangi",
           "Bassa",
           "Beti",
-          "Peuls"
+          "Grand Nord"
         ],
         "hook": "Un pays, dix régions, mille saveurs : les plats de fête qui donnent à chaque Camerounais le goût de chez lui.",
         "quickInsight": "Chaque région a son plat phare. Servez-en un de la terre de chaque famille, et tout le monde se sent honoré.",
@@ -3053,9 +3050,7 @@
       "categoryColor": "#4A2E1F",
       "tribes": [
         "Bamoun",
-        "Bamileke",
-        "Tikar",
-        "Beti",
+        "Grassfields",
         "Fulani"
       ],
       "author": "EventCrafter Editorial",
@@ -3092,9 +3087,7 @@
         "category": "Decor",
         "tribes": [
           "Bamoun",
-          "Bamileke",
-          "Tikar",
-          "Beti",
+          "Grassfields",
           "Fulani"
         ],
         "hook": "That spider on the carved door isn't decoration — it's a symbol of wisdom. Here's how to read Cameroon's motifs.",
@@ -3205,9 +3198,7 @@
         "category": "Décoration",
         "tribes": [
           "Bamoun",
-          "Bamiléké",
-          "Tikar",
-          "Beti",
+          "Grassfields",
           "Peuls"
         ],
         "hook": "Cette araignée sur la porte sculptée n'est pas un ornement : c'est un symbole de sagesse. Apprenez à lire les motifs du Cameroun.",
@@ -3325,9 +3316,7 @@
         "Northwest Grassfields",
         "Bamileke",
         "Bamoun",
-        "Fulani",
-        "Beti",
-        "Bassa"
+        "Fulani"
       ],
       "author": "EventCrafter Editorial",
       "defaultLanguage": "fr",
@@ -3365,9 +3354,7 @@
           "Northwest Grassfields",
           "Bamileke",
           "Bamoun",
-          "Fulani",
-          "Beti",
-          "Bassa"
+          "Fulani"
         ],
         "hook": "Ndop, toghu, pagne: the fabrics that turn any room into a Cameroonian celebration.",
         "quickInsight": "Fabrics are heritage, language and spiritual covering — every thread tells who we are.",
@@ -3479,9 +3466,7 @@
           "Grassfields du Nord-Ouest",
           "Bamiléké",
           "Bamoun",
-          "Peuls",
-          "Beti",
-          "Bassa"
+          "Peuls"
         ],
         "hook": "Ndop, toghu, pagne : les tissus qui transforment n'importe quelle salle en fête camerounaise.",
         "quickInsight": "Les tissus sont héritage, langage et protection spirituelle : chaque fil dit qui nous sommes.",
@@ -4959,7 +4944,6 @@
         "Bassa",
         "Beti",
         "Bakossi",
-        "Bamileke",
         "Fulani"
       ],
       "author": "EventCrafter Editorial",
@@ -4998,7 +4982,6 @@
           "Bassa",
           "Beti",
           "Bakossi",
-          "Bamileke",
           "Fulani"
         ],
         "hook": "Hidden, delicate and powerful: why waist beads are making a comeback with Cameroonian women.",
@@ -5110,7 +5093,6 @@
           "Bassa",
           "Beti",
           "Bakossi",
-          "Bamiléké",
           "Peuls"
         ],
         "hook": "Discrètes, délicates et puissantes : pourquoi les perles de hanches reviennent en force chez les Camerounaises.",
@@ -5224,10 +5206,10 @@
       "categoryColor": "#6E2847",
       "tribes": [
         "Bamileke",
-        "Beti",
-        "Bakweri",
-        "Fulani",
-        "Bassa"
+        "Bamoun",
+        "Bassa",
+        "Sawa",
+        "Fulani"
       ],
       "author": "EventCrafter Editorial",
       "defaultLanguage": "fr",
@@ -5263,10 +5245,10 @@
         "category": "Attire",
         "tribes": [
           "Bamileke",
-          "Beti",
-          "Bakweri",
-          "Fulani",
-          "Bassa"
+          "Bamoun",
+          "Bassa",
+          "Sawa",
+          "Fulani"
         ],
         "hook": "Toghu blazers. Ndop ballgowns. Pagne tuxedos. Fusion fashion is how modern Cameroonians say 'I am all of me.'",
         "quickInsight": "Cultural fusion isn't compromise — it's creativity rooted in reverence.",
@@ -5383,10 +5365,10 @@
         "category": "Tenues",
         "tribes": [
           "Bamiléké",
-          "Beti",
-          "Bakweri",
-          "Peuls",
-          "Bassa"
+          "Bamoun",
+          "Bassa",
+          "Sawa",
+          "Peuls"
         ],
         "hook": "Blazers en toghu. Robes de bal en ndop. Smokings en pagne. La mode fusion, c'est la façon moderne de dire « je suis tout cela à la fois ».",
         "quickInsight": "La fusion culturelle n'est pas un compromis : c'est une créativité enracinée dans le respect.",
@@ -5507,11 +5489,7 @@
       "category": "Ceremony",
       "categoryColor": "#2F5D46",
       "tribes": [
-        "Bamileke",
-        "Beti",
-        "Bassa",
-        "Bakweri",
-        "Fulani"
+        "Across Cameroon"
       ],
       "author": "EventCrafter Editorial",
       "defaultLanguage": "fr",
@@ -5546,11 +5524,7 @@
         "title": "The Anatomy of a Traditional Cameroonian Wedding Ceremony",
         "category": "Ceremony",
         "tribes": [
-          "Bamileke",
-          "Beti",
-          "Bassa",
-          "Bakweri",
-          "Fulani"
+          "Across Cameroon"
         ],
         "hook": "From 'knock door' to the final dance: the 5 stages of a Cameroonian traditional wedding.",
         "quickInsight": "A traditional wedding unfolds in phases — introductions, dowry, blessings, celebration and new family life.",
@@ -5662,11 +5636,7 @@
         "title": "Anatomie d'un mariage traditionnel camerounais",
         "category": "Cérémonie",
         "tribes": [
-          "Bamiléké",
-          "Beti",
-          "Bassa",
-          "Bakweri",
-          "Peuls"
+          "Tout le Cameroun"
         ],
         "hook": "Du « toquer à la porte » à la dernière danse : les 5 étapes d'un mariage traditionnel camerounais.",
         "quickInsight": "Le mariage traditionnel se déroule par étapes : présentations, dot, bénédictions, fête et entrée dans la nouvelle famille.",
@@ -5787,8 +5757,8 @@
       "tribes": [
         "Bamileke",
         "Beti",
-        "Duala & Sawa",
-        "Northwest Grassfields",
+        "Duala",
+        "Northwest",
         "Fulani"
       ],
       "author": "EventCrafter Editorial",
@@ -5826,8 +5796,8 @@
         "tribes": [
           "Bamileke",
           "Beti",
-          "Duala & Sawa",
-          "Northwest Grassfields",
+          "Duala",
+          "Northwest",
           "Fulani"
         ],
         "hook": "A Cameroonian funeral can welcome hundreds of guests. Here's how families plan a dignified farewell.",
@@ -5942,8 +5912,8 @@
         "tribes": [
           "Bamiléké",
           "Beti",
-          "Douala et Sawa",
-          "Grassfields du Nord-Ouest",
+          "Douala",
+          "Nord-Ouest",
           "Peuls"
         ],
         "hook": "Des funérailles camerounaises peuvent accueillir des centaines d'invités. Voici comment les familles organisent un adieu digne.",
@@ -6063,11 +6033,7 @@
       "category": "Ceremony",
       "categoryColor": "#2F5D46",
       "tribes": [
-        "Bamileke",
-        "Beti",
-        "Bassa",
-        "Bakweri",
-        "Fulani"
+        "Across Cameroon"
       ],
       "author": "EventCrafter Editorial",
       "defaultLanguage": "fr",
@@ -6102,11 +6068,7 @@
         "title": "Kola Nut, Palm Wine, and Libation: The Spiritual Tools of Ceremony",
         "category": "Ceremony",
         "tribes": [
-          "Bamileke",
-          "Beti",
-          "Bassa",
-          "Bakweri",
-          "Fulani"
+          "Across Cameroon"
         ],
         "hook": "Kola nut, palm wine, libation: the three things that turn an event into a sacred gathering.",
         "quickInsight": "Kola, palm wine and libation are bridges between the seen and the unseen — truth, unity and ancestral alignment.",
@@ -6215,11 +6177,7 @@
         "title": "Kola, vin de palme et libation : les outils spirituels de la cérémonie",
         "category": "Cérémonie",
         "tribes": [
-          "Bamiléké",
-          "Beti",
-          "Bassa",
-          "Bakweri",
-          "Peuls"
+          "Tout le Cameroun"
         ],
         "hook": "La kola, le vin de palme, la libation : les trois éléments qui transforment un événement en rencontre sacrée.",
         "quickInsight": "La kola, le vin de palme et la libation font le pont entre le visible et l'invisible : vérité, unité et accord avec les ancêtres.",
@@ -6333,10 +6291,8 @@
       "category": "Ceremony",
       "categoryColor": "#2F5D46",
       "tribes": [
-        "Northwest & Southwest",
+        "Across Cameroon",
         "Bamileke",
-        "Beti",
-        "Duala",
         "Fulani"
       ],
       "author": "EventCrafter Editorial",
@@ -6372,10 +6328,8 @@
         "title": "Born House: Welcoming a New Baby the Cameroonian Way",
         "category": "Ceremony",
         "tribes": [
-          "Northwest & Southwest",
+          "Across Cameroon",
           "Bamileke",
-          "Beti",
-          "Duala",
           "Fulani"
         ],
         "hook": "Before the baby shower went viral, Cameroon had the born house. Here's how to host one.",
@@ -6487,10 +6441,8 @@
         "title": "Born house : accueillir un bébé à la camerounaise",
         "category": "Cérémonie",
         "tribes": [
-          "Nord-Ouest et Sud-Ouest",
+          "Tout le Cameroun",
           "Bamiléké",
-          "Beti",
-          "Douala",
           "Peuls"
         ],
         "hook": "Bien avant que la baby shower ne devienne virale, le Cameroun avait le born house. Voici comment l'organiser.",
