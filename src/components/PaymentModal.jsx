@@ -8,12 +8,7 @@ import { CreditCard, Loader2, CheckCircle2, Smartphone, ShieldCheck, Landmark, C
 import { useToast } from "@/components/ui/use-toast";
 import { NotificationService } from '@/components/NotificationService';
 
-const BANK_DETAILS = {
-  accountHolder: "IMMOBILIERE SONAN",
-  bank: "RIB SONAN",
-  iban: "CM21 10003 04000 06401341228 80",
-  swift: "SGCMCMCX"
-};
+const MTN_MOMO_NUMBER = "670 93 43 78";
 
 export default function PaymentModal({ booking, invoice, onPaymentComplete, label = "Proceed to Payment", open, onOpenChange }) {
   const [internalOpen, setInternalOpen] = useState(false);
@@ -25,7 +20,7 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
   const [successMessage, setSuccessMessage] = useState({ title: "", description: "" });
   const { toast } = useToast();
 
-  const [activeMethod, setActiveMethod] = useState("bank");
+  const [activeMethod, setActiveMethod] = useState("orange");
   const [proofImage, setProofImage] = useState(null);
   const [uploadingProof, setUploadingProof] = useState(false);
 
@@ -80,7 +75,7 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
           proof_code: proofCode,
           user_id: currentUser.id,
           amount: Number(amountToPay),
-          payment_method: activeMethod === "bank" ? "bank_transfer" : "orange_momo",
+          payment_method: activeMethod === "mtn" ? "mtn_momo" : "orange_momo",
           proof_image_url: proofImage,
           phone_number: "",
           status: 'pending'
@@ -110,7 +105,7 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
           await SendEmail({
             to: admin.email,
             subject: "💰 Nouvelle preuve de paiement à valider",
-            body: `Bonjour ${admin.full_name},\n\nUne nouvelle preuve de paiement nécessite votre validation:\n\nMontant: ${amountToPay?.toLocaleString()} FCFA\nMéthode: ${activeMethod === "bank" ? "Virement Bancaire" : "Mobile Money"}\nType: ${booking ? 'Réservation' : 'Abonnement'}\nCode: ${proofCode}\n\nAccéder au back office: ${window.location.origin}/AdminDashboard\n\nCordialement,\nL'équipe EventCrafter`
+            body: `Bonjour ${admin.full_name},\n\nUne nouvelle preuve de paiement nécessite votre validation:\n\nMontant: ${amountToPay?.toLocaleString()} FCFA\nMéthode: ${activeMethod === "mtn" ? "MTN Mobile Money" : "Orange Money"}\nType: ${booking ? 'Réservation' : 'Abonnement'}\nCode: ${proofCode}\n\nAccéder au back office: ${window.location.origin}/AdminDashboard\n\nCordialement,\nL'équipe EventCrafter`
           });
         }
 
@@ -194,55 +189,12 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
 
             <Tabs value={activeMethod} onValueChange={setActiveMethod} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="bank">Virement Bancaire</TabsTrigger>
-                <TabsTrigger value="momo">Mobile Money</TabsTrigger>
+                <TabsTrigger value="orange">Orange Money</TabsTrigger>
+                <TabsTrigger value="mtn">MTN Mobile Money</TabsTrigger>
               </TabsList>
 
               <form onSubmit={handlePayment}>
-                <TabsContent value="bank" className="space-y-4">
-                  <div className="bg-gradient-to-br from-slate-50 to-blue-50 border-2 border-slate-200 rounded-lg p-4 space-y-3">
-                    <div className="flex items-center gap-2 text-slate-700 font-semibold">
-                      <Landmark className="w-4 h-4" />
-                      Coordonnées bancaires pour virement
-                    </div>
-
-                    <div className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-100">
-                      {[
-                        { label: "Titulaire du compte", value: BANK_DETAILS.accountHolder },
-                        { label: "Banque", value: BANK_DETAILS.bank },
-                        { label: "IBAN / RIB", value: BANK_DETAILS.iban },
-                        { label: "Code SWIFT / BIC", value: BANK_DETAILS.swift }
-                      ].map((field) => (
-                        <div key={field.label} className="flex items-center justify-between p-3">
-                          <div>
-                            <p className="text-xs text-stone-500">{field.label}</p>
-                            <p className="text-sm font-semibold text-stone-900">{field.value}</p>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-slate-500 hover:text-slate-900"
-                            onClick={() => copyToClipboard(field.value, field.label)}
-                          >
-                            <Copy className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-200">
-                      <p className="text-xs text-stone-700">
-                        <strong>Montant à virer :</strong> {amountToPay?.toLocaleString()} FCFA
-                      </p>
-                      <p className="text-xs text-stone-600 mt-1">
-                        Après le virement, téléchargez votre preuve ci-dessous. Notre équipe validera votre paiement sous 24 heures.
-                      </p>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="momo" className="space-y-4">
+                <TabsContent value="orange" className="space-y-4">
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                     <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-orange-200 rounded-lg p-4 space-y-3">
                       <div className="flex items-center gap-2 text-orange-700 font-semibold">
@@ -283,6 +235,43 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
                   </div>
                 </TabsContent>
 
+                <TabsContent value="mtn" className="space-y-4">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-300 rounded-lg p-4 space-y-3">
+                      <div className="flex items-center gap-2 text-yellow-800 font-semibold">
+                        <Smartphone className="w-4 h-4" />
+                        Paiement MTN Mobile Money
+                      </div>
+
+                      <div className="bg-white rounded-lg p-4 border-2 border-yellow-300">
+                        <p className="text-xs text-stone-600 mb-2">Envoyez le montant par MTN Mobile Money au numéro :</p>
+                        <code className="text-2xl font-bold text-yellow-700 block select-all">
+                          {MTN_MOMO_NUMBER}
+                        </code>
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => copyToClipboard("670934378", "Numéro MTN")}
+                      >
+                        Copier le numéro
+                      </Button>
+
+                      <div className="pt-2 border-t border-yellow-200">
+                        <p className="text-xs text-stone-700">
+                          <strong>Montant à envoyer :</strong> {amountToPay?.toLocaleString()} FCFA
+                        </p>
+                        <p className="text-xs text-stone-600 mt-1">
+                          Après le transfert, téléchargez votre preuve ci-dessous. Notre équipe validera votre paiement sous 24 heures.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
                 <div className="space-y-3 bg-gradient-to-br from-rose-50 to-orange-50 border-2 border-rose-200 rounded-lg p-4 mt-4">
                   <div className="flex items-center gap-2 text-rose-700 font-semibold">
                     <CheckCircle2 className="w-5 h-5" />
@@ -294,7 +283,7 @@ export default function PaymentModal({ booking, invoice, onPaymentComplete, labe
                       <strong>Instructions :</strong>
                     </p>
                     <ol className="text-xs text-stone-600 space-y-1 list-decimal ml-4">
-                      <li>Effectuez le {activeMethod === "bank" ? "virement" : "transfert"} avec les informations ci-dessus</li>
+                      <li>Effectuez le transfert avec les informations ci-dessus</li>
                       <li>Prenez une capture d'écran du message de confirmation</li>
                       <li>Téléchargez la preuve ci-dessous</li>
                       <li>Validez pour soumettre à l'équipe</li>

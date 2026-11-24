@@ -1,6 +1,7 @@
 export const translations = {
   en: {
     nav: {
+      home: "Home",
       marketplace: "Marketplace",
       inspiration: "Inspiration",
       tools: "Tools",
@@ -1151,6 +1152,7 @@ export const translations = {
   },
   fr: {
     nav: {
+      home: "Accueil",
       marketplace: "Marché",
       inspiration: "Inspiration",
       tools: "Outils",
@@ -2317,6 +2319,7 @@ export const translations = {
   },
   pcm: {
     nav: {
+      home: "Home",
       marketplace: "Market",
       inspiration: "Inspiration",
       tools: "Tools",

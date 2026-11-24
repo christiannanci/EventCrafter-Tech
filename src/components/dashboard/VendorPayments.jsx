@@ -63,7 +63,9 @@ export default function VendorPayments({ user, vendorProfile, onUpdate }) {
 
     const getAccountIcon = (type) => {
         switch (type) {
-            case 'mobile_money': return <Smartphone className="w-4 h-4 text-orange-500" />;
+            case 'mobile_money':
+            case 'orange_money': return <Smartphone className="w-4 h-4 text-orange-500" />;
+            case 'mtn_momo': return <Smartphone className="w-4 h-4 text-yellow-500" />;
             case 'bank_account': return <Landmark className="w-4 h-4 text-blue-500" />;
             default: return <CreditCard className="w-4 h-4 text-gray-500" />;
         }
