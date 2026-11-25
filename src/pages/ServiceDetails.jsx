@@ -4,6 +4,7 @@ import { base44, supabase } from "@/api/apiClient";
 import { SendEmail } from "@/api/integrations";
 import { Button } from "@/components/ui/button";
 import ShareServiceDialog from "@/components/ShareServiceDialog";
+import { getServicePhotos } from "@/lib/servicePhotos";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
@@ -36,6 +37,7 @@ import { useCurrency } from '@/components/CurrencyContext';
 export default function ServiceDetails() {
   const [service, setService] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
   const [serviceUnavailable, setServiceUnavailable] = useState(false);
   const { t } = useLanguage();
   const { formatPrice } = useCurrency();
@@ -203,6 +205,8 @@ export default function ServiceDetails() {
   );
   if (!service) return <div className="p-20 text-center animate-pulse">{t('serviceDetails.loadingDetails')}</div>;
 
+  const galleryPhotos = getServicePhotos(service);
+
   return (
     <div className="bg-white min-h-screen pb-20">
       {/* Hero Header */}
@@ -222,12 +226,22 @@ export default function ServiceDetails() {
           </video>
         ) : (
           <img
-            src={service.image_url}
+            src={galleryPhotos[photoIndex] || service.image_url}
             alt={service.title}
             className="w-full h-full object-cover"
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        {galleryPhotos.length > 1 && (
+          <div className="absolute top-4 right-4 z-10 flex gap-2 bg-black/40 backdrop-blur p-2 rounded-xl max-w-[70vw] overflow-x-auto">
+            {galleryPhotos.map((url, i) => (
+              <button key={url} type="button" onClick={() => setPhotoIndex(i)} aria-label={`Photo ${i + 1}`}
+                className={`w-14 h-14 shrink-0 rounded-lg overflow-hidden border-2 ${i === photoIndex ? "border-white" : "border-transparent opacity-70 hover:opacity-100"}`}>
+                <img src={url} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
         <div className="absolute bottom-0 left-0 w-full p-6 md:p-12">
           <div className="container mx-auto">
              <Badge className="bg-rose-600 hover:bg-rose-700 text-white mb-4 border-0">

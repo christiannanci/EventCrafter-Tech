@@ -1,6 +1,7 @@
 // EVEN IA - moteur autonome (regles, sans LLM). Cote vendeur.
 // Utilise la session Supabase du vendeur : les regles RLS s'appliquent.
 import { base44 } from "@/api/apiClient";
+import { getServicePhotos, MIN_SERVICE_PHOTOS, meetsPhotoRule, isServiceDisplayable } from "@/lib/servicePhotos";
 import { UploadFile } from "@/api/integrations";
 import { generateEntityCode, generateSlug } from "@/components/SecurityUtils";
 import { serviceSchema, validateData } from "@/components/ValidationSchemas";
@@ -79,7 +80,9 @@ export function serviceVisibility(s) {
   if (!s.price_min) reasons.push("prix manquant");
   if (!s.city) reasons.push("ville manquante");
   if (!s.image_url) reasons.push("pas d'image (fortement recommande)");
-  return { visible: !s.is_hidden && !s.is_suspended, reasons };
+  const photos = getServicePhotos(s).length;
+  if (photos < MIN_SERVICE_PHOTOS) reasons.push(`moins de ${MIN_SERVICE_PHOTOS} photos (${photos}/${MIN_SERVICE_PHOTOS}) : ${meetsPhotoRule(s) ? "ajoutez-en pour rester visible" : "non affiche sur la marketplace"}`);
+  return { visible: isServiceDisplayable(s), reasons };
 }
 
 export function serviceScore(s) {
@@ -131,7 +134,7 @@ export async function createServiceFromDraft(draft, user) {
     price_min: parseFloat(draft.price_min), price_max: draft.price_max ? parseFloat(draft.price_max) : null, availability_level: "ville",
     availability_code: draft.availability_code || (draft.city || "").slice(0, 3).toUpperCase(),
     location: draft.city, city: draft.city, region: draft.region || "", neighborhood_code: draft.neighborhood_code || "",
-    address_details: draft.address_details || "", image_url: draft.image_url || "", video_url: draft.video_url || "",
+    address_details: draft.address_details || "", image_url: draft.image_url || "", gallery_urls: [draft.gallery_1, draft.gallery_2].filter(Boolean), video_url: draft.video_url || "",
     cultural_zones: [], cultural_compliance_details: "", spoken_languages: [], religious_compatibility: [], diaspora_ready: false,
     service_code: generateEntityCode("SERVICE"), slug: generateSlug(draft.title), planner_id: user.id,
   };
@@ -164,6 +167,8 @@ export function buildServiceSteps(ctx) {
     { key: "description_details", ask: "Que comprennent vos **prestations** ? (max 1500 caracteres - ou 'passer')", optional: true, validate: v => v.length <= 1500 || "Maximum 1500 caracteres." },
     { key: "description_terms", ask: "Quelles sont vos **conditions** ? (max 800 caracteres - ou 'passer')", optional: true, validate: v => v.length <= 800 || "Maximum 800 caracteres." },
     { key: "image_url", ask: "Ajoutez votre **image de couverture** avec le bouton ci-dessous.", media: "image" },
+    { key: "gallery_1", ask: "Ajoutez une **2e photo** de votre service (3 photos minimum pour etre affiche sur la marketplace).", media: "image" },
+    { key: "gallery_2", ask: "Ajoutez une **3e photo** de votre service.", media: "image" },
     { key: "video_url", ask: "Ajoutez une **video de presentation** (optionnel).", media: "video", optional: true },
   ];
 }
@@ -173,7 +178,7 @@ export function draftRecap(d) {
     `**${d.title}**`, `Categorie : ${d.category}`,
     `Evenements : ${(d.supported_event_types || []).join(", ") || "non precise"}`,
     `Prix : ${fcfa(d.price_min)}${d.price_max ? " a " + fcfa(d.price_max) : ""}`, `Lieu : ${d.city}${d.region ? ", " + d.region : ""}`,
-    `Image : ${d.image_url ? "oui" : "non"} - Video : ${d.video_url ? "oui" : "non"}`,
+    `Photos : ${[d.image_url, d.gallery_1, d.gallery_2].filter(Boolean).length}/3 - Video : ${d.video_url ? "oui" : "non"}`,
   ].join("\n");
 }
 

@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import ShareServiceDialog from "@/components/ShareServiceDialog";
+import ServicePhotosField from "@/components/ServicePhotosField";
+import { MIN_SERVICE_PHOTOS, photoCount, meetsPhotoRule } from "@/lib/servicePhotos";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -122,6 +124,7 @@ export default function VendorDashboard() {
     neighborhood_code: "",
     address_details: "",
     image_url: "",
+    gallery_urls: [],
     description_details: "",
     description_terms: "",
     cultural_zones: [],
@@ -334,6 +337,29 @@ export default function VendorDashboard() {
     }
   };
 
+  // Televerse une photo du service (compression + limite de debit) et renvoie son URL
+  const uploadServicePhoto = async (file) => {
+    let url = null;
+    try {
+      await withRateLimit('UPLOAD_FILE', user.id, async () => {
+        let fileToUpload = file;
+        if (isImage(file)) {
+          fileToUpload = await compressImage(file, { maxWidth: 1920, maxHeight: 1080, quality: 0.85, outputFormat: 'webp' });
+        }
+        const result = await UploadFile({ file: fileToUpload });
+        url = result.file_url;
+        return true;
+      });
+    } catch (error) {
+      toast({
+        title: error.message?.includes('Rate limit') ? "⚠️ Limite atteinte" : "Echec du telechargement",
+        description: error.message?.includes('Rate limit') ? error.message : undefined,
+        variant: "destructive"
+      });
+    }
+    return url;
+  };
+
   const handleVideoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -380,6 +406,16 @@ export default function VendorDashboard() {
         return;
       }
       
+      const nbPhotos = [newService.image_url, ...(newService.gallery_urls || [])].filter(Boolean).length;
+      if (nbPhotos < MIN_SERVICE_PHOTOS) {
+        toast({
+          title: `Ajoutez au moins ${MIN_SERVICE_PHOTOS} photos`,
+          description: `Votre service n'est affiche sur la marketplace qu'avec ${MIN_SERVICE_PHOTOS} photos ou plus (actuellement ${nbPhotos}).`,
+          variant: "destructive"
+        });
+        return;
+      }
+
       if (editingService) {
         await base44.entities.Service.update(editingService.id, {
           ...newService,
@@ -404,7 +440,7 @@ export default function VendorDashboard() {
           category: "", service_type_code: "", function_codes: [], supported_event_types: [], price_min: "", 
           availability_level: "ville", availability_code: "",
           location: "", city: "", region: "", neighborhood_code: "", 
-          address_details: "", image_url: "",
+          address_details: "", image_url: "", gallery_urls: [],
           cultural_zones: [], cultural_compliance_details: "",
           spoken_languages: [], religious_compatibility: [], diaspora_ready: false
       });
@@ -437,6 +473,7 @@ export default function VendorDashboard() {
       neighborhood_code: service.neighborhood_code || "",
       address_details: service.address_details || "",
       image_url: service.image_url || "",
+      gallery_urls: Array.isArray(service.gallery_urls) ? service.gallery_urls : [],
       description_details: service.description_details || "",
       description_terms: service.description_terms || "",
       cultural_zones: service.cultural_zones || [],
@@ -732,14 +769,11 @@ export default function VendorDashboard() {
                 <Input placeholder="Quartier" value={newService.neighborhood_code} onChange={e => setNewService({...newService, neighborhood_code: e.target.value})} />
                 <Input placeholder="Adresse precise" value={newService.address_details} onChange={e => setNewService({...newService, address_details: e.target.value})} />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-stone-600">Image de Couverture</label>
-                <input type="file" id="media-upload" accept="image/*" onChange={handleMediaUpload} className="hidden" />
-                <Button type="button" variant="outline" className="w-full" onClick={() => document.getElementById('media-upload').click()} disabled={uploadingMedia}>
-                  {uploadingMedia ? "Telechargement..." : newService.image_url ? "Changer l'image" : "Telecharger une image"}
-                </Button>
-                {newService.image_url && <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Image telechargee</div>}
-              </div>
+              <ServicePhotosField
+                value={{ image_url: newService.image_url, gallery_urls: newService.gallery_urls }}
+                onChange={(v) => setNewService(prev => ({ ...prev, image_url: v.image_url, gallery_urls: v.gallery_urls }))}
+                onUploadFile={uploadServicePhoto}
+              />
               <div className="space-y-2">
                 <label className="text-sm font-medium text-stone-600">Video de Presentation</label>
                 <input type="file" id="video-upload" accept="video/*" onChange={handleVideoUpload} className="hidden" />
@@ -1082,6 +1116,13 @@ export default function VendorDashboard() {
                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold">
                     {service.price_min?.toLocaleString()} FCFA
                   </div>
+                  {photoCount(service) < MIN_SERVICE_PHOTOS && (
+                    <div className={`absolute top-2 left-2 px-2 py-1 rounded text-[11px] font-semibold text-white ${meetsPhotoRule(service) ? "bg-amber-500" : "bg-rose-600"}`}>
+                      {meetsPhotoRule(service)
+                        ? `Ajoutez ${MIN_SERVICE_PHOTOS - photoCount(service)} photo(s) (${photoCount(service)}/${MIN_SERVICE_PHOTOS})`
+                        : `Non visible : ${photoCount(service)}/${MIN_SERVICE_PHOTOS} photos`}
+                    </div>
+                  )}
                   <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs text-white flex items-center gap-1">
                     <Eye className="w-3 h-3" /> {service.views || 0}
                   </div>

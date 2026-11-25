@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import LocationSelector from "@/components/LocationSelector";
+import { isServiceDisplayable } from "@/lib/servicePhotos";
 import AnnouncementCarousel from '@/components/banners/AnnouncementCarousel';
 
 export default function Marketplace() {
@@ -134,7 +135,7 @@ export default function Marketplace() {
 
   // Options de filtre : uniquement celles qui correspondent a au moins un service publie
   const filterOptions = React.useMemo(() => {
-    const visible = (allServices || []).filter(s => s && !s.is_hidden && !s.is_suspended);
+    const visible = (allServices || []).filter(s => isServiceDisplayable(s));
     const collect = (field, list) => {
       const present = new Set();
       visible.forEach(s => { if (Array.isArray(s[field])) s[field].forEach(v => present.add(v)); });
@@ -217,7 +218,7 @@ export default function Marketplace() {
     }
     
     data = data.filter(s => s && typeof s === 'object' && s.id);
-    data = data.filter(s => !s.is_hidden && !s.is_suspended);
+    data = data.filter(s => isServiceDisplayable(s));
     
     data = data.map(service => {
       try {
@@ -389,8 +390,9 @@ export default function Marketplace() {
                     }
                 }
 
-                if (locLevel === 'ville' && s.city === locName) return true;
-                if (locLevel === 'region' && s.region === locName) return true;
+                const nn = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+                if (locLevel === 'ville' && nn(s.city) && nn(s.city) === nn(locName)) return true;
+                if (locLevel === 'region' && nn(s.region) && nn(s.region) === nn(locName)) return true;
 
                 return false;
             });

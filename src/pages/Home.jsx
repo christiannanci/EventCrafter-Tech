@@ -8,6 +8,7 @@ import { Search, Calendar, Star, CheckCircle, ArrowRight, User, CheckCircle2, Qu
 import { Service, ServiceType, Fonction, PlatformFeedback, VendorProfile, ClientProfile } from '@/api/entities';
 import ServiceCard from '@/components/ServiceCard';
 import LocationSelector from '@/components/LocationSelector';
+import { isServiceDisplayable } from '@/lib/servicePhotos';
 import { createPageUrl } from '../utils';
 import { useLanguage } from '@/components/LanguageContext';
 import { useLocationContext } from '@/components/LocationContext';
@@ -63,7 +64,7 @@ export default function Home() {
           PlatformFeedback.list(),
           VendorProfile.list().catch(() => [])
         ]);
-        const visibleServices = servicesData.filter(s => !s.is_hidden && !s.is_suspended);
+        const visibleServices = servicesData.filter(s => isServiceDisplayable(s));
         // Mise en avant automatique : les services Gold d'abord, puis les plus recents.
         // Sans prestataire Gold, l'ordre reste celui des plus recents.
         const planByVendor = new Map((vendorsData || []).map(v => [v.user_id, v.plan]));
