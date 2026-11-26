@@ -14,6 +14,9 @@ export function serviceShareUrl(service) {
 const T = {
   fr: {
     title: "Partager ce service",
+    pubTitle: "🎉 Votre service est en ligne !",
+    pubDesc: "Faites-le connaître maintenant : partagez-le sur Facebook et Instagram pour recevoir vos premières demandes.",
+    later: "Plus tard",
     desc: "Partagez votre service sur vos réseaux pour recevoir plus de demandes.",
     facebook: "Facebook",
     whatsapp: "WhatsApp",
@@ -29,6 +32,9 @@ const T = {
   },
   en: {
     title: "Share this service",
+    pubTitle: "🎉 Your service is live!",
+    pubDesc: "Spread the word now: share it on Facebook and Instagram to get your first requests.",
+    later: "Later",
     desc: "Share your service on your networks to get more requests.",
     facebook: "Facebook",
     whatsapp: "WhatsApp",
@@ -65,7 +71,7 @@ async function copyText(text) {
   }
 }
 
-export default function ShareServiceDialog({ service, open, onOpenChange }) {
+export default function ShareServiceDialog({ service, open, onOpenChange, justPublished = false }) {
   const lang = useLanguage()?.language === "en" ? "en" : "fr";
   const t = T[lang];
   const [copied, setCopied] = useState("");
@@ -87,8 +93,8 @@ export default function ShareServiceDialog({ service, open, onOpenChange }) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Share2 className="w-5 h-5" />{t.title}</DialogTitle>
-          <DialogDescription>{t.desc}</DialogDescription>
+          <DialogTitle className="flex items-center gap-2">{!justPublished && <Share2 className="w-5 h-5" />}{justPublished ? t.pubTitle : t.title}</DialogTitle>
+          <DialogDescription>{justPublished ? t.pubDesc : t.desc}</DialogDescription>
         </DialogHeader>
 
         <p className="text-sm font-medium text-stone-800 truncate">{service.title}</p>
@@ -130,6 +136,10 @@ export default function ShareServiceDialog({ service, open, onOpenChange }) {
             </a>
           </div>
         </div>
+
+        {justPublished && (
+          <Button type="button" variant="ghost" className="w-full text-stone-500" onClick={() => onOpenChange(false)}>{t.later}</Button>
+        )}
       </DialogContent>
     </Dialog>
   );
