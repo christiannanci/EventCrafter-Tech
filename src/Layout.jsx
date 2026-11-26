@@ -511,6 +511,19 @@ function LayoutContent({ children }) {
                   </svg>
                   Instagram
                 </a>
+                <a
+                  href="https://wa.me/237670934378"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Ecrire a EventCrafter sur WhatsApp"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#1EBE5A] hover:shadow-md"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 21l1.65-4.8A9 9 0 1 1 8 19.4L3 21z" />
+                    <path d="M9 10c0 3 2 5 5 5l1.2-1.4-1.9-1-0.8 0.6c-0.9-0.4-1.6-1.1-2-2l0.6-0.8-1-1.9L9 10z" fill="currentColor" stroke="none" />
+                  </svg>
+                  WhatsApp
+                </a>
               </div>
             </div>
 
