@@ -10,6 +10,20 @@ import AddLocationDialog from './AddLocationDialog';
 import { useLocationContext } from '@/components/LocationContext';
 import { useLanguage } from '@/components/LanguageContext';
 
+// Nom compare sans accents, majuscules ni espaces parasites ("Yaounde " = "Yaoundé")
+const normName = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+
+// Retire les doublons de villes (meme nom a l'accent pres) en gardant la fiche officielle (rattachee a un departement)
+function dedupeCities(list) {
+    const best = new Map();
+    for (const c of list) {
+        const k = normName(c.name);
+        const cur = best.get(k);
+        if (!cur || (!cur.departement_code && c.departement_code)) best.set(k, c);
+    }
+    return list.filter(c => best.get(normName(c.name)) === c);
+}
+
 export default function LocationSelector({ className, onSearch, minimal }) {
     const navigate = useNavigate();
     const { t } = useLanguage();
@@ -119,7 +133,7 @@ export default function LocationSelector({ className, onSearch, minimal }) {
 
     const coverage = useMemo(() => {
         if (!Array.isArray(allServices) || allServices.length === 0 || departments.length === 0) return null;
-        const norm = (v) => String(v || '').trim().toLowerCase();
+        const norm = normName;
         const visible = allServices.filter(s => s && !s.is_hidden && !s.is_suspended);
         const regionSet = new Set(), deptSet = new Set(), villeSet = new Set(), quartierSet = new Set();
         const legacyCities = new Set(), legacyRegions = new Set();
@@ -161,7 +175,7 @@ export default function LocationSelector({ className, onSearch, minimal }) {
         const list = availableRegions.filter(r => coverage.coveredRegionCodes.has(r.code) || r.name === selectedRegion);
         return list.length > 0 ? list : availableRegions;
     })();
-    const baseCities = getFilteredCities();
+    const baseCities = dedupeCities(getFilteredCities());
     const shownCities = (() => {
         if (!coverage) return baseCities;
         const list = baseCities.filter(c => coverage.cityCovered(c) || c.name === selectedCity);

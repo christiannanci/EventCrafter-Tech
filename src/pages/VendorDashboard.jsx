@@ -69,6 +69,7 @@ export default function VendorDashboard() {
   const [isNewServiceOpen, setIsNewServiceOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [sharingService, setSharingService] = useState(null);
+  const [justPublished, setJustPublished] = useState(false);
   const [availableFunctions, setAvailableFunctions] = useState([]);
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -380,6 +381,7 @@ export default function VendorDashboard() {
         return;
       }
       
+      let createdService = null;
       if (editingService) {
         await base44.entities.Service.update(editingService.id, {
           ...newService,
@@ -387,7 +389,7 @@ export default function VendorDashboard() {
         });
         toast({ title: "Service modifie avec succes" });
       } else {
-        await base44.entities.Service.create({
+        createdService = await base44.entities.Service.create({
           ...newService,
           service_code: generateEntityCode('SERVICE'),
           slug: generateSlug(newService.title),
@@ -409,6 +411,11 @@ export default function VendorDashboard() {
           spoken_languages: [], religious_compatibility: [], diaspora_ready: false
       });
       refetch();
+      // Apres une mise en ligne, on propose tout de suite de partager le service (Facebook, Instagram...)
+      if (createdService?.id) {
+        setJustPublished(true);
+        setSharingService(createdService);
+      }
     } catch (error) {
       console.error("Error creating/updating service", error);
       toast({ 
@@ -1187,7 +1194,7 @@ export default function VendorDashboard() {
         </TabsContent>
 
       </Tabs>
-      <ShareServiceDialog service={sharingService} open={!!sharingService} onOpenChange={(o) => { if (!o) setSharingService(null); }} />
+      <ShareServiceDialog service={sharingService} open={!!sharingService} justPublished={justPublished} onOpenChange={(o) => { if (!o) { setSharingService(null); setJustPublished(false); } }} />
     </div>
   );
 }
